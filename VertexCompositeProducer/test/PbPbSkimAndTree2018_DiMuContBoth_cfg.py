@@ -104,8 +104,8 @@ process.load('VertexCompositeAnalysis.VertexCompositeProducer.collisionEventSele
 process.load('VertexCompositeAnalysis.VertexCompositeProducer.clusterCompatibilityFilter_cfi')
 process.load('VertexCompositeAnalysis.VertexCompositeProducer.hfCoincFilter_cff')
 process.load("VertexCompositeAnalysis.VertexCompositeProducer.OfflinePrimaryVerticesRecovery_cfi")
-#process.colEvtSel = cms.Sequence(process.hfCoincFilter2Th4 * process.primaryVertexFilter * process.clusterCompatibilityFilter)
-process.colEvtSel = cms.Sequence(process.primaryVertexFilter * process.clusterCompatibilityFilter)
+process.colEvtSel = cms.Sequence(process.hfCoincFilter2Th4 * process.primaryVertexFilter * process.clusterCompatibilityFilter)
+#process.colEvtSel = cms.Sequence(process.primaryVertexFilter * process.clusterCompatibilityFilter)
 
 # Define the event selection sequence
 process.eventFilter_HM = cms.Sequence(
@@ -139,12 +139,12 @@ process.schedule = cms.Schedule(
 )
 
 # Add the event selection filters
-#process.Flag_colEvtSel = cms.Path(process.eventFilter_HM * process.colEvtSel)
-#process.Flag_hfCoincFilter2Th4 = cms.Path(process.eventFilter_HM * process.hfCoincFilter2Th4)
+process.Flag_colEvtSel = cms.Path(process.eventFilter_HM * process.colEvtSel)
+process.Flag_hfCoincFilter2Th4 = cms.Path(process.eventFilter_HM * process.hfCoincFilter2Th4)
 process.Flag_primaryVertexFilter = cms.Path(process.eventFilter_HM * process.primaryVertexFilter)
 process.Flag_clusterCompatibilityFilter = cms.Path(process.eventFilter_HM * process.clusterCompatibilityFilter)
-#eventFilterPaths = [ process.Flag_colEvtSel , process.Flag_hfCoincFilter2Th4 , process.Flag_primaryVertexFilter , process.Flag_clusterCompatibilityFilter ]
-eventFilterPaths = [ process.Flag_primaryVertexFilter , process.Flag_clusterCompatibilityFilter ]
+eventFilterPaths = [ process.Flag_colEvtSel , process.Flag_hfCoincFilter2Th4 , process.Flag_primaryVertexFilter , process.Flag_clusterCompatibilityFilter ]
+#eventFilterPaths = [ process.Flag_primaryVertexFilter , process.Flag_clusterCompatibilityFilter ]
 for P in eventFilterPaths:
     process.schedule.insert(0, P)
 
