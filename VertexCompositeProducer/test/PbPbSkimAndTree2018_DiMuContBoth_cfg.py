@@ -14,7 +14,7 @@ process.options = cms.untracked.PSet(wantSummary = cms.untracked.bool(True))
 
 # Define the input source
 process.source = cms.Source("PoolSource",
-   fileNames = cms.untracked.vstring('root://cmsxrootd.fnal.gov//store/hidata/HIRun2018A/HISingleMuon/AOD/04Apr2019-v1/270003/21A8A05E-B3C5-4445-A76E-1433602ED7FF.root'),
+   fileNames = cms.untracked.vstring('root://xrootd-cms.infn.it//store/hidata/HIRun2018A/HIDoubleMuon/AOD/04Apr2019-v1/110000/0004BD75-0C13-BB4B-B71D-E61D14CD66C7.root'),
    inputCommands=cms.untracked.vstring('keep *', 'drop *_hiEvtPlane_*_*')
 )
 process.maxEvents = cms.untracked.PSet(input = cms.untracked.int32(-1))
@@ -30,7 +30,7 @@ process.centralityBin.centralityVariable = cms.string("HFtowers")
 process.GlobalTag.snapshotTime = cms.string("9999-12-31 23:59:59.000")
 process.GlobalTag.toGet.extend([
     cms.PSet(record = cms.string("HeavyIonRcd"),
-        tag = cms.string("CentralityTable_HFtowers200_DataPbPb_periHYDJETshape_run2v1033p1x01_offline"),
+        tag = cms.string("CentralityTable_HFtowers200_DataPbPb_periHYDJETshape_run2v1033p1x01_offline"), # not sure if need change
         connect = cms.string("frontier://FrontierProd/CMS_CONDITIONS"),
         label = cms.untracked.string("HFtowers")
         ),
@@ -63,7 +63,7 @@ process.evtplane_seq = cms.Sequence(process.hiEvtPlane * process.hiEvtPlaneFlat)
 
 # Add the VertexComposite producer
 process.load("VertexCompositeAnalysis.VertexCompositeProducer.generalDiMuCandidates_cff")
-process.generalMuMuMassMin7CandidatesWrongSign = process.generalMuMuMassMin7Candidates.clone(isWrongSign = cms.bool(True))
+process.generalMuMuMassMin0CandidatesWrongSign = process.generalMuMuMassMin0Candidates.clone(isWrongSign = cms.bool(True))
 from VertexCompositeAnalysis.VertexCompositeProducer.PATAlgos_cff import doPATMuons
 doPATMuons(process, False)
 
@@ -71,11 +71,11 @@ doPATMuons(process, False)
 process.twoMuons = cms.EDFilter("CandViewCountFilter", src = cms.InputTag("muons"), minNumber = cms.uint32(2))
 process.goodMuon = cms.EDFilter("MuonSelector",
             src = cms.InputTag("muons"),
-            cut = process.generalMuMuMassMin7Candidates.muonSelection,
+            cut = process.generalMuMuMassMin0Candidates.muonSelection,
             )
 process.twoGoodMuons = cms.EDFilter("CandViewCountFilter", src = cms.InputTag("goodMuon"), minNumber = cms.uint32(2))
 process.goodDimuon = cms.EDProducer("CandViewShallowCloneCombiner",
-            cut = process.generalMuMuMassMin7Candidates.candidateSelection,
+            cut = process.generalMuMuMassMin0Candidates.candidateSelection,
             checkCharge = cms.bool(False),
             decay = cms.string('goodMuon@+ goodMuon@-')
             )
@@ -91,13 +91,12 @@ process.hltFilter.HLTPaths = [
     # Double muon triggers
     'HLT_HIL1DoubleMuOpen_OS_Centrality_40_100_v*', # Peripheral OS dimuons
     'HLT_HIL1DoubleMuOpen_Centrality_50_100_v*', # Peripheral dimuons
-    'HLT_HIL3Mu2p5NHitQ10_L2Mu2_M7toinf_v*', # Bottomonia
-    'HLT_HIL1DoubleMu10_v*', # Z bosons
-    'HLT_HIUPC_DoubleMu0_NotMBHF2AND_v*', # UPC dimuons
+    'HLT_HIL1DoubleMuOpen_v*'
+    'HLT_HIL1DoubleMuOpen_OS_Centrality_30_100_v*',
+    'HLT_HIL3DoubleMuOpen_JpsiPsi_v1'
+    'HLT_HIL3DoubleMuOpen_Upsi_v1'
     # Single muon triggers
     'HLT_HIL1MuOpen_Centrality_80_100_v*', # Peripheral muons
-    'HLT_HIL3Mu12_v*', # Electroweak bosons
-    'HLT_HIUPC_SingleMuOpen_NotMBHF2AND_v*', # UPC muons
     ]
 
 # Add PbPb collision event selection
@@ -105,7 +104,8 @@ process.load('VertexCompositeAnalysis.VertexCompositeProducer.collisionEventSele
 process.load('VertexCompositeAnalysis.VertexCompositeProducer.clusterCompatibilityFilter_cfi')
 process.load('VertexCompositeAnalysis.VertexCompositeProducer.hfCoincFilter_cff')
 process.load("VertexCompositeAnalysis.VertexCompositeProducer.OfflinePrimaryVerticesRecovery_cfi")
-process.colEvtSel = cms.Sequence(process.hfCoincFilter2Th4 * process.primaryVertexFilter * process.clusterCompatibilityFilter)
+#process.colEvtSel = cms.Sequence(process.hfCoincFilter2Th4 * process.primaryVertexFilter * process.clusterCompatibilityFilter)
+process.colEvtSel = cms.Sequence(process.primaryVertexFilter * process.clusterCompatibilityFilter)
 
 # Define the event selection sequence
 process.eventFilter_HM = cms.Sequence(
@@ -117,11 +117,11 @@ process.eventFilter_HM_step = cms.Path( process.eventFilter_HM )
 
 # Define the analysis steps
 process.pcentandep_step = cms.Path(process.eventFilter_HM * process.cent_seq * process.evtplane_seq)
-process.dimurereco_step = cms.Path(process.eventFilter_HM * process.patMuonSequence * process.generalMuMuMassMin7Candidates)
-process.dimurerecowrongsign_step = cms.Path(process.eventFilter_HM * process.patMuonSequence * process.generalMuMuMassMin7CandidatesWrongSign)
+process.dimurereco_step = cms.Path(process.eventFilter_HM * process.patMuonSequence * process.generalMuMuMassMin0Candidates)
+process.dimurerecowrongsign_step = cms.Path(process.eventFilter_HM * process.patMuonSequence * process.generalMuMuMassMin0CandidatesWrongSign)
 
 # Add the VertexComposite tree
-process.load("VertexCompositeAnalysis.VertexCompositeAnalyzer.dimuanalyzer_tree_cff")
+process.load("VertexCompositeAnalysis.VertexCompositeAnalyzer.dimuanalyzer_tree_cff") # changed 7->0
 process.dimucontana.selectEvents = cms.untracked.string("eventFilter_HM_step")
 process.dimucontana_wrongsign.selectEvents = cms.untracked.string("eventFilter_HM_step")
 
@@ -139,11 +139,12 @@ process.schedule = cms.Schedule(
 )
 
 # Add the event selection filters
-process.Flag_colEvtSel = cms.Path(process.eventFilter_HM * process.colEvtSel)
-process.Flag_hfCoincFilter2Th4 = cms.Path(process.eventFilter_HM * process.hfCoincFilter2Th4)
+#process.Flag_colEvtSel = cms.Path(process.eventFilter_HM * process.colEvtSel)
+#process.Flag_hfCoincFilter2Th4 = cms.Path(process.eventFilter_HM * process.hfCoincFilter2Th4)
 process.Flag_primaryVertexFilter = cms.Path(process.eventFilter_HM * process.primaryVertexFilter)
 process.Flag_clusterCompatibilityFilter = cms.Path(process.eventFilter_HM * process.clusterCompatibilityFilter)
-eventFilterPaths = [ process.Flag_colEvtSel , process.Flag_hfCoincFilter2Th4 , process.Flag_primaryVertexFilter , process.Flag_clusterCompatibilityFilter ]
+#eventFilterPaths = [ process.Flag_colEvtSel , process.Flag_hfCoincFilter2Th4 , process.Flag_primaryVertexFilter , process.Flag_clusterCompatibilityFilter ]
+eventFilterPaths = [ process.Flag_primaryVertexFilter , process.Flag_clusterCompatibilityFilter ]
 for P in eventFilterPaths:
     process.schedule.insert(0, P)
 
