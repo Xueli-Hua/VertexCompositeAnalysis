@@ -25,18 +25,29 @@ dimuana = cms.EDAnalyzer('PATCompositeTreeProducer',
 
   #Trigger info
   TriggerResultCollection = cms.untracked.InputTag("TriggerResults::HLT"),
+  #triggerPathNames = cms.untracked.vstring(
+  #    'HLT_HIL1DoubleMuOpen_OS_Centrality_40_100_v', # Peripheral OS dimuons
+  #    'HLT_HIL1DoubleMuOpen_Centrality_50_100_v', # Peripheral dimuons
+  #    'HLT_HIL3Mu2p5NHitQ10_L2Mu2_M7toinf_v', # Bottomonia
+  #    'HLT_HIL1DoubleMu10_v', # Z bosons
+  #    'HLT_HIUPC_DoubleMu0_NotMBHF2AND_v', # UPC dimuons
+  #    # Single muon triggers
+  #    'HLT_HIL1MuOpen_Centrality_80_100_v', # Peripheral muons
+  #    'HLT_HIL3Mu12_v', # Electroweak bosons
+  #    'HLT_HIUPC_SingleMuOpen_NotMBHF2AND_v', # UPC muons
+  #    'HLT_HIL3Mu3_NHitQ10_v1', # Low pT muons
+ # ),
   triggerPathNames = cms.untracked.vstring(
-      'HLT_HIL1DoubleMuOpen_OS_Centrality_40_100_v', # Peripheral OS dimuons
-      'HLT_HIL1DoubleMuOpen_Centrality_50_100_v', # Peripheral dimuons
-      'HLT_HIL3Mu2p5NHitQ10_L2Mu2_M7toinf_v', # Bottomonia
-      'HLT_HIL1DoubleMu10_v', # Z bosons
-      'HLT_HIUPC_DoubleMu0_NotMBHF2AND_v', # UPC dimuons
-      # Single muon triggers
-      'HLT_HIL1MuOpen_Centrality_80_100_v', # Peripheral muons
-      'HLT_HIL3Mu12_v', # Electroweak bosons
-      'HLT_HIUPC_SingleMuOpen_NotMBHF2AND_v', # UPC muons
-      'HLT_HIL3Mu3_NHitQ10_v1', # Low pT muons
-  ),
+    # Double muon triggers
+    'HLT_HIL1DoubleMuOpen_OS_Centrality_40_100_v*', # Peripheral OS dimuons
+    'HLT_HIL1DoubleMuOpen_Centrality_50_100_v*', # Peripheral dimuons
+    'HLT_HIL1DoubleMuOpen_v*'
+    'HLT_HIL1DoubleMuOpen_OS_Centrality_30_100_v*',
+    'HLT_HIL3DoubleMuOpen_JpsiPsi_v1'
+    'HLT_HIL3DoubleMuOpen_Upsi_v1'
+    # Single muon triggers
+    'HLT_HIL1MuOpen_Centrality_80_100_v*', # Peripheral muons
+  ),         
   triggerFilterNames = cms.untracked.vstring(
       'hltL1fL1sL1DoubleMuOpenOSCentrality40100L1Filtered0',
       'hltL1fL1sL1DoubleMuOpenCentrality50100L1Filtered0',
