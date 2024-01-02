@@ -1,5 +1,6 @@
 if __name__ == '__main__':
 
+    import CRABClient
     from CRABAPI.RawCommand import crabCommand
     from CRABClient.ClientExceptions import ClientException
     from httplib import HTTPException
@@ -38,11 +39,9 @@ if __name__ == '__main__':
         except HTTPException as hte:
             #print "Failed submitting task: %s" % (hte.headers)
             print("Failed submitting task: %s" % hte.headers)
-            raise
         except ClientException as cle:
             #print "Failed submitting task: %s" % (cle)
             print("Failed submitting task: %s" % cle)
-            raise
 
     #############################################################################################
     ## From now on that's what users should modify: this is the a-la-CRAB2 configuration part. ##
@@ -57,7 +56,7 @@ if __name__ == '__main__':
     config.General.requestName = 'PbPbDiMu_v2_MP327564_v5'
     #config.Data.inputDataset = '/HIDoubleMuon/HIRun2018A-PromptReco-v2/AOD'
     config.Data.inputDataset = '/HIDoubleMuon/HIRun2018A-04Apr2019-v1/AOD'
-    config.Data.inputDBS = 'global'
+    #config.Data.inputDBS = 'global'
     config.Data.outputDatasetTag = '2018Skimv2_DiMuCont_MuonPhysics_HLTMass2p5toInf_v5' # 7->2p5
     config.JobType.psetName = '../test/PbPbSkimAndTree2018_DiMuContBoth_cfg.py'
     submit(config)
