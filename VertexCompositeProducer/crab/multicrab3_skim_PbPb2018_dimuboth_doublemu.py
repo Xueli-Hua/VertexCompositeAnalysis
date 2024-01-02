@@ -17,10 +17,10 @@ if __name__ == '__main__':
 #    config.JobType.maxJobRuntimeMin = 2750
     config.JobType.psetName = '../test/PbPbSkimAndTree2018_DiMuContBoth_cfg.py'
     config.JobType.inputFiles=['../test/HeavyIonRPRcd_PbPb2018_offline.db']
-#    config.Data.unitsPerJob = 20
-#    config.Data.totalUnits = 100
-#    config.Data.splitting = 'LumiBased'
-    config.Data.splitting = 'Automatic'
+    config.Data.unitsPerJob = 5    # 20->5 One could also change the number of luminosity sections to analyze per job (Data.unitsPerJob); e.g. one could decrease it so that to have shorter jobs.
+    config.Data.totalUnits = 5   # 100->5 totalUnits = NJobs*unitsPerJob
+    config.Data.splitting = 'LumiBased'
+#    config.Data.splitting = 'Automatic' (no unitsPerJob and totalUnits)
     config.Data.lumiMask = '/afs/cern.ch/cms/CAF/CMSCOMM/COMM_DQM/certification/Collisions18/HI/PromptReco/Cert_326381-327564_HI_PromptReco_Collisions18_JSON_MuonPhys.txt'
     #config.Data.lumiMask = 'Cert_326381-327489_HI_PromptReco_Collisions18_JSON_MuonPhys.txt'
 #    config.Data.lumiMask = 'jsondiff_327560_327489.txt'
@@ -28,9 +28,9 @@ if __name__ == '__main__':
     config.Data.outLFNDirBase = '/store/user/%s/' % (getUsernameFromSiteDB())
     config.Data.publication = True
 #    config.Site.storageSite = 'T2_US_Vanderbilt'
-    config.Site.storageSite = 'T2_US_MIT'
+#    config.Site.storageSite = 'T2_US_MIT'
 #    config.Site.storageSite = 'T3_US_Rice'
-#    config.Site.storageSite = 'T2_CH_CERN'
+    config.Site.storageSite = 'T2_CH_CERN'
 
     def submit(config):
         try:
@@ -51,8 +51,9 @@ if __name__ == '__main__':
 #    submit(config)
 
     config.General.requestName = 'PbPbDiMu_v2_MP327564_v5'
-    config.Data.inputDataset = '/HIDoubleMuon/HIRun2018A-PromptReco-v2/AOD'
-    config.Data.outputDatasetTag = '2018Skimv2_DiMuCont_MuonPhysics_HLTMass7toInf_v5'
+    #config.Data.inputDataset = '/HIDoubleMuon/HIRun2018A-PromptReco-v2/AOD'
+    config.Data.inputDataset = '/HIDoubleMuon/HIRun2018A-04Apr2019-v1/AOD'
+    config.Data.outputDatasetTag = '2018Skimv2_DiMuCont_MuonPhysics_HLTMass2p5toInf_v5' # 7->2p5
     config.JobType.psetName = '../test/PbPbSkimAndTree2018_DiMuContBoth_cfg.py'
     submit(config)
 
