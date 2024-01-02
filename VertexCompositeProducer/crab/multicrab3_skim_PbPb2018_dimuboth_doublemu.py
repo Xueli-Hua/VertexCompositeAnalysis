@@ -39,7 +39,8 @@ if __name__ == '__main__':
             #print "Failed submitting task: %s" % (hte.headers)
             print("Failed submitting task: %s" % hte.headers)
         except ClientException as cle:
-            print "Failed submitting task: %s" % (cle)
+            #print "Failed submitting task: %s" % (cle)
+            print("Failed submitting task: %s" % cle)
 
     #############################################################################################
     ## From now on that's what users should modify: this is the a-la-CRAB2 configuration part. ##
