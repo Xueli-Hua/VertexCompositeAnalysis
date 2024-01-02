@@ -89,14 +89,16 @@ process.hltFilter.andOr = cms.bool(True)
 process.hltFilter.throw = cms.bool(False)
 process.hltFilter.HLTPaths = [
     # Double muon triggers
-    'HLT_HIL1DoubleMuOpen_OS_Centrality_40_100_v*', # Peripheral OS dimuons
-    'HLT_HIL1DoubleMuOpen_Centrality_50_100_v*', # Peripheral dimuons
-    'HLT_HIL1DoubleMuOpen_v*'
-    'HLT_HIL1DoubleMuOpen_OS_Centrality_30_100_v*',
-    'HLT_HIL3DoubleMuOpen_JpsiPsi_v1'
-    'HLT_HIL3DoubleMuOpen_Upsi_v1'
+    'HLT_HIL1DoubleMuOpen_OS_Centrality_40_100_v', # Peripheral OS dimuons
+    'HLT_HIL1DoubleMuOpen_Centrality_50_100_v', # Peripheral dimuons
+    'HLT_HIL3Mu2p5NHitQ10_L2Mu2_M7toinf_v', # Bottomonia
+    'HLT_HIL1DoubleMu10_v', # Z bosons
+    'HLT_HIUPC_DoubleMu0_NotMBHF2AND_v', # UPC dimuons
     # Single muon triggers
-    'HLT_HIL1MuOpen_Centrality_80_100_v*', # Peripheral muons
+    'HLT_HIL1MuOpen_Centrality_80_100_v', # Peripheral muons
+    'HLT_HIL3Mu12_v', # Electroweak bosons
+    'HLT_HIUPC_SingleMuOpen_NotMBHF2AND_v', # UPC muons
+    'HLT_HIL3Mu3_NHitQ10_v1', # Low pT muons
     ]
 
 # Add PbPb collision event selection
