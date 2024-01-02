@@ -1,6 +1,6 @@
 if __name__ == '__main__':
 
-    import CRABClient
+    #import CRABClient
     from CRABAPI.RawCommand import crabCommand
     from CRABClient.ClientExceptions import ClientException
     from httplib import HTTPException
