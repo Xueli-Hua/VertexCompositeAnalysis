@@ -128,7 +128,7 @@ process.dimucontana.selectEvents = cms.untracked.string("eventFilter_HM_step")
 process.dimucontana_wrongsign.selectEvents = cms.untracked.string("eventFilter_HM_step")
 
 # Define the output
-process.TFileService = cms.Service("TFileService", fileName = cms.string('/eos/cms/store/group/phys_heavyions/xueli/test/dimuana.root'))
+process.TFileService = cms.Service("TFileService", fileName = cms.string('/eos/cms/store/group/phys_heavyions/xueli/test/dimuana2p5.root'))
 process.p = cms.EndPath(process.dimucontana * process.dimucontana_wrongsign)
 
 # Define the process schedule
