@@ -63,7 +63,7 @@ process.evtplane_seq = cms.Sequence(process.hiEvtPlane * process.hiEvtPlaneFlat)
 
 # Add the VertexComposite producer
 process.load("VertexCompositeAnalysis.VertexCompositeProducer.generalDiMuCandidates_cff")
-process.generalMuMuMassMin0CandidatesWrongSign = process.generalMuMuMassMin0Candidates.clone(isWrongSign = cms.bool(True))
+process.generalMuMuMassMin2p5CandidatesWrongSign = process.generalMuMuMassMin2p5Candidates.clone(isWrongSign = cms.bool(True))
 from VertexCompositeAnalysis.VertexCompositeProducer.PATAlgos_cff import doPATMuons
 doPATMuons(process, False)
 
@@ -71,11 +71,11 @@ doPATMuons(process, False)
 process.twoMuons = cms.EDFilter("CandViewCountFilter", src = cms.InputTag("muons"), minNumber = cms.uint32(2))
 process.goodMuon = cms.EDFilter("MuonSelector",
             src = cms.InputTag("muons"),
-            cut = process.generalMuMuMassMin0Candidates.muonSelection,
+            cut = process.generalMuMuMassMin2p5Candidates.muonSelection,
             )
 process.twoGoodMuons = cms.EDFilter("CandViewCountFilter", src = cms.InputTag("goodMuon"), minNumber = cms.uint32(2))
 process.goodDimuon = cms.EDProducer("CandViewShallowCloneCombiner",
-            cut = process.generalMuMuMassMin0Candidates.candidateSelection,
+            cut = process.generalMuMuMassMin2p5Candidates.candidateSelection,
             checkCharge = cms.bool(False),
             decay = cms.string('goodMuon@+ goodMuon@-')
             )
@@ -119,8 +119,8 @@ process.eventFilter_HM_step = cms.Path( process.eventFilter_HM )
 
 # Define the analysis steps
 process.pcentandep_step = cms.Path(process.eventFilter_HM * process.cent_seq * process.evtplane_seq)
-process.dimurereco_step = cms.Path(process.eventFilter_HM * process.patMuonSequence * process.generalMuMuMassMin0Candidates)
-process.dimurerecowrongsign_step = cms.Path(process.eventFilter_HM * process.patMuonSequence * process.generalMuMuMassMin0CandidatesWrongSign)
+process.dimurereco_step = cms.Path(process.eventFilter_HM * process.patMuonSequence * process.generalMuMuMassMin2p5Candidates)
+process.dimurerecowrongsign_step = cms.Path(process.eventFilter_HM * process.patMuonSequence * process.generalMuMuMassMin2p5CandidatesWrongSign)
 
 # Add the VertexComposite tree
 process.load("VertexCompositeAnalysis.VertexCompositeAnalyzer.dimuanalyzer_tree_cff") # changed 7->0
