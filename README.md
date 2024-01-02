@@ -18,13 +18,3 @@ cd VertexCompositeProducer/test
 
 cmsRun PbPbSkimAndTree2018_DiMuContBothGammaGamma_mc_cfg.py 
 
-## Changes
-1. generalMuMuMassMin7Candidates -> generalMuMuMassMin2p5Candidates
-   
-   files:
-   
-          VetexCompositeProducer/test/PbPbSkimAndTree2018_DiMuContBoth_cfg.py
-   
-          VertexCompositeAnalyzer/python/dimuanalyzer_tree_cff.py
-   
-          VertexCompositeProducer/python/generalDiMuCandidates_cff.py
