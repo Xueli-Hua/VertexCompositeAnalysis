@@ -27,10 +27,10 @@ if __name__ == '__main__':
 #    config.Data.lumiMask = 'json_DCSONLY_HI_327327.txt'
     config.Data.outLFNDirBase = '/store/user/%s/' % (getUsername())#FromSiteDB())
     config.Data.publication = True
-#    config.Site.storageSite = 'T2_US_Vanderbilt'
+    config.Site.storageSite = 'T2_US_Vanderbilt'
 #    config.Site.storageSite = 'T2_US_MIT'
 #    config.Site.storageSite = 'T3_US_Rice'
-    config.Site.storageSite = 'T2_CH_CERN'
+#    config.Site.storageSite = 'T2_CH_CERN'
 
     def submit(config):
         try:
