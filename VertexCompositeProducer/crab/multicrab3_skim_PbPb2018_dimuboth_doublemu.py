@@ -6,7 +6,8 @@ if __name__ == '__main__':
 
     # We want to put all the CRAB project directories from the tasks we submit here into one common directory.
     # That's why we need to set this parameter (here or above in the configuration file, it does not matter, we will not overwrite it).
-    from CRABClient.UserUtilities import config, getUsernameFromSiteDB
+    from CRABClient.UserUtilities import config
+    from CRABClient.UserUtilities import getUsernameFromSiteDB
     config = config()
 
     config.General.workArea = 'VertexCompositeAna'
