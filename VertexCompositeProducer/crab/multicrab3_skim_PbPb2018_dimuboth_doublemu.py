@@ -6,7 +6,7 @@ if __name__ == '__main__':
 
     # We want to put all the CRAB project directories from the tasks we submit here into one common directory.
     # That's why we need to set this parameter (here or above in the configuration file, it does not matter, we will not overwrite it).
-    from CRABClient.UserUtilities import config, getUsernameFromSiteDB
+    from CRABClient.UserUtilities import config, getUsername #FromSiteDB
     config = config()
 
     config.General.workArea = 'VertexCompositeAna'
@@ -25,7 +25,7 @@ if __name__ == '__main__':
     #config.Data.lumiMask = 'Cert_326381-327489_HI_PromptReco_Collisions18_JSON_MuonPhys.txt'
 #    config.Data.lumiMask = 'jsondiff_327560_327489.txt'
 #    config.Data.lumiMask = 'json_DCSONLY_HI_327327.txt'
-    config.Data.outLFNDirBase = '/store/user/%s/' % (getUsernameFromSiteDB())
+    config.Data.outLFNDirBase = '/store/user/%s/' % (getUsername())#FromSiteDB())
     config.Data.publication = True
 #    config.Site.storageSite = 'T2_US_Vanderbilt'
 #    config.Site.storageSite = 'T2_US_MIT'
