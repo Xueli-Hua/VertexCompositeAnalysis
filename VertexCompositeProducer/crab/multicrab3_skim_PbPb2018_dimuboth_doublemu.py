@@ -10,7 +10,7 @@ if __name__ == '__main__':
     config = config()
 
     config.General.workArea = '/eos/cms/store/group/phys_heavyions/xueli/test/VertexCompositeAna'
-    config.General.transferOutputs = False #True
+    config.General.transferOutputs = True
     config.General.transferLogs = False
     config.JobType.pluginName = 'Analysis'
 #    config.JobType.maxMemoryMB = 4000
