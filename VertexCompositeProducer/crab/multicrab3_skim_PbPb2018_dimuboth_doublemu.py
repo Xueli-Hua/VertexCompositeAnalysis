@@ -9,8 +9,8 @@ if __name__ == '__main__':
     from CRABClient.UserUtilities import config, getUsername #FromSiteDB
     config = config()
 
-    config.General.workArea = 'VertexCompositeAna'
-    config.General.transferOutputs = True
+    config.General.workArea = '/eos/cms/store/group/phys_heavyions/xueli/test/VertexCompositeAna'
+    config.General.transferOutputs = False #True
     config.General.transferLogs = False
     config.JobType.pluginName = 'Analysis'
 #    config.JobType.maxMemoryMB = 4000
@@ -52,11 +52,11 @@ if __name__ == '__main__':
 #    config.JobType.psetName = '../test/PbPbSkimAndTree2018_DiMuContBoth_cfg.py'
 #    submit(config)
 
-    config.General.requestName = 'PbPbDiMu_v2_MP327564_v1'
+    config.General.requestName = 'PbPbDiMu_v2_MP327564_v2'
     #config.Data.inputDataset = '/HIDoubleMuon/HIRun2018A-PromptReco-v2/AOD'
     config.Data.inputDataset = '/HIDoubleMuon/HIRun2018A-04Apr2019-v1/AOD'
     #config.Data.inputDBS = 'global'
-    config.Data.outputDatasetTag = '2018Skimv2_DiMuCont_MuonPhysics_HLTMass2p5toInf_v5' # 7->2p5
+    config.Data.outputDatasetTag = '2018Skimv2_DiMuCont_MuonPhysics_HLTMass2p5toInf_v2' # 7->2p5
     config.JobType.psetName = '../test/PbPbSkimAndTree2018_DiMuContBoth_cfg.py'
     submit(config)
 
