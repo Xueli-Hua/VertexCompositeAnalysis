@@ -18,7 +18,7 @@ if __name__ == '__main__':
     config.JobType.psetName = '../test/PbPbSkimAndTree2018_DiMuContBoth_cfg.py'
     config.JobType.inputFiles=['../test/HeavyIonRPRcd_PbPb2018_offline.db']
     config.Data.unitsPerJob = 20    # 20->5 One could also change the number of luminosity sections to analyze per job (Data.unitsPerJob); e.g. one could decrease it so that to have shorter jobs.
-    config.Data.totalUnits = 20   # 100->5 totalUnits = NJobs*unitsPerJob
+    config.Data.totalUnits = 100   # 100->5 totalUnits = NJobs*unitsPerJob
     config.Data.splitting = 'LumiBased'
 #    config.Data.splitting = 'Automatic' (no unitsPerJob and totalUnits)
     config.Data.lumiMask = '/afs/cern.ch/cms/CAF/CMSCOMM/COMM_DQM/certification/Collisions18/HI/PromptReco/Cert_326381-327564_HI_PromptReco_Collisions18_JSON_MuonPhys.txt'
