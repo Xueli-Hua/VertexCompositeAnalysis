@@ -52,7 +52,7 @@ if __name__ == '__main__':
 #    config.JobType.psetName = '../test/PbPbSkimAndTree2018_DiMuContBoth_cfg.py'
 #    submit(config)
 
-    config.General.requestName = 'PbPbDiMu_v2_MP327564_v2'
+    config.General.requestName = 'PbPbDiMu_v2_MP327564_v3'
     #config.Data.inputDataset = '/HIDoubleMuon/HIRun2018A-PromptReco-v2/AOD'
     config.Data.inputDataset = '/HIDoubleMuon/HIRun2018A-04Apr2019-v1/AOD'
     #config.Data.inputDBS = 'global'
