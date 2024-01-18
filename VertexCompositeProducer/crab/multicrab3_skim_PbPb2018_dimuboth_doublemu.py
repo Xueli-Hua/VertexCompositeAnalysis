@@ -25,7 +25,8 @@ if __name__ == '__main__':
     #config.Data.lumiMask = 'Cert_326381-327489_HI_PromptReco_Collisions18_JSON_MuonPhys.txt'
 #    config.Data.lumiMask = 'jsondiff_327560_327489.txt'
 #    config.Data.lumiMask = 'json_DCSONLY_HI_327327.txt'
-    config.Data.outLFNDirBase = '/store/user/%s/' % (getUsername())#FromSiteDB())
+#    config.Data.outLFNDirBase = '/store/user/%s/' % (getUsername())#FromSiteDB())
+    config.Data.outLFNDirBase = '/store/group/phys_heavyions/xueli' % (getUsername())#FromSiteDB())
     config.Data.publication = False
 #    config.Site.storageSite = 'T2_US_Vanderbilt'
 #    config.Site.storageSite = 'T2_US_MIT'
