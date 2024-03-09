@@ -57,7 +57,7 @@ if __name__ == '__main__':
     #config.Data.inputDataset = '/HIDoubleMuon/HIRun2018A-PromptReco-v2/AOD'
     config.Data.inputDataset = '/HIDoubleMuon/HIRun2018A-04Apr2019-v1/AOD'
     #config.Data.inputDBS = 'global'
-    config.Data.outputDatasetTag = '2018Skimv2_DiMuCont_MuonPhysics_HLTMass2p5toInf' # 7->2p5
+    config.Data.outputDatasetTag = '2018Skimv2_DiMuCont_MuonPhysics_HLTMass2p5toInf_v2' # 7->2p5
     config.JobType.psetName = '../test/PbPbSkimAndTree2018_DiMuContBoth_cfg.py'
     submit(config)
     print "fortest"
