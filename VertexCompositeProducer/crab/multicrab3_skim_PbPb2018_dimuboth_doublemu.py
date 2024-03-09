@@ -9,8 +9,7 @@ if __name__ == '__main__':
     from CRABClient.UserUtilities import config, getUsername #FromSiteDB
     
     import CRABClient
-    from WMCore.Configuration import Configuration
-    config = Configuration()
+    from CRABClient.UserUtilities import config 
     
     #config = config()
     print "fortest"
