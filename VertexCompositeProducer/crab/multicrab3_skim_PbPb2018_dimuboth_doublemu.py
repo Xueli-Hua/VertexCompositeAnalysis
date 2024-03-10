@@ -17,8 +17,8 @@ if __name__ == '__main__':
 #    config.JobType.maxJobRuntimeMin = 2750
     config.JobType.psetName = '../test/PbPbSkimAndTree2018_DiMuContBoth_cfg.py'
     config.JobType.inputFiles=['../test/HeavyIonRPRcd_PbPb2018_offline.db']
-    config.Data.unitsPerJob = 5    # 20->5 One could also change the number of luminosity sections to analyze per job (Data.unitsPerJob); e.g. one could decrease it so that to have shorter jobs.
-    config.Data.totalUnits = 5   # 100->5 totalUnits = NJobs*unitsPerJob
+    config.Data.unitsPerJob = 200    # 20->5 One could also change the number of luminosity sections to analyze per job (Data.unitsPerJob); e.g. one could decrease it so that to have shorter jobs.
+    config.Data.totalUnits = 200   # 100->5 totalUnits = NJobs*unitsPerJob
     config.Data.splitting = 'LumiBased'
 #    config.Data.splitting = 'Automatic' (no unitsPerJob and totalUnits)
     config.Data.lumiMask = '/afs/cern.ch/cms/CAF/CMSCOMM/COMM_DQM/certification/Collisions18/HI/PromptReco/Cert_326381-327564_HI_PromptReco_Collisions18_JSON_MuonPhys.txt'
@@ -53,11 +53,11 @@ if __name__ == '__main__':
 #    config.JobType.psetName = '../test/PbPbSkimAndTree2018_DiMuContBoth_cfg.py'
 #    submit(config)
 
-    config.General.requestName = 'PbPbDiMu_v2_MP327564_v5'
+    config.General.requestName = 'PbPbDiMu_v2_MP327564'
     #config.Data.inputDataset = '/HIDoubleMuon/HIRun2018A-PromptReco-v2/AOD'
     config.Data.inputDataset = '/HIDoubleMuon/HIRun2018A-04Apr2019-v1/AOD'
     #config.Data.inputDBS = 'global'
-    config.Data.outputDatasetTag = '2018Skimv2_DiMuCont_MuonPhysics_HLTMass2p5toInf_v2' # 7->2p5
+    config.Data.outputDatasetTag = '2018Skimv2_DiMuCont_MuonPhysics_HLTMass2p5toInf' # 7->2p5
     config.JobType.psetName = '../test/PbPbSkimAndTree2018_DiMuContBoth_cfg.py'
     submit(config)
 
