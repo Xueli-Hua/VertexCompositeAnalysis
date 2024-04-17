@@ -195,11 +195,9 @@ testEventInfoTreeProducer::fillRECO(const edm::Event& iEvent, const edm::EventSe
   if(!vertices.isValid()) throw cms::Exception("testEventInfoTreeProducer") << "Primary vertices  collection not found!" << std::endl;
 
   //best vertex
-    double bestvz=-999.9, bestvx=-999.9, bestvy=-999.9;
-    double bestvzError=-999.9, bestvxError=-999.9, bestvyError=-999.9;
+    double bestvz=-999.9;
     const reco::Vertex & vtx = (*vertices)[0];
-    bestvz = vtx.z(); bestvx = vtx.x(); bestvy = vtx.y();
-    bestvzError = vtx.zError(); bestvxError = vtx.xError(); bestvyError = vtx.yError();
+    bestvz = vtx.z();
 
   edm::Handle<reco::TrackCollection> tracks;
   iEvent.getByToken(generalTrkToken_, tracks);
