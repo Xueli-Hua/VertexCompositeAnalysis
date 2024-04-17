@@ -85,6 +85,8 @@ public:
 
 private:
   virtual void beginJob();
+  virtual void beginRun(const edm::Run&, const edm::EventSetup&);
+  virtual void endRun(const edm::Run&, const edm::EventSetup&) {};
   virtual void analyze(const edm::Event&, const edm::EventSetup&);
   virtual void fillRECO(const edm::Event&, const edm::EventSetup&);
   virtual void endJob();
@@ -229,12 +231,7 @@ testEventInfoTreeProducer::fillRECO(const edm::Event& iEvent, const edm::EventSe
   iEvent.getByToken(muonsToken_, recoMuons);
 
   for (const auto& mu1 : *recoMuons) {
-    if (!(mu1.isPFMuon() || mu1.isGlobalMuon() || mu1.isTrackerMuon()))
-      continue;
-
     for (const auto& mu2 : *recoMuons) {
-      if (!(mu2.isPFMuon() || mu2.isGlobalMuon() || mu2.isTrackerMuon()))
-        continue;
       double dimuCharge = mu1.charge()+mu2.charge();
       double dimuMass = mu1.mass()+mu2.mass();
 
@@ -252,10 +249,9 @@ testEventInfoTreeProducer::fillRECO(const edm::Event& iEvent, const edm::EventSe
   double trkqx = 0;
   double trkqy = 0;
   double trkPt = 0;
-  double trkQx = 0;
-  double trkQy = 0;
+  double trkQx = -999;
+  double trkQy = -999;
   //bool DauTrk = false;
-  
 
   for(unsigned it=0; it<tracks->size(); ++it){
         
@@ -269,7 +265,6 @@ testEventInfoTreeProducer::fillRECO(const edm::Event& iEvent, const edm::EventSe
     //  if( fabs(eta-d1Eta[i]) <0.03 && fabs(phi-d1Phi[i]) <0.03 ) DauTrk = true;
      // if( fabs(eta-d2Eta[i]) <0.03 && fabs(phi-d2Phi[i]) <0.03) DauTrk = true;
     //}
-
     //if(DauTrk == true) continue;
 
     trkqx += pt*cos(2*phi);
@@ -283,6 +278,8 @@ testEventInfoTreeProducer::fillRECO(const edm::Event& iEvent, const edm::EventSe
   double twqx = 0;
   double twqy = 0;
   double twEt = 0;
+  double twQx = -999；
+  double twQy = -999；
   for(unsigned itw = 0; itw < towers->size(); ++itw){
         
     const CaloTower & hit= (*towers)[itw];
@@ -296,8 +293,8 @@ testEventInfoTreeProducer::fillRECO(const edm::Event& iEvent, const edm::EventSe
     twEt += et;
         
   }
-  double twQx = twqx/twEt;
-  double twQy = twqy/twEt;
+  twQx = twqx/twEt;
+  twQy = twqy/twEt;
 }
 
 // ------------ method called once each job just before starting event
@@ -328,6 +325,16 @@ testEventInfoTreeProducer::initTree()
   EventInfoNtuple->Branch("trkQy",&trkQy,"trkQy/D");
   EventInfoNtuple->Branch("twQx",&twQx,"twQx/D");
   EventInfoNtuple->Branch("twQy",&twQy,"twQy/D");
+}
+
+//--------------------------------------------------------------------------------------------------
+void 
+EventInfoTreeProducer::beginRun(const edm::Run& iRun, const edm::EventSetup& iSetup)
+{
+  bool changed = true;
+  EDConsumerBase::Labels triggerResultsLabel;
+  EDConsumerBase::labelsForToken(tok_triggerResults_, triggerResultsLabel);
+  hltPrescaleProvider_.init(iRun, iSetup, triggerResultsLabel.process, changed);
 }
 
 // ------------ method called once each job just after ending the event
