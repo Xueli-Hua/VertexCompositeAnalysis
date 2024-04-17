@@ -258,7 +258,6 @@ testEventInfoTreeProducer::fillRECO(const edm::Event& iEvent, const edm::EventSe
   trkQy = -1;
   //bool DauTrk = false;
   
-  if(!tracks.isValid()) continue;
   for(unsigned it=0; it<tracks->size(); ++it){
         
     const reco::Track & trk = (*tracks)[it];
