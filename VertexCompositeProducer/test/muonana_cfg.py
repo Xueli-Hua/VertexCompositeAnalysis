@@ -50,7 +50,7 @@ process.cent_seq = cms.Sequence(process.centralityBin)
 
 
 
-process.eventinfoana = cms.EDAnalyzer('EventInfoTreeProducer',
+process.eventinfoana = cms.EDAnalyzer('testEventInfoTreeProducer',
   vtxInputTag = cms.untracked.InputTag("offlinePrimaryVertices"),
   trkInputTag = cms.untracked.InputTag("generalTracks"),
   muInputTag = cms.untracked.InputTag("muons"),
