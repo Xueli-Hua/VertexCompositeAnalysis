@@ -268,11 +268,6 @@ testEventInfoTreeProducer::fillRECO(const edm::Event& iEvent, const edm::EventSe
     double dxyvtx = trk.dxy(bestvtx);
     double dzerror = sqrt(trk.dzError()*trk.dzError()+bestvzError*bestvzError);
     double dxyerror = sqrt(trk.d0Error()*trk.d0Error()+bestvxError*bestvyError);
-        
-    if(!trk.quality(reco::TrackBase::highPurity)) continue;
-    if(fabs(trk.ptError())/trk.pt()>0.10) continue;
-    if(fabs(dzvtx/dzerror) > 3) continue;
-    if(fabs(dxyvtx/dxyerror) > 3) continue;
     
     //double eta = trk.eta();
     double pt  = trk.pt();
