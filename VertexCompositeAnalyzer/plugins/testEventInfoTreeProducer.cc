@@ -106,6 +106,11 @@ private:
   short centrality;
   int   NtrkHP;
   uint candSize;
+
+  double trkQx;
+  double trkQy;
+  double twQx;
+  double twQy;
   
   bool isCentrality_;
     
@@ -249,14 +254,14 @@ testEventInfoTreeProducer::fillRECO(const edm::Event& iEvent, const edm::EventSe
   double trkqx = 0;
   double trkqy = 0;
   double trkPt = 0;
-  double trkQx = -1;
-  double trkQy = -1;
+  trkQx = -1;
+  trkQy = -1;
   //bool DauTrk = false;
 
   for(unsigned it=0; it<tracks->size(); ++it){
         
     const reco::Track & trk = (*tracks)[it];
-    double eta = trk.eta();
+    //double eta = trk.eta();
     double pt  = trk.pt();
     double phi = trk.phi();
 
@@ -278,8 +283,8 @@ testEventInfoTreeProducer::fillRECO(const edm::Event& iEvent, const edm::EventSe
   double twqx = 0;
   double twqy = 0;
   double twEt = 0;
-  double twQx = -1;
-  double twQy = -1;
+  twQx = -1;
+  twQy = -1;
   for(unsigned itw = 0; itw < towers->size(); ++itw){
         
     const CaloTower & hit= (*towers)[itw];
