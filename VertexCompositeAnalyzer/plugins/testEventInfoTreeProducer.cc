@@ -77,11 +77,10 @@
 
 using namespace std;
 
-class testEventInfoTreeProducer : public edm::EDAnalyzer {
+class testEventInfoTreeProducer : public edm::one::EDAnalyzer<edm::one::WatchRuns> {
 public:
   explicit testEventInfoTreeProducer(const edm::ParameterSet&);
   ~testEventInfoTreeProducer();
-
 
 private:
   virtual void beginJob();
