@@ -249,8 +249,8 @@ testEventInfoTreeProducer::fillRECO(const edm::Event& iEvent, const edm::EventSe
   double trkqx = 0;
   double trkqy = 0;
   double trkPt = 0;
-  double trkQx = -999;
-  double trkQy = -999;
+  double trkQx = -1;
+  double trkQy = -1;
   //bool DauTrk = false;
 
   for(unsigned it=0; it<tracks->size(); ++it){
@@ -278,8 +278,8 @@ testEventInfoTreeProducer::fillRECO(const edm::Event& iEvent, const edm::EventSe
   double twqx = 0;
   double twqy = 0;
   double twEt = 0;
-  double twQx = -999；
-  double twQy = -999；
+  double twQx = -1;
+  double twQy = -1;
   for(unsigned itw = 0; itw < towers->size(); ++itw){
         
     const CaloTower & hit= (*towers)[itw];
@@ -329,12 +329,8 @@ testEventInfoTreeProducer::initTree()
 
 //--------------------------------------------------------------------------------------------------
 void 
-EventInfoTreeProducer::beginRun(const edm::Run& iRun, const edm::EventSetup& iSetup)
+testEventInfoTreeProducer::beginRun(const edm::Run& iRun, const edm::EventSetup& iSetup)
 {
-  bool changed = true;
-  EDConsumerBase::Labels triggerResultsLabel;
-  EDConsumerBase::labelsForToken(tok_triggerResults_, triggerResultsLabel);
-  hltPrescaleProvider_.init(iRun, iSetup, triggerResultsLabel.process, changed);
 }
 
 // ------------ method called once each job just after ending the event
