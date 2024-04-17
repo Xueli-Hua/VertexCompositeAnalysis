@@ -14,7 +14,8 @@ process.options = cms.untracked.PSet(wantSummary = cms.untracked.bool(True))
 
 # Define the input source
 process.source = cms.Source("PoolSource",
-    fileNames = cms.untracked.vstring("file:/eos/cms/store/group/phys_heavyions/anstahll/CERN/PbPb2023/SKIM/SKIM_AOD_HIForward0_HIRun2023A_20231009/HIForward0/SKIM_AOD_HIForward0_HIRun2023A_20231009/231009_081732/0000/reco_RAW2DIGI_L1Reco_RECO_89.root"),
+    #fileNames = cms.untracked.vstring("file:/eos/cms/store/group/phys_heavyions/anstahll/CERN/PbPb2023/SKIM/SKIM_AOD_HIForward0_HIRun2023A_20231009/HIForward0/SKIM_AOD_HIForward0_HIRun2023A_20231009/231009_081732/0000/reco_RAW2DIGI_L1Reco_RECO_89.root"),
+    fileNames = cms.untracked.vstring("root://cmsxrootd.fnal.gov//store/hidata/HIRun2023A/HIForward0/AOD/16Jan2024-v1/2810000/015b7c65-f17d-45d5-9858-a81d7e779bc5.root"),
 )
 process.maxEvents = cms.untracked.PSet(input = cms.untracked.int32(-1))
 
@@ -31,7 +32,7 @@ process.es_pool = cms.ESSource("PoolDBESSource",
 )
 process.es_prefer = cms.ESPrefer('HcalTextCalibrations', 'es_ascii')
 process.es_ascii = cms.ESSource('HcalTextCalibrations',
-    input = cms.VPSet(cms.PSet(object = cms.string('ElectronicsMap'), file = cms.FileInPath("emap_2023_newZDC_v3.txt")))
+    input = cms.VPSet(cms.PSet(object = cms.string('ElectronicsMap'), file = cms.FileInPath("/eos/cms/store/group/phys_heavyions/xueli/test/VertexComposite2024/CMSSW_13_2_6_patch2/src/VertexCompositeAnalysis/VertexCompositeProducer/test/emap_2023_newZDC_v3.txt")))
 )
 
 # Add PbPb centrality
