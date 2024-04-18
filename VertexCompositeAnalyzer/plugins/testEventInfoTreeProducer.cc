@@ -199,11 +199,9 @@ testEventInfoTreeProducer::fillRECO(const edm::Event& iEvent, const edm::EventSe
   if(!vertices.isValid()) throw cms::Exception("testEventInfoTreeProducer") << "Primary vertices  collection not found!" << std::endl;
 
   //best vertex
-    double bestvz=-999.9, bestvx=-999.9, bestvy=-999.9;
-    double bestvzError=-999.9, bestvxError=-999.9, bestvyError=-999.9;
+    double bestvz=-999.9;
     const reco::Vertex & vtx = (*vertices)[0];
-    bestvz = vtx.z(); bestvx = vtx.x(); bestvy = vtx.y();
-    bestvzError = vtx.zError(); bestvxError = vtx.xError(); bestvyError = vtx.yError();
+    bestvz = vtx.z();
  
   edm::Handle<CaloTowerCollection> towers;
   iEvent.getByToken(caloTowerToken_, towers);
@@ -264,9 +262,9 @@ testEventInfoTreeProducer::fillRECO(const edm::Event& iEvent, const edm::EventSe
         
     const reco::Track & trk = (*tracks)[it];
 
-    math::XYZPoint bestvtx(bestvx,bestvy,bestvz);
+    /*math::XYZPoint bestvtx(bestvx,bestvy,bestvz);
         
-    /*double dzvtx = trk.dz(bestvtx);
+    double dzvtx = trk.dz(bestvtx);
     double dxyvtx = trk.dxy(bestvtx);
     double dzerror = sqrt(trk.dzError()*trk.dzError()+bestvzError*bestvzError);
     double dxyerror = sqrt(trk.d0Error()*trk.d0Error()+bestvxError*bestvyError);
