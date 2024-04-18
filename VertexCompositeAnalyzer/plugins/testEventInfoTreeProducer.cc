@@ -260,15 +260,7 @@ testEventInfoTreeProducer::fillRECO(const edm::Event& iEvent, const edm::EventSe
   for(unsigned it=0; it<tracks->size(); ++it){
         
     const reco::Track & trk = (*tracks)[it];
-
-    /*math::XYZPoint bestvtx(bestvx,bestvy,bestvz);
-        
-    double dzvtx = trk.dz(bestvtx);
-    double dxyvtx = trk.dxy(bestvtx);
-    double dzerror = sqrt(trk.dzError()*trk.dzError()+bestvzError*bestvzError);
-    double dxyerror = sqrt(trk.d0Error()*trk.d0Error()+bestvxError*bestvyError);
-    */
-    //double eta = trk.eta();
+    
     double pt  = trk.pt();
     htrkpt->Fill(pt);
     double phi = trk.phi();
@@ -296,8 +288,7 @@ testEventInfoTreeProducer::fillRECO(const edm::Event& iEvent, const edm::EventSe
   for(unsigned itw = 0; itw < towers->size(); ++itw){
         
     const CaloTower & hit= (*towers)[itw];
-        
-    //double caloEta = hit.eta();
+    
     double et = hit.et(bestvz);
     double caloPhi = hit.phi();
 
