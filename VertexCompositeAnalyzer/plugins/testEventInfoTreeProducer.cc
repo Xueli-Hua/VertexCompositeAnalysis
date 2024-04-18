@@ -97,12 +97,15 @@ private:
 
   TTree* EventInfoNtuple;
 
+  TH1D* htrkpt;
+
   //tree branches
   //event info
   uint  runNb;
   uint  eventNb;
   uint  lsNb;
   short centrality;
+  int   Ntrkoffline;
   int   NtrkHP;
   uint candSize;
 
@@ -201,10 +204,7 @@ testEventInfoTreeProducer::fillRECO(const edm::Event& iEvent, const edm::EventSe
     const reco::Vertex & vtx = (*vertices)[0];
     bestvz = vtx.z(); bestvx = vtx.x(); bestvy = vtx.y();
     bestvzError = vtx.zError(); bestvxError = vtx.xError(); bestvyError = vtx.yError();
-
-  edm::Handle<reco::TrackCollection> tracks;
-  iEvent.getByToken(generalTrkToken_, tracks);
-    
+ 
   edm::Handle<CaloTowerCollection> towers;
   iEvent.getByToken(caloTowerToken_, towers);
   if(!towers.isValid()) return;
@@ -218,6 +218,7 @@ testEventInfoTreeProducer::fillRECO(const edm::Event& iEvent, const edm::EventSe
   {
     edm::Handle<reco::Centrality> cent;
     iEvent.getByToken(centSrcToken_, cent);
+    Ntrkoffline = (cent.isValid() ? cent->Ntracks() : -1);
 
     edm::Handle<int> cbin;
     iEvent.getByToken(centBinLabelToken_, cbin);
@@ -225,6 +226,8 @@ testEventInfoTreeProducer::fillRECO(const edm::Event& iEvent, const edm::EventSe
   }
 
   NtrkHP = -1;
+  edm::Handle<reco::TrackCollection> tracks;
+  iEvent.getByToken(generalTrkToken_, tracks);
   if(tracks.isValid()) 
   {
     NtrkHP = 0;
@@ -249,8 +252,7 @@ testEventInfoTreeProducer::fillRECO(const edm::Event& iEvent, const edm::EventSe
     }
   }
 
-  //track info and Ntrkoffline
-  //int Ntrkoffline = 0;
+  //track info
   double trkqx = 0;
   double trkqy = 0;
   double trkPt = 0;
@@ -264,13 +266,14 @@ testEventInfoTreeProducer::fillRECO(const edm::Event& iEvent, const edm::EventSe
 
     math::XYZPoint bestvtx(bestvx,bestvy,bestvz);
         
-    double dzvtx = trk.dz(bestvtx);
+    /*double dzvtx = trk.dz(bestvtx);
     double dxyvtx = trk.dxy(bestvtx);
     double dzerror = sqrt(trk.dzError()*trk.dzError()+bestvzError*bestvzError);
     double dxyerror = sqrt(trk.d0Error()*trk.d0Error()+bestvxError*bestvyError);
-    
+    */
     //double eta = trk.eta();
     double pt  = trk.pt();
+    htrkpt->Fill(pt);
     double phi = trk.phi();
 
     //for(unsigned i=0; i<d1Eta.size(); ++i)
@@ -318,6 +321,8 @@ testEventInfoTreeProducer::beginJob()
     TH1D::SetDefaultSumw2();
 
     initTree();
+
+    htrkpt = fs->make<TH1D>("hTrk",";pT",100,0,10);
 }
 
 void 
@@ -332,6 +337,7 @@ testEventInfoTreeProducer::initTree()
   if(isCentrality_) 
   {
     EventInfoNtuple->Branch("centrality",&centrality,"centrality/S");
+    EventInfoNtuple->Branch("Ntrkoffline",&Ntrkoffline,"Ntrkoffline/I");
     EventInfoNtuple->Branch("NtrkHP",&NtrkHP,"NtrkHP/I");
   }
   EventInfoNtuple->Branch("trkPt",&trkPt,"trkPt/D");
