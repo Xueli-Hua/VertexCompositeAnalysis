@@ -109,7 +109,6 @@ private:
   int   NtrkHP;
   uint candSize;
 
-  double trkPt;
   double trkQx;
   double trkQy;
   double twQx;
@@ -338,7 +337,6 @@ testEventInfoTreeProducer::initTree()
     EventInfoNtuple->Branch("Ntrkoffline",&Ntrkoffline,"Ntrkoffline/I");
     EventInfoNtuple->Branch("NtrkHP",&NtrkHP,"NtrkHP/I");
   }
-  EventInfoNtuple->Branch("trkPt",&trkPt,"trkPt/D");
   EventInfoNtuple->Branch("trkQx",&trkQx,"trkQx/D");
   EventInfoNtuple->Branch("trkQy",&trkQy,"trkQy/D");
   EventInfoNtuple->Branch("twQx",&twQx,"twQx/D");
