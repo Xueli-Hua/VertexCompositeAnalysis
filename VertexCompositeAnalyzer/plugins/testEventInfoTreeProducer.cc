@@ -236,16 +236,31 @@ testEventInfoTreeProducer::fillRECO(const edm::Event& iEvent, const edm::EventSe
   edm::Handle<reco::MuonCollection> recoMuons;
   iEvent.getByToken(muonsToken_, recoMuons);
 
-  for (const auto& mu1 : *recoMuons) {
-    for (const auto& mu2 : *recoMuons) {
-      double dimuCharge = mu1.charge()+mu2.charge();
-      double dimuMass = mu1.mass()+mu2.mass();
+  reco::MuonCollection muonColl;
+  for (const auto& muon : *recoMuons) {
+    const reco::TrackRef& trackRef = muon.track();
+    if(trackRef.isNull()) continue;
+    muonColl.push_back(muon);
+  }
 
-      if (dimuCharge==0 && abs(dimuMass-MASS_.at(443)) < WIDTH_.at(443)) {
-        d1Eta.push_back(mu1.eta());
-        d1Phi.push_back(mu1.phi());
-        d2Eta.push_back(mu2.eta());
-        d2Phi.push_back(mu2.phi());
+  for (uint ic = 0; ic < muonColl.size(); ic++) {
+
+    const reco::Muon& cand1 = muonColl[ic];
+    const reco::TrackRef& trackRef1 = cand1.track();
+
+    for(uint fc = ic+1; fc < muonColl.size(); fc++) {
+
+       const reco::Muon& cand2 = muonColl[fc];
+
+       auto cand1P4 = cand1.polarP4(); cand1P4.SetM(MASS_.at(13));
+       auto cand2P4 = cand2.polarP4(); cand2P4.SetM(MASS_.at(13));
+       const double& mass = (cand1P4 + cand2P4).mass();
+
+       if (abs(mass-MASS_.at(443)) < WIDTH_.at(443)) {
+        d1Eta.push_back(cand1P4.eta());
+        d1Phi.push_back(cand1P4.phi());
+        d2Eta.push_back(cand2P4.eta());
+        d2Phi.push_back(cand2P4.phi());
       }
     }
   }
@@ -256,7 +271,7 @@ testEventInfoTreeProducer::fillRECO(const edm::Event& iEvent, const edm::EventSe
   double trkPt = 0;
   trkQx = -1;
   trkQy = -1;
-  //bool DauTrk = false;
+  bool DauTrk = false;
   
   for(unsigned it=0; it<tracks->size(); ++it){
         
@@ -269,21 +284,21 @@ testEventInfoTreeProducer::fillRECO(const edm::Event& iEvent, const edm::EventSe
     double dzerror = sqrt(trk.dzError()*trk.dzError()+bestvzError*bestvzError);
     double dxyerror = sqrt(trk.d0Error()*trk.d0Error()+bestvxError*bestvyError);
     */
-    //double eta = trk.eta();
+    double eta = trk.eta();
     double pt  = trk.pt();
-    htrkpt->Fill(pt);
     double phi = trk.phi();
 
-    //for(unsigned i=0; i<d1Eta.size(); ++i)
-   // {
-    //  if( fabs(eta-d1Eta[i]) <0.03 && fabs(phi-d1Phi[i]) <0.03 ) DauTrk = true;
-     // if( fabs(eta-d2Eta[i]) <0.03 && fabs(phi-d2Phi[i]) <0.03) DauTrk = true;
-    //}
-    //if(DauTrk == true) continue;
+    for(unsigned i=0; i<d1Eta.size(); ++i)
+    {
+      if( fabs(eta-d1Eta[i]) <0.03 && fabs(phi-d1Phi[i]) <0.03 ) DauTrk = true;
+      if( fabs(eta-d2Eta[i]) <0.03 && fabs(phi-d2Phi[i]) <0.03) DauTrk = true;
+    }
+    if(DauTrk == true) continue;
+    htrkpt->Fill(pt);
 
     trkqx += pt*cos(2*phi);
     trkqy += pt*sin(2*phi);
-    trkPt += abs(pt);
+    trkPt += pt;
   }
   trkQx = trkqx/trkPt;
   trkQy = trkqy/trkPt;
