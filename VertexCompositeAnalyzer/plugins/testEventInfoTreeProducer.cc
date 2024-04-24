@@ -109,7 +109,6 @@ private:
   int   NtrkHP;
   uint candSize;
 
-  double trkPt;
   double trkQx;
   double trkQy;
   double twQx;
@@ -276,6 +275,7 @@ testEventInfoTreeProducer::fillRECO(const edm::Event& iEvent, const edm::EventSe
   for(unsigned it=0; it<tracks->size(); ++it){
         
     const reco::Track & trk = (*tracks)[it];
+<<<<<<< HEAD
 
     /*math::XYZPoint bestvtx(bestvx,bestvy,bestvz);
         
@@ -285,6 +285,9 @@ testEventInfoTreeProducer::fillRECO(const edm::Event& iEvent, const edm::EventSe
     double dxyerror = sqrt(trk.d0Error()*trk.d0Error()+bestvxError*bestvyError);
     */
     double eta = trk.eta();
+=======
+    
+>>>>>>> ebbe62cc609bf306e64b5965e6ed0f04e206c00e
     double pt  = trk.pt();
     double phi = trk.phi();
 
@@ -312,8 +315,7 @@ testEventInfoTreeProducer::fillRECO(const edm::Event& iEvent, const edm::EventSe
   for(unsigned itw = 0; itw < towers->size(); ++itw){
         
     const CaloTower & hit= (*towers)[itw];
-        
-    //double caloEta = hit.eta();
+    
     double et = hit.et(bestvz);
     double caloPhi = hit.phi();
 
@@ -353,7 +355,6 @@ testEventInfoTreeProducer::initTree()
     EventInfoNtuple->Branch("Ntrkoffline",&Ntrkoffline,"Ntrkoffline/I");
     EventInfoNtuple->Branch("NtrkHP",&NtrkHP,"NtrkHP/I");
   }
-  EventInfoNtuple->Branch("trkPt",&trkPt,"trkPt/D");
   EventInfoNtuple->Branch("trkQx",&trkQx,"trkQx/D");
   EventInfoNtuple->Branch("trkQy",&trkQy,"trkQy/D");
   EventInfoNtuple->Branch("twQx",&twQx,"twQx/D");
