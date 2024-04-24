@@ -275,7 +275,6 @@ testEventInfoTreeProducer::fillRECO(const edm::Event& iEvent, const edm::EventSe
   for(unsigned it=0; it<tracks->size(); ++it){
         
     const reco::Track & trk = (*tracks)[it];
-<<<<<<< HEAD
 
     /*math::XYZPoint bestvtx(bestvx,bestvy,bestvz);
         
@@ -285,9 +284,6 @@ testEventInfoTreeProducer::fillRECO(const edm::Event& iEvent, const edm::EventSe
     double dxyerror = sqrt(trk.d0Error()*trk.d0Error()+bestvxError*bestvyError);
     */
     double eta = trk.eta();
-=======
-    
->>>>>>> ebbe62cc609bf306e64b5965e6ed0f04e206c00e
     double pt  = trk.pt();
     double phi = trk.phi();
 
