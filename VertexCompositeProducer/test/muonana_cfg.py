@@ -68,9 +68,9 @@ process.eventinfoana = cms.EDAnalyzer('testEventInfoTreeProducer',
 )
 
 # Add PbPb collision event selection
-process.load('JpsiAnalysis.muAnalyzer.collisionEventSelection_cff')
-process.load('JpsiAnalysis.muAnalyzer.clusterCompatibilityFilter_cfi')
-process.load('JpsiAnalysis.muAnalyzer.hfCoincFilter_cff')
+process.load('VertexCompositeAnalysis.VertexCompositeProducer.collisionEventSelection_cff')
+process.load('VertexCompositeAnalysis.VertexCompositeProducer.hfCoincFilter_cff')
+process.load('VertexCompositeAnalysis.VertexCompositeProducer.clusterCompatibilityFilter_cfi')
 process.colEvtSel = cms.Sequence(process.hfCoincFilter2Th4 * process.primaryVertexFilter*process.clusterCompatibilityFilter)
 
 # Define the analysis steps
