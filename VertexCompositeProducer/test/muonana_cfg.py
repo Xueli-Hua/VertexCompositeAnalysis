@@ -38,7 +38,7 @@ process.es_pool = cms.ESSource("PoolDBESSource",
 )
 process.es_prefer = cms.ESPrefer('HcalTextCalibrations', 'es_ascii')
 process.es_ascii = cms.ESSource('HcalTextCalibrations',
-    input = cms.VPSet(cms.PSet(object = cms.string('ElectronicsMap'), file = cms.FileInPath("/eos/cms/store/group/phys_heavyions/xueli/test/VertexComposite2024/CMSSW_13_2_6_patch2/src/VertexCompositeAnalysis/VertexCompositeProducer/test/emap_2023_newZDC_v3.txt")))
+    input = cms.VPSet(cms.PSet(object = cms.string('ElectronicsMap'), file = cms.FileInPath("/afs/cern.ch/user/x/xueli/CMSSW_13_2_6_patch2/src/VertexCompositeAnalysis/VertexCompositeProducer/test/emap_2023_newZDC_v3.txt")))
 )
 
 # Add PbPb centrality
