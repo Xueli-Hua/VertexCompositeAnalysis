@@ -7,6 +7,7 @@
 
 #include <TH1.h>
 #include <TH2.h>
+#include <TH3.h>
 #include <TTree.h>
 #include <TFile.h>
 #include <TVector3.h>
@@ -98,6 +99,7 @@ private:
   TTree* EventInfoNtuple;
 
   TH1D* htrkpt;
+  TH3D* hRunIDvsEvtIDvsLSID;
 
   //tree branches
   //event info
@@ -225,6 +227,7 @@ testEventInfoTreeProducer::fillRECO(const edm::Event& iEvent, const edm::EventSe
   NtrkHP = -1;
   edm::Handle<reco::TrackCollection> tracks;
   iEvent.getByToken(generalTrkToken_, tracks);
+  if(tracks->size()>0) hRunIDvsEvtIDvsLSID->Fill(runNb,eventNb,lsNb);
   if(tracks.isValid()) 
   {
     NtrkHP = 0;
@@ -334,6 +337,7 @@ testEventInfoTreeProducer::beginJob()
     initTree();
 
     htrkpt = fs->make<TH1D>("hTrk",";pT",100,0,10);
+    hRunIDvsEvtIDvsLSID = fs->make<TH3D>();
 }
 
 void 
