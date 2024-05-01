@@ -338,7 +338,7 @@ testEventInfoTreeProducer::beginJob()
     initTree();
 
     htrkpt = fs->make<TH1D>("hTrk",";pT",100,0,10);
-    hRunIDvsLSID = fs->make<TH2D>("hRunIDvsLSID","LS;Run",3000,373000,376000,2000,0,2000);
+    hRunIDvsLSID = fs->make<TH2D>("hRunIDvsLSID",";LS;Run",374300-373850,373850,374300,350,0,350);
 }
 
 void 
