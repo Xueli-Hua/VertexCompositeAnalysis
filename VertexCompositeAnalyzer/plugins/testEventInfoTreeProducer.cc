@@ -135,7 +135,7 @@ private:
   {2212, 0.938272013}, {3122, 1.115683}, {3312, 1.32171}, {3334, 1.67245}, {4122, 2.28646}, // baryons
   {3872, 3.87169} // exotic hadrons
 };
-  const std::map<uint, float> WIDTH_ = {{211, 3.5E-7f}, {321, 1.6E-5f}, {2212, 1.6E-5f}, {443, 6E-6f}};
+  const std::map<uint, float> WIDTH_ = {{211, 3.5E-7f}, {321, 1.6E-5f}, {2212, 1.6E-5f}, {443, 4.51623e-02}};
 
   std::vector<double> d1Eta;
   std::vector<double> d2Eta;
@@ -257,8 +257,9 @@ testEventInfoTreeProducer::fillRECO(const edm::Event& iEvent, const edm::EventSe
        auto cand1P4 = cand1.polarP4(); cand1P4.SetM(MASS_.at(13));
        auto cand2P4 = cand2.polarP4(); cand2P4.SetM(MASS_.at(13));
        const double& mass = (cand1P4 + cand2P4).mass();
+       const double& pt = (cand1P4 + cand2P4).pt();
 
-       if (abs(mass-MASS_.at(443)) < WIDTH_.at(443)) {
+       if (abs(mass-MASS_.at(443)) < WIDTH_.at(443) && pt < 0.2) {
         d1Eta.push_back(cand1P4.eta());
         d1Phi.push_back(cand1P4.phi());
         d2Eta.push_back(cand2P4.eta());
