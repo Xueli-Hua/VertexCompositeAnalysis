@@ -99,7 +99,7 @@ private:
   TTree* EventInfoNtuple;
 
   TH1D* htrkpt;
-  TH3D* hRunIDvsEvtIDvsLSID;
+  TH2D* hRunIDvsLSID;
 
   //tree branches
   //event info
@@ -227,7 +227,7 @@ testEventInfoTreeProducer::fillRECO(const edm::Event& iEvent, const edm::EventSe
   NtrkHP = -1;
   edm::Handle<reco::TrackCollection> tracks;
   iEvent.getByToken(generalTrkToken_, tracks);
-  if(tracks->size()>0) hRunIDvsEvtIDvsLSID->Fill(runNb,eventNb,lsNb);
+  if(tracks->size()>0) hRunIDvsLSID->Fill(runNb,lsNb);
   if(tracks.isValid()) 
   {
     NtrkHP = 0;
@@ -338,7 +338,7 @@ testEventInfoTreeProducer::beginJob()
     initTree();
 
     htrkpt = fs->make<TH1D>("hTrk",";pT",100,0,10);
-    hRunIDvsEvtIDvsLSID = fs->make<TH3D>();
+    hRunIDvsLSID = fs->make<TH2D>("hRunIDvsLSID","LS;Run",3000,373000,376000,2000,0,2000);
 }
 
 void 
