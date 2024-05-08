@@ -235,7 +235,7 @@ testEventInfoTreeProducer::fillRECO(const edm::Event& iEvent, const edm::EventSe
   }
     
   //RECO Candidate info; muon info
-  /*edm::Handle<reco::MuonCollection> recoMuons;
+  edm::Handle<reco::MuonCollection> recoMuons;
   iEvent.getByToken(muonsToken_, recoMuons);
 
   reco::MuonCollection muonColl;
@@ -245,14 +245,14 @@ testEventInfoTreeProducer::fillRECO(const edm::Event& iEvent, const edm::EventSe
     muonColl.push_back(muon);
   }
 
+  auto out = std::make_unique<std::vector<reco::Muon>>();
   for (uint ic = 0; ic < muonColl.size(); ic++) {
-
     const reco::Muon& cand1 = muonColl[ic];
-    const reco::TrackRef& trackRef1 = cand1.track();
+    //const reco::TrackRef& trackRef1 = cand1.track();
 
     for(uint fc = ic+1; fc < muonColl.size(); fc++) {
-
        const reco::Muon& cand2 = muonColl[fc];
+       //const reco::TrackRef& trackRef2 = cand2.track();
 
        auto cand1P4 = cand1.polarP4(); cand1P4.SetM(MASS_.at(13));
        auto cand2P4 = cand2.polarP4(); cand2P4.SetM(MASS_.at(13));
@@ -264,9 +264,10 @@ testEventInfoTreeProducer::fillRECO(const edm::Event& iEvent, const edm::EventSe
         d1Phi.push_back(cand1P4.phi());
         d2Eta.push_back(cand2P4.eta());
         d2Phi.push_back(cand2P4.phi());
+        out->push_back(cand1);out->push_back(cand2);
       }
     }
-  }*/
+  }
 
   //track info
   double trkqx = 0;
@@ -278,25 +279,25 @@ testEventInfoTreeProducer::fillRECO(const edm::Event& iEvent, const edm::EventSe
   
   for(unsigned it=0; it<tracks->size(); ++it){
         
-    const reco::Track & trk = (*tracks)[it];
+    //const reco::Track & trk = (*tracks)[it];
+    //double eta = trk.eta();
+    //double pt  = trk.pt();
+    //double phi = trk.phi();
 
-    /*math::XYZPoint bestvtx(bestvx,bestvy,bestvz);
-        
-    double dzvtx = trk.dz(bestvtx);
-    double dxyvtx = trk.dxy(bestvtx);
-    double dzerror = sqrt(trk.dzError()*trk.dzError()+bestvzError*bestvzError);
-    double dxyerror = sqrt(trk.d0Error()*trk.d0Error()+bestvxError*bestvyError);
-    */
-    double eta = trk.eta();
-    double pt  = trk.pt();
-    double phi = trk.phi();
+    reco::TrackRef track(tracks, it);
+    double pt  = track->pt();
+    double phi = track->phi();
+    for (std::vector<reco::Muon>::const_iterator muon = out->begin(); muon < out->end(); muon++) {
+        if (muon->track() == track) DauTrk = true;
+    }
+    
 
     /*for(unsigned i=0; i<d1Eta.size(); ++i)
     {
       if( fabs(eta-d1Eta[i]) <0.03 && fabs(phi-d1Phi[i]) <0.03 ) DauTrk = true;
       if( fabs(eta-d2Eta[i]) <0.03 && fabs(phi-d2Phi[i]) <0.03) DauTrk = true;
-    }
-    if(DauTrk == true) continue;*/
+    }*/
+    if(DauTrk == true) continue;
     htrkpt->Fill(pt);
 
     trkqx += pt*cos(2*phi);
