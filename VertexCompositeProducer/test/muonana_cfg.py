@@ -18,12 +18,12 @@ process.source = cms.Source("PoolSource",
     #fileNames = cms.untracked.vstring("root://cmsxrootd.fnal.gov//store/hidata/HIRun2023A/HIForward0/AOD/16Jan2024-v1/2810000/015b7c65-f17d-45d5-9858-a81d7e779bc5.root"), #227798
     #fileNames = cms.untracked.vstring("root://cmsxrootd.fnal.gov//store/hidata/HIRun2023A/HIForward0/AOD/PromptReco-v1/000/373/870/00000/7cd3089d-3a8c-44cc-b1e3-930b4e9908fb.root"), #4174
     #fileNames = cms.untracked.vstring("root://cmsxrootd.fnal.gov//store/hidata/HIRun2023A/HIMinimumBias0/AOD/PromptReco-v1/000/373/870/00000/82016a82-f1a3-45d7-8090-26ce3f361113.root"), #1874                        
-    fileNames = cms.untracked.vstring('/store/hidata/HIRun2023A/HIMinimumBias0/AOD/PromptReco-v1/000/373/870/00000/82016a82-f1a3-45d7-8090-26ce3f361113.root', #1874
-                                      '/store/hidata/HIRun2023A/HIMinimumBias0/AOD/PromptReco-v1/000/373/871/00000/f228ea3f-8bf5-49fb-b40e-cddd47b7d310.root',
-                                      '/store/hidata/HIRun2023A/HIMinimumBias0/AOD/PromptReco-v1/000/373/985/00000/4ae69479-86de-4e26-98ca-ac0f90dcecc3.root',
-                                      '/store/hidata/HIRun2023A/HIMinimumBias0/AOD/PromptReco-v1/000/374/289/00000/0342ac4e-2f75-4d46-86f7-8240823bbaa7.root'),                        
+    fileNames = cms.untracked.vstring('/store/hidata/HIRun2023A/HIMinimumBias0/AOD/PromptReco-v1/000/374/322/00000/192bbdec-ab4a-4da5-a155-07f725ef5577.root', #run:374322
+                                      '/store/hidata/HIRun2023A/HIMinimumBias0/AOD/PromptReco-v1/000/374/322/00000/2de0e400-f7c7-47ff-b6b2-cb5fa47ec768.root',
+                                      '/store/hidata/HIRun2023A/HIMinimumBias0/AOD/PromptReco-v1/000/374/322/00000/484f0dcd-e413-4300-9370-75d03333b450.root',
+                                      '/store/hidata/HIRun2023A/HIMinimumBias0/AOD/PromptReco-v1/000/374/322/00000/4ac57eb9-afbf-4400-8d51-109f23e634a1.root'),                        
 )
-process.maxEvents = cms.untracked.PSet(input = cms.untracked.int32(-1))
+process.maxEvents = cms.untracked.PSet(input = cms.untracked.int32(1000))
 
 # Set the global tag
 process.load('Configuration.StandardSequences.FrontierConditions_GlobalTag_cff')
