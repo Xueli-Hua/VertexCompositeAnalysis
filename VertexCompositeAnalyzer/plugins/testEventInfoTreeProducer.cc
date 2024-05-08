@@ -99,6 +99,7 @@ private:
   TTree* EventInfoNtuple;
 
   TH1D* htrkpt;
+  TH1D* heta_DauTrk;
   TH2D* hRunIDvsLSID;
 
   //tree branches
@@ -291,13 +292,16 @@ testEventInfoTreeProducer::fillRECO(const edm::Event& iEvent, const edm::EventSe
         if (muon->track() == track) DauTrk = true;
     }
     
-
     /*for(unsigned i=0; i<d1Eta.size(); ++i)
     {
       if( fabs(eta-d1Eta[i]) <0.03 && fabs(phi-d1Phi[i]) <0.03 ) DauTrk = true;
       if( fabs(eta-d2Eta[i]) <0.03 && fabs(phi-d2Phi[i]) <0.03) DauTrk = true;
     }*/
-    if(DauTrk == true) continue;
+    
+    if(DauTrk == true) {
+      heta_DauTrk->Fill(track->eta());
+      continue;
+    }
     htrkpt->Fill(pt);
 
     trkqx += pt*cos(2*phi);
@@ -339,6 +343,7 @@ testEventInfoTreeProducer::beginJob()
     initTree();
 
     htrkpt = fs->make<TH1D>("hTrk",";pT",100,0,10);
+    heta_DauTrk = fs->make<TH1D>("heta_DauTrk",";Eta",200,-10,10);
     hRunIDvsLSID = fs->make<TH2D>("hRunIDvsLSID",";Run;LS",374300-373850,373850,374300,350,0,350);
 }
 
