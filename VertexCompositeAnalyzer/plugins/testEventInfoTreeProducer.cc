@@ -235,7 +235,7 @@ testEventInfoTreeProducer::fillRECO(const edm::Event& iEvent, const edm::EventSe
   }
     
   //RECO Candidate info; muon info
-  edm::Handle<reco::MuonCollection> recoMuons;
+  /*edm::Handle<reco::MuonCollection> recoMuons;
   iEvent.getByToken(muonsToken_, recoMuons);
 
   reco::MuonCollection muonColl;
@@ -266,7 +266,7 @@ testEventInfoTreeProducer::fillRECO(const edm::Event& iEvent, const edm::EventSe
         d2Phi.push_back(cand2P4.phi());
       }
     }
-  }
+  }*/
 
   //track info
   double trkqx = 0;
@@ -291,12 +291,12 @@ testEventInfoTreeProducer::fillRECO(const edm::Event& iEvent, const edm::EventSe
     double pt  = trk.pt();
     double phi = trk.phi();
 
-    for(unsigned i=0; i<d1Eta.size(); ++i)
+    /*for(unsigned i=0; i<d1Eta.size(); ++i)
     {
       if( fabs(eta-d1Eta[i]) <0.03 && fabs(phi-d1Phi[i]) <0.03 ) DauTrk = true;
       if( fabs(eta-d2Eta[i]) <0.03 && fabs(phi-d2Phi[i]) <0.03) DauTrk = true;
     }
-    if(DauTrk == true) continue;
+    if(DauTrk == true) continue;*/
     htrkpt->Fill(pt);
 
     trkqx += pt*cos(2*phi);
