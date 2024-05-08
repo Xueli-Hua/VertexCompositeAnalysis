@@ -288,15 +288,16 @@ testEventInfoTreeProducer::fillRECO(const edm::Event& iEvent, const edm::EventSe
     reco::TrackRef track(tracks, it);
     double pt  = track->pt();
     double phi = track->phi();
-    for (std::vector<reco::Muon>::const_iterator muon = out->begin(); muon < out->end(); muon++) {
+    /*for (std::vector<reco::Muon>::const_iterator muon = out->begin(); muon < out->end(); muon++) {
         if (muon->track() == track) DauTrk = true;
-    }
-    
-    /*for(unsigned i=0; i<d1Eta.size(); ++i)
+    }*/
+
+    double eta = track->eta();
+    for(unsigned i=0; i<d1Eta.size(); ++i)
     {
       if( fabs(eta-d1Eta[i]) <0.03 && fabs(phi-d1Phi[i]) <0.03 ) DauTrk = true;
       if( fabs(eta-d2Eta[i]) <0.03 && fabs(phi-d2Phi[i]) <0.03) DauTrk = true;
-    }*/
+    }
     
     if(DauTrk == true) {
       heta_DauTrk->Fill(track->eta());
