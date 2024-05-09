@@ -99,7 +99,7 @@ private:
   TTree* EventInfoNtuple;
 
   TH1D* htrkpt;
-  TH1D* hEtavsPt_DauTrk;
+  TH2D* hEtavsPt_DauTrk;
   TH2D* hMassvsPt_dimu;
   TH2D* hEtavsPt_mu1;
   TH2D* hEtavsPt_mu2;
