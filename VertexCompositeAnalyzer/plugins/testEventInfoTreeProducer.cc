@@ -99,8 +99,10 @@ private:
   TTree* EventInfoNtuple;
 
   TH1D* htrkpt;
-  TH1D* heta_DauTrk;
-  TH2D* hRunIDvsLSID;
+  TH1D* hEtavsPt_DauTrk;
+  TH2D* hMassvsPt_dimu;
+  TH2D* hEtavsPt_mu1;
+  TH2D* hEtavsPt_mu2;
 
   //tree branches
   //event info
@@ -116,6 +118,9 @@ private:
   double trkQy;
   double twQx;
   double twQy;
+
+  double all_trkQx;
+  double all_trkQy;
   
   bool isCentrality_;
     
@@ -228,7 +233,6 @@ testEventInfoTreeProducer::fillRECO(const edm::Event& iEvent, const edm::EventSe
   NtrkHP = -1;
   edm::Handle<reco::TrackCollection> tracks;
   iEvent.getByToken(generalTrkToken_, tracks);
-  if(tracks->size()>0) hRunIDvsLSID->Fill(runNb,lsNb);
   if(tracks.isValid()) 
   {
     NtrkHP = 0;
@@ -260,12 +264,16 @@ testEventInfoTreeProducer::fillRECO(const edm::Event& iEvent, const edm::EventSe
        const double& mass = (cand1P4 + cand2P4).mass();
        const double& pt = (cand1P4 + cand2P4).pt();
 
-       if (abs(mass-MASS_.at(443)) < WIDTH_.at(443) && pt < 0.2) {
+       //if (abs(mass-MASS_.at(443)) < WIDTH_.at(443) && pt < 0.2) {
+       if (mass>2.9 && mass<3.2 && pt < 0.2) {
         d1Eta.push_back(cand1P4.eta());
         d1Phi.push_back(cand1P4.phi());
         d2Eta.push_back(cand2P4.eta());
         d2Phi.push_back(cand2P4.phi());
         out->push_back(cand1);out->push_back(cand2);
+        hMassvsPt_dimu->Fill(mass,pt);
+        hEtavsPt_mu1->Fill(cand1.eta(),cand1.pt());
+        hEtavsPt_mu2->Fill(cand2.eta(),cand2.pt());
       }
     }
   }
@@ -277,6 +285,12 @@ testEventInfoTreeProducer::fillRECO(const edm::Event& iEvent, const edm::EventSe
   trkQx = -1;
   trkQy = -1;
   bool DauTrk = false;
+
+  double all_trkqx= 0;
+  double all_trkqy = 0;
+  double all_trkPt = 0;
+  all_trkQx = -1;
+  all_trkQy = -1;
   
   for(unsigned it=0; it<tracks->size(); ++it){
         
@@ -288,19 +302,23 @@ testEventInfoTreeProducer::fillRECO(const edm::Event& iEvent, const edm::EventSe
     reco::TrackRef track(tracks, it);
     double pt  = track->pt();
     double phi = track->phi();
-    /*for (std::vector<reco::Muon>::const_iterator muon = out->begin(); muon < out->end(); muon++) {
+    for (std::vector<reco::Muon>::const_iterator muon = out->begin(); muon < out->end(); muon++) {
         if (muon->track() == track) DauTrk = true;
-    }*/
+    }
 
-    double eta = track->eta();
+    /*double eta = track->eta();
     for(unsigned i=0; i<d1Eta.size(); ++i)
     {
       if( fabs(eta-d1Eta[i]) <0.03 && fabs(phi-d1Phi[i]) <0.03 ) DauTrk = true;
       if( fabs(eta-d2Eta[i]) <0.03 && fabs(phi-d2Phi[i]) <0.03) DauTrk = true;
-    }
+    }*/
+
+    all_trkqx += pt*cos(2*phi);
+    all_trkqy += pt*sin(2*phi);
+    all_trkPt += pt;
     
     if(DauTrk == true) {
-      heta_DauTrk->Fill(track->eta());
+      hEtavsPt_DauTrk->Fill(track->eta(),track->pt());
       continue;
     }
     htrkpt->Fill(pt);
@@ -311,6 +329,8 @@ testEventInfoTreeProducer::fillRECO(const edm::Event& iEvent, const edm::EventSe
   }
   trkQx = trkqx/trkPt;
   trkQy = trkqy/trkPt;
+  all_trkQx = all_trkqx/all_trkPt;
+  all_trkQy = all_trkqy/all_trkPt;
     
   //Calo tower info
   double twqx = 0;
@@ -344,8 +364,10 @@ testEventInfoTreeProducer::beginJob()
     initTree();
 
     htrkpt = fs->make<TH1D>("hTrk",";pT",100,0,10);
-    heta_DauTrk = fs->make<TH1D>("heta_DauTrk",";Eta",200,-10,10);
-    hRunIDvsLSID = fs->make<TH2D>("hRunIDvsLSID",";Run;LS",374300-373850,373850,374300,350,0,350);
+    hEtavsPt_DauTrk = fs->make<TH2D>("hEtavsPt_DauTrk",";Eta;Pt",200,-10,10,100,0,10);
+    hMassvsPt_dimu = fs->make<TH2D>("hMassvsPt_dimu",";Mass;Pt",20,2.6,4.2,100,0,10);
+    hEtavsPt_mu1 = fs->make<TH2D>("hEtavsPt_mu1",";Eta;Pt",100,-10,10,100,0,10);
+    hEtavsPt_mu2 = fs->make<TH2D>("hEtavsPt_mu2",";Eta;Pt",100,-10,10,100,0,10);
 }
 
 void 
@@ -367,6 +389,8 @@ testEventInfoTreeProducer::initTree()
   EventInfoNtuple->Branch("trkQy",&trkQy,"trkQy/D");
   EventInfoNtuple->Branch("twQx",&twQx,"twQx/D");
   EventInfoNtuple->Branch("twQy",&twQy,"twQy/D");
+  EventInfoNtuple->Branch("all_trkQx",&all_trkQx,"all_trkQx/D");
+  EventInfoNtuple->Branch("all_trkQy",&all_trkQy,"all_trkQy/D");
 }
 
 //--------------------------------------------------------------------------------------------------
