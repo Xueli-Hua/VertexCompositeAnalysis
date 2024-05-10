@@ -298,7 +298,8 @@ testEventInfoTreeProducer::fillRECO(const edm::Event& iEvent, const edm::EventSe
     //double eta = trk.eta();
     //double pt  = trk.pt();
     //double phi = trk.phi();
-
+    
+    DauTrk = false;
     reco::TrackRef track(tracks, it);
     double pt  = track->pt();
     double phi = track->phi();
@@ -327,7 +328,6 @@ testEventInfoTreeProducer::fillRECO(const edm::Event& iEvent, const edm::EventSe
     trkqx += pt*cos(2*phi);
     trkqy += pt*sin(2*phi);
     trkPt += pt;
-    DauTrk = false;
   }
   trkQx = trkqx/trkPt;
   trkQy = trkqy/trkPt;
