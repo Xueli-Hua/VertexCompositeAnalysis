@@ -253,14 +253,15 @@ testEventInfoTreeProducer::fillRECO(const edm::Event& iEvent, const edm::EventSe
   auto out = std::make_unique<std::vector<reco::Muon>>();
   for (uint ic = 0; ic < muonColl.size(); ic++) {
     const reco::Muon& cand1 = muonColl[ic];
-    //const reco::TrackRef& trackRef1 = cand1.track();
 
     for(uint fc = ic+1; fc < muonColl.size(); fc++) {
        const reco::Muon& cand2 = muonColl[fc];
-       //const reco::TrackRef& trackRef2 = cand2.track();
 
-       auto cand1P4 = cand1.polarP4(); cand1P4.SetM(MASS_.at(13));
-       auto cand2P4 = cand2.polarP4(); cand2P4.SetM(MASS_.at(13));
+       //auto cand1P4 = cand1.polarP4(); cand1P4.SetM(MASS_.at(13));
+       //auto cand2P4 = cand2.polarP4(); cand2P4.SetM(MASS_.at(13));
+       const auto cand1P4 = math::PtEtaPhiMLorentzVector(cand1.pt(), cand1.eta(), cand1.phi(), MASS_.at(13));
+       const auto cand2P4 = math::PtEtaPhiMLorentzVector(cand2.pt(), cand2.eta(), cand2.phi(), MASS_.at(13));
+      
        const double& mass = (cand1P4 + cand2P4).mass();
        const double& pt = (cand1P4 + cand2P4).pt();
 
