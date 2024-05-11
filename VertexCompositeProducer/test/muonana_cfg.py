@@ -57,7 +57,8 @@ process.cent_seq = cms.Sequence(process.centralityBin)
 
 
 process.eventinfoana = cms.EDAnalyzer('testEventInfoTreeProducer',
-  vtxInputTag = cms.untracked.InputTag("offlinePrimaryVertices"),
+  #vtxInputTag = cms.untracked.InputTag("offlinePrimaryVertices"),
+  vtxInputTag = cms.untracked.InputTag("offlineSlimmedPrimaryVertices"),
   trkInputTag = cms.untracked.InputTag("generalTracks"),
   muInputTag = cms.untracked.InputTag("muons"),
   caloTowerInputTag = cms.untracked.InputTag("towerMaker"),
