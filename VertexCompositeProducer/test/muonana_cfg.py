@@ -54,14 +54,10 @@ process.GlobalTag.toGet.extend([
 )
 process.cent_seq = cms.Sequence(process.centralityBin)
 
-
-
 process.eventinfoana = cms.EDAnalyzer('testEventInfoTreeProducer',
-  #vtxInputTag = cms.untracked.InputTag("offlinePrimaryVertices"),
-  vtxInputTag = cms.untracked.InputTag("offlineSlimmedPrimaryVertices"),
+  vtxInputTag = cms.untracked.InputTag("offlinePrimaryVertices"),
   trkInputTag = cms.untracked.InputTag("generalTracks"),
   muInputTag = cms.untracked.InputTag("muons"),
-  #muInputTag = cms.untracked.InputTag("slimmedMuons"),
   caloTowerInputTag = cms.untracked.InputTag("towerMaker"),
 
   isCentrality = cms.bool(True),
@@ -73,7 +69,7 @@ process.eventinfoana = cms.EDAnalyzer('testEventInfoTreeProducer',
 process.load('VertexCompositeAnalysis.VertexCompositeProducer.collisionEventSelection_cff')
 process.load('VertexCompositeAnalysis.VertexCompositeProducer.hfCoincFilter_cff')
 process.load('VertexCompositeAnalysis.VertexCompositeProducer.clusterCompatibilityFilter_cfi')
-process.colEvtSel = cms.Sequence(process.hfCoincFilter2Th4 * process.primaryVertexFilter*process.clusterCompatibilityFilter)
+process.colEvtSel = cms.Sequence(process.hfCoincFilter2Th4 * process.primaryVertexFilter * process.clusterCompatibilityFilter)
 
 # Define the analysis steps
 process.pcentandep_step = cms.Path(process.cent_seq)
@@ -86,6 +82,10 @@ process.p = cms.EndPath(process.eventinfoana)
 process.schedule = cms.Schedule(
     process.pcentandep_step,
     process.p
+)
+
+process.eventFilter_HM = cms.Sequence(
+    process.primaryVertexFilter 
 )
 
 from VertexCompositeAnalysis.VertexCompositeProducer.PATAlgos_cff import changeToMiniAOD
