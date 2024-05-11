@@ -60,8 +60,8 @@ process.eventinfoana = cms.EDAnalyzer('testEventInfoTreeProducer',
   #vtxInputTag = cms.untracked.InputTag("offlinePrimaryVertices"),
   vtxInputTag = cms.untracked.InputTag("offlineSlimmedPrimaryVertices"),
   trkInputTag = cms.untracked.InputTag("generalTracks"),
-  #muInputTag = cms.untracked.InputTag("muons"),
-  muInputTag = cms.untracked.InputTag("slimmedMuons"),
+  muInputTag = cms.untracked.InputTag("muons"),
+  #muInputTag = cms.untracked.InputTag("slimmedMuons"),
   caloTowerInputTag = cms.untracked.InputTag("towerMaker"),
 
   isCentrality = cms.bool(True),
@@ -87,6 +87,9 @@ process.schedule = cms.Schedule(
     process.pcentandep_step,
     process.p
 )
+
+from VertexCompositeAnalysis.VertexCompositeProducer.PATAlgos_cff import changeToMiniAOD
+changeToMiniAOD(process)
 
 # Add the event selection filters
 #process.Flag_colEvtSel = cms.Path(process.colEvtSel)
