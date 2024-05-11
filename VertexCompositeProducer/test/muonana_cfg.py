@@ -19,10 +19,8 @@ process.source = cms.Source("PoolSource",
     #fileNames = cms.untracked.vstring("root://cmsxrootd.fnal.gov//store/hidata/HIRun2023A/HIForward0/AOD/PromptReco-v1/000/373/870/00000/7cd3089d-3a8c-44cc-b1e3-930b4e9908fb.root"), #4174
     #fileNames = cms.untracked.vstring("root://cmsxrootd.fnal.gov//store/hidata/HIRun2023A/HIMinimumBias0/AOD/PromptReco-v1/000/373/870/00000/82016a82-f1a3-45d7-8090-26ce3f361113.root"), #1874                        
     fileNames = cms.untracked.vstring(
-        '/store/hidata/HIRun2023A/HIMinimumBias0/AOD/PromptReco-v1/000/374/322/00000/192bbdec-ab4a-4da5-a155-07f725ef5577.root', #run:374322
-        #'/store/hidata/HIRun2023A/HIMinimumBias0/AOD/PromptReco-v1/000/374/322/00000/2de0e400-f7c7-47ff-b6b2-cb5fa47ec768.root',
-        #'/store/hidata/HIRun2023A/HIMinimumBias0/AOD/PromptReco-v1/000/374/322/00000/484f0dcd-e413-4300-9370-75d03333b450.root',
-        #'/store/hidata/HIRun2023A/HIMinimumBias0/AOD/PromptReco-v1/000/374/322/00000/4ac57eb9-afbf-4400-8d51-109f23e634a1.root'
+        #'/store/hidata/HIRun2023A/HIMinimumBias0/AOD/PromptReco-v1/000/374/322/00000/192bbdec-ab4a-4da5-a155-07f725ef5577.root', #run:374322
+        '/store/hidata/HIRun2023A/HIMinimumBias0/MINIAOD/PromptReco-v2/000/374/668/00000/99ceb28c-542e-4b2c-ac5d-bf44588e288d.root', #run:374668
     ),                        
 )
 process.maxEvents = cms.untracked.PSet(input = cms.untracked.int32(-1))
@@ -79,7 +77,7 @@ process.colEvtSel = cms.Sequence(process.hfCoincFilter2Th4 * process.primaryVert
 process.pcentandep_step = cms.Path(process.cent_seq)
 
 # Define the output
-process.TFileService = cms.Service("TFileService", fileName = cms.string('testMinReco.root'))
+process.TFileService = cms.Service("TFileService", fileName = cms.string('testMBMINIAOD.root'))
 process.p = cms.EndPath(process.eventinfoana)
 
 # Define the process schedule
