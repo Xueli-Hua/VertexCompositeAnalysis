@@ -87,7 +87,7 @@ process.load('VertexCompositeAnalysis.VertexCompositeProducer.clusterCompatibili
 process.colEvtSel = cms.Sequence(process.hfCoincFilter2Th4 * process.primaryVertexFilter * process.clusterCompatibilityFilter)
 
 # Define the analysis steps
-process.pcentandep_step = cms.Path(process.cent_seq)
+process.pcentandep_step = cms.Path(process.QWzdcreco * process.cent_seq)
 
 # Define the output
 process.TFileService = cms.Service("TFileService", fileName = cms.string('testMBMINIAOD.root'))
