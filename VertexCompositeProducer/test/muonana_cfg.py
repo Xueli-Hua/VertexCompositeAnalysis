@@ -23,7 +23,7 @@ process.source = cms.Source("PoolSource",
         '/store/hidata/HIRun2023A/HIMinimumBias0/MINIAOD/PromptReco-v2/000/374/668/00000/99ceb28c-542e-4b2c-ac5d-bf44588e288d.root', #run:374668
     ),                        
 )
-process.maxEvents = cms.untracked.PSet(input = cms.untracked.int32(-1))
+process.maxEvents = cms.untracked.PSet(input = cms.untracked.int32(5000))
 
 # Set the global tag
 process.load('Configuration.StandardSequences.FrontierConditions_GlobalTag_cff')
@@ -43,6 +43,21 @@ process.es_ascii = cms.ESSource('HcalTextCalibrations',
 
 # Add PbPb centrality
 process.load("RecoHI.HiCentralityAlgos.CentralityBin_cfi")
+process.load('RecoHI.HiCentralityAlgos.HiCentrality_cfi')
+process.hiCentrality.produceHFhits = False
+process.hiCentrality.produceHFtowers = False
+process.hiCentrality.produceEcalhits = False
+process.hiCentrality.produceZDChits = True
+process.hiCentrality.produceETmidRapidity = False
+process.hiCentrality.producePixelhits = False
+process.hiCentrality.produceTracks = False
+process.hiCentrality.producePixelTracks = False
+process.hiCentrality.reUseCentrality = True
+process.hiCentrality.srcZDChits = cms.InputTag("QWzdcreco")
+process.hiCentrality.srcReUse = cms.InputTag("hiCentrality","","reRECO")
+process.centralityBin.Centrality = cms.InputTag("hiCentrality")
+process.centralityBin.centralityVariable = cms.string("HFtowers")
+process.centralityBin.nonDefaultGlauberModel = cms.string("")
 process.GlobalTag.snapshotTime = cms.string("9999-12-31 23:59:59.000")
 process.GlobalTag.toGet.extend([
     cms.PSet(record = cms.string("HeavyIonRcd"),
@@ -52,7 +67,7 @@ process.GlobalTag.toGet.extend([
         )
     ]
 )
-process.cent_seq = cms.Sequence(process.centralityBin)
+process.cent_seq = cms.Sequence(process.hiCentrality * process.centralityBin)
 
 process.eventinfoana = cms.EDAnalyzer('testEventInfoTreeProducer',
   vtxInputTag = cms.untracked.InputTag("offlinePrimaryVertices"),
