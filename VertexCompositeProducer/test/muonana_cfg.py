@@ -78,18 +78,24 @@ process.pcentandep_step = cms.Path(process.cent_seq)
 process.TFileService = cms.Service("TFileService", fileName = cms.string('testMBMINIAOD.root'))
 process.p = cms.EndPath(process.eventinfoana)
 
+process.eventFilter_HM = cms.Sequence(
+    process.primaryVertexFilter 
+)
+process.eventFilter_HM_step = cms.Path( process.eventFilter_HM )
+
 # Define the process schedule
 process.schedule = cms.Schedule(
+    process.eventFilter_HM_step,
     process.pcentandep_step,
     process.p
 )
 
-process.eventFilter_HM = cms.Sequence(
-    process.primaryVertexFilter 
-)
+process.load('PhysicsTools.PatAlgos.slimming.unpackedTracksAndVertices_cfi')
+process.eventFilter_HM.insert(0, process.unpackedTracksAndVertices)
 
-from VertexCompositeAnalysis.VertexCompositeProducer.PATAlgos_cff import changeToMiniAOD
-changeToMiniAOD(process)
+from Configuration.Applications.ConfigBuilder import MassReplaceInputTag
+process = MassReplaceInputTag(process,"offlinePrimaryVertices","unpackedTracksAndVertices")
+process = MassReplaceInputTag(process,"generalTracks","unpackedTracksAndVertices")
 
 # Add the event selection filters
 #process.Flag_colEvtSel = cms.Path(process.colEvtSel)
