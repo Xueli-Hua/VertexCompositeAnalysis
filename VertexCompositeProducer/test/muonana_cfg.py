@@ -79,7 +79,7 @@ process.colEvtSel = cms.Sequence(process.hfCoincFilter2Th4 * process.primaryVert
 process.pcentandep_step = cms.Path(process.cent_seq)
 
 # Define the output
-process.TFileService = cms.Service("TFileService", fileName = cms.string('testMinRecobyEtaPhi.root'))
+process.TFileService = cms.Service("TFileService", fileName = cms.string('testMinReco.root'))
 process.p = cms.EndPath(process.eventinfoana)
 
 # Define the process schedule
