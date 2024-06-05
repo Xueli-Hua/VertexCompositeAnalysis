@@ -79,10 +79,10 @@
 
 using namespace std;
 
-class testEventInfoTreeProducer : public edm::one::EDAnalyzer<edm::one::WatchRuns> {
+class ForEventPlane : public edm::one::EDAnalyzer<edm::one::WatchRuns> {
 public:
-  explicit testEventInfoTreeProducer(const edm::ParameterSet&);
-  ~testEventInfoTreeProducer();
+  explicit ForEventPlane(const edm::ParameterSet&);
+  ~ForEventPlane();
 
 private:
   virtual void beginJob();
@@ -158,7 +158,7 @@ private:
 // constructors and destructor
 //
 
-testEventInfoTreeProducer::testEventInfoTreeProducer(const edm::ParameterSet& ps)
+ForEventPlane::ForEventPlane(const edm::ParameterSet& ps)
 {
   //input tokens
   vtxToken_ = consumes<reco::VertexCollection>(ps.getUntrackedParameter<edm::InputTag>("vtxInputTag"));
@@ -176,7 +176,7 @@ testEventInfoTreeProducer::testEventInfoTreeProducer(const edm::ParameterSet& ps
 }
 
 
-testEventInfoTreeProducer::~testEventInfoTreeProducer()
+ForEventPlane::~ForEventPlane()
 {
   // do anything here that needs to be done at desctruction time
   // (e.g. close files, deallocate resources etc.)
@@ -189,7 +189,7 @@ testEventInfoTreeProducer::~testEventInfoTreeProducer()
 
 // ------------ method called to for each event  ------------
 void
-testEventInfoTreeProducer::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup)
+ForEventPlane::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup)
 {
   using std::vector;
   using namespace edm;
@@ -199,12 +199,12 @@ testEventInfoTreeProducer::analyze(const edm::Event& iEvent, const edm::EventSet
 }
 
 void
-testEventInfoTreeProducer::fillRECO(const edm::Event& iEvent, const edm::EventSetup& iSetup)
+ForEventPlane::fillRECO(const edm::Event& iEvent, const edm::EventSetup& iSetup)
 {
   //get collections
   edm::Handle<reco::VertexCollection> vertices;
   iEvent.getByToken(vtxToken_,vertices);
-  if(!vertices.isValid()) throw cms::Exception("testEventInfoTreeProducer") << "Primary vertices  collection not found!" << std::endl;
+  if(!vertices.isValid()) throw cms::Exception("ForEventPlane") << "Primary vertices  collection not found!" << std::endl;
 
   //best vertex
     double bestvz=-999.9;
@@ -354,7 +354,7 @@ testEventInfoTreeProducer::fillRECO(const edm::Event& iEvent, const edm::EventSe
 // ------------ method called once each job just before starting event
 //loop  ------------
 void
-testEventInfoTreeProducer::beginJob()
+ForEventPlane::beginJob()
 {
     TH1D::SetDefaultSumw2();
 
@@ -368,7 +368,7 @@ testEventInfoTreeProducer::beginJob()
 }
 
 void 
-testEventInfoTreeProducer::initTree()
+ForEventPlane::initTree()
 { 
   EventInfoNtuple = fs->make< TTree>("EventInfoNtuple","EventInfoNtuple");
 
@@ -392,17 +392,17 @@ testEventInfoTreeProducer::initTree()
 
 //--------------------------------------------------------------------------------------------------
 void 
-testEventInfoTreeProducer::beginRun(const edm::Run& iRun, const edm::EventSetup& iSetup)
+ForEventPlane::beginRun(const edm::Run& iRun, const edm::EventSetup& iSetup)
 {
 }
 
 // ------------ method called once each job just after ending the event
 //loop  ------------
 void
-testEventInfoTreeProducer::endJob() {
+ForEventPlane::endJob() {
     
 }
 
 //define this as a plug-in
-DEFINE_FWK_MODULE(testEventInfoTreeProducer);
+DEFINE_FWK_MODULE(ForEventPlane);
 
