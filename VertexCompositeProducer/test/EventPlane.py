@@ -53,11 +53,12 @@ process.hiEvtPlaneFlat.vertexTag = cms.InputTag("offlinePrimaryVerticesRecovery"
 process.hiEvtPlaneFlat.useNtrk = cms.untracked.bool(False)
 #process.evtplane_seq = cms.Sequence(process.hiEvtPlaneFlat)
 
-
+process.load('VertexCompositeAnalysis.VertexCompositeProducer.unpackedTracksAndVertices_cfi')
+process.load('VertexCompositeAnalysis.VertexCompositeProducer.unpackedMuons_cfi')
 process.eventinfoana = cms.EDAnalyzer('ForEventPlane',
-  vtxInputTag = cms.untracked.InputTag("offlinePrimaryVertices"),
-  trkInputTag = cms.untracked.InputTag("generalTracks"),
-  muInputTag = cms.untracked.InputTag("muons"),
+  vtxInputTag = cms.untracked.InputTag("unpackedTracksAndVertices"),
+  trkInputTag = cms.untracked.InputTag("unpackedTracksAndVertices"),
+  muInputTag = cms.untracked.InputTag("unpackedMuons"),
   caloTowerInputTag = cms.untracked.InputTag("towerMaker"),
 
   isCentrality = cms.bool(True),
