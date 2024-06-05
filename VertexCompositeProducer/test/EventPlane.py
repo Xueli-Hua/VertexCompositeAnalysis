@@ -95,6 +95,7 @@ eventFilterPaths = [ process.Flag_colEvtSel , process.Flag_primaryVertexFilter, 
 
 for P in eventFilterPaths:
     process.schedule.insert(0, P)
-'''
+
 from VertexCompositeAnalysis.VertexCompositeProducer.PATAlgos_cff import changeToMiniAOD
 changeToMiniAOD(process)
+'''
