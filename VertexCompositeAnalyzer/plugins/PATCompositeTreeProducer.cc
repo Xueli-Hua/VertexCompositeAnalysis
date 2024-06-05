@@ -18,7 +18,7 @@
 
 // user include files
 #include "FWCore/Framework/interface/Frameworkfwd.h"
-#include "FWCore/Framework/interface/EDAnalyzer.h"
+#include "FWCore/Framework/interface/one/EDAnalyzer.h"
 #include "FWCore/Framework/interface/Event.h"
 #include "FWCore/Framework/interface/Run.h"
 #include "FWCore/Framework/interface/MakerMacros.h"
@@ -56,6 +56,7 @@
 #include "TrackingTools/PatternTools/interface/TSCBLBuilderNoMaterial.h"
 #include "CommonTools/UtilAlgos/interface/TFileService.h"
 
+
 //
 // constants, enums and typedefs
 //
@@ -75,7 +76,7 @@ typedef ROOT::Math::SVector<double, 6> SVector6;
 // class decleration
 //
 
-class PATCompositeTreeProducer : public edm::EDAnalyzer {
+class PATCompositeTreeProducer : public edm::one::EDAnalyzer<edm::one::WatchRuns> {
 public:
   explicit PATCompositeTreeProducer(const edm::ParameterSet&);
   ~PATCompositeTreeProducer();
@@ -85,6 +86,7 @@ public:
 private:
   virtual void beginJob();
   virtual void beginRun(const edm::Run&, const edm::EventSetup&);
+  virtual void endRun(const edm::Run&, const edm::EventSetup&) {};
   virtual void analyze(const edm::Event&, const edm::EventSetup&);
   virtual void fillRECO(const edm::Event&, const edm::EventSetup&);
   virtual void fillMUON(const edm::Event&, const edm::EventSetup&);
@@ -163,17 +165,22 @@ private:
   uint  runNb;
   uint  eventNb;
   uint  lsNb;
-  short trigPrescale[MAXTRG];
+  float trigPrescale[MAXTRG];
   short centrality;
   int   Ntrkoffline;
   int   NtrkHP;
   int   Npixel;
+  int   NpixelTracks;
   short nPV;
   uint candSize;
   bool  trigHLT[MAXTRG];
   bool  evtSel[MAXSEL];
   float HFsumETPlus;
   float HFsumETMinus;
+  float PFHFmaxETPlus;
+  float PFHFmaxETMinus;
+  float PFHFsumETPlus;
+  float PFHFsumETMinus;
   float ZDCPlus;
   float ZDCMinus;
   float bestvx;
@@ -340,6 +347,7 @@ private:
   bool isSkimMVA_;
   bool isCentrality_;
   bool isEventPlane_;
+  bool usePF_;
   bool useDeDxData_;
 
   //token
@@ -356,6 +364,7 @@ private:
 
   edm::EDGetTokenT<pat::MuonCollection> tok_muoncol_;
   edm::EDGetTokenT<reco::TrackCollection> tok_tracks_;
+  edm::EDGetTokenT<reco::PFCandidateCollection> tok_pfcands_;
 
   edm::EDGetTokenT<int> tok_centBinLabel_;
   edm::EDGetTokenT<reco::Centrality> tok_centSrc_;
@@ -437,6 +446,12 @@ PATCompositeTreeProducer::PATCompositeTreeProducer(const edm::ParameterSet& iCon
 
   tok_muoncol_ = consumes<pat::MuonCollection>(edm::InputTag(iConfig.getUntrackedParameter<edm::InputTag>("MuonCollection")));
   tok_tracks_ = consumes<reco::TrackCollection>(edm::InputTag(iConfig.getUntrackedParameter<edm::InputTag>("TrackCollection")));
+
+  usePF_ = (iConfig.exists("usePF") ? iConfig.getParameter<bool>("usePF") : false);
+  if (usePF_)
+  {
+    tok_pfcands_ = consumes<reco::PFCandidateCollection>(edm::InputTag(iConfig.getUntrackedParameter<edm::InputTag>("PFCandidateCollection")));
+  }
 
   useDeDxData_ = (iConfig.exists("useDeDxData") ? iConfig.getParameter<bool>("useDeDxData") : false);
   if(useDeDxData_)
@@ -562,10 +577,10 @@ PATCompositeTreeProducer::fillRECO(const edm::Event& iEvent, const edm::EventSet
       bool isTriggerFired = false;
       if(triggerResults->accept(triggerIndex)) isTriggerFired = true;
       //Get the trigger prescale
-      int prescaleValue = -1;
+      float prescaleValue = -1;
       if(hltPrescaleProvider_.hltConfigProvider().inited() && hltPrescaleProvider_.prescaleSet(iEvent,iSetup)>=0)
       {
-        const auto& presInfo = hltPrescaleProvider_.prescaleValuesInDetail(iEvent, iSetup, triggerNames.triggerName(triggerIndex));
+        const auto& presInfo = hltPrescaleProvider_.prescaleValuesInDetail<double>(iEvent, iSetup, triggerNames.triggerName(triggerIndex));
         const auto& hltPres = presInfo.second;
         const short& l1Pres = ((presInfo.first.size()==1) ? presInfo.first.at(0).second : ((presInfo.first.size()>1) ? 1 : -1));
         prescaleValue = hltPres*l1Pres;
@@ -592,11 +607,11 @@ PATCompositeTreeProducer::fillRECO(const edm::Event& iEvent, const edm::EventSet
   centrality = -1;
   if(isCentrality_)
   {
-    edm::Handle<reco::Centrality> cent;
-    iEvent.getByToken(tok_centSrc_, cent);
+    const auto& cent = iEvent.getHandle(tok_centSrc_);
     HFsumETPlus = (cent.isValid() ? cent->EtHFtowerSumPlus() : -1.);
     HFsumETMinus = (cent.isValid() ? cent->EtHFtowerSumMinus() : -1.);
     Npixel = (cent.isValid() ? cent->multiplicityPixel() : -1);
+    NpixelTracks = (cent.isValid() ? cent->NpixelTracks() : -1);
     ZDCPlus = (cent.isValid() ? cent->zdcSumPlus() : -1.);
     ZDCMinus = (cent.isValid() ? cent->zdcSumMinus() : -1.);
     Ntrkoffline = (cent.isValid() ? cent->Ntracks() : -1);
@@ -606,12 +621,29 @@ PATCompositeTreeProducer::fillRECO(const edm::Event& iEvent, const edm::EventSet
   }
   
   NtrkHP = -1;
-  edm::Handle<reco::TrackCollection> trackColl;
-  iEvent.getByToken(tok_tracks_, trackColl);
+  const auto& trackColl = iEvent.getHandle(tok_tracks_);
   if(trackColl.isValid()) 
   {
     NtrkHP = 0;
     for (const auto& trk : *trackColl) { if (trk.quality(reco::TrackBase::highPurity)) NtrkHP++; }
+  }
+
+  PFHFmaxETPlus = -1, PFHFmaxETMinus = -1, PFHFsumETPlus = -1, PFHFsumETMinus = -1;
+  if (usePF_)
+  {
+    const auto& pfCandColl = iEvent.getHandle(tok_pfcands_);
+    if(pfCandColl.isValid())
+    {
+      for (const auto& pf : *pfCandColl) {
+        const auto aeta = std::abs(pf.eta());
+        if (pf.particleId() < 6 || aeta < 3.0 || aeta > 6.0) continue;
+        if (pf.eta() > 0 && PFHFmaxETPlus < pf.energy())
+          PFHFmaxETPlus = pf.energy();
+        if (pf.eta() < 0 && PFHFmaxETMinus < pf.energy())
+          PFHFmaxETMinus = pf.energy();
+        (pf.eta() > 0 ? PFHFsumETPlus : PFHFsumETMinus) += pf.energy();
+      }
+    }
   }
 
   if(isEventPlane_)
@@ -1304,10 +1336,18 @@ PATCompositeTreeProducer::initTree()
     PATCompositeNtuple->Branch("bestvtxY",&bestvy,"bestvtxY/F");
     PATCompositeNtuple->Branch("bestvtxZ",&bestvz,"bestvtxZ/F");
     PATCompositeNtuple->Branch("candSize",&candSize,"candSize/i");
+    if(usePF_)
+    {
+      PATCompositeNtuple->Branch("PFHFmaxETPlus",&PFHFmaxETPlus,"PFHFmaxETPlus/F");
+      PATCompositeNtuple->Branch("PFHFmaxETMinus",&PFHFmaxETMinus,"PFHFmaxETMinus/F");
+      PATCompositeNtuple->Branch("PFHFsumETPlus",&PFHFsumETPlus,"PFHFsumETPlus/F");
+      PATCompositeNtuple->Branch("PFHFsumETMinus",&PFHFsumETMinus,"PFHFsumETMinus/F");
+    }
     if(isCentrality_) 
     {
       PATCompositeNtuple->Branch("centrality",&centrality,"centrality/S");
       PATCompositeNtuple->Branch("Npixel",&Npixel,"Npixel/I");
+      PATCompositeNtuple->Branch("NpixelTracks",&NpixelTracks,"NpixelTracks/I");
       PATCompositeNtuple->Branch("HFsumETPlus",&HFsumETPlus,"HFsumETPlus/F");
       PATCompositeNtuple->Branch("HFsumETMinus",&HFsumETMinus,"HFsumETMinus/F");
       PATCompositeNtuple->Branch("ZDCPlus",&ZDCPlus,"ZDCPlus/F");
@@ -1326,7 +1366,7 @@ PATCompositeTreeProducer::initTree()
       PATCompositeNtuple->Branch("ephfmSumW",&ephfmSumW,"ephfmSumW/F");
       PATCompositeNtuple->Branch("eptrackmidSumW",&eptrackmidSumW,"eptrackmidSumW/F");
     }
-    PATCompositeNtuple->Branch("trigPrescale",trigPrescale,Form("trigPrescale[%d]/S",NTRG_));
+    PATCompositeNtuple->Branch("trigPrescale",trigPrescale,Form("trigPrescale[%d]/F",NTRG_));
     PATCompositeNtuple->Branch("trigHLT",trigHLT,Form("trigHLT[%d]/O",NTRG_));
     PATCompositeNtuple->Branch("evtSel",evtSel,Form("evtSel[%d]/O",NSEL_));
 

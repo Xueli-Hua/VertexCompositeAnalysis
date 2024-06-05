@@ -36,13 +36,27 @@ def doPATMuons(process, MC=False):
     process.muonL1Info.maxDeltaR = cms.double(0.3)
     process.muonL1Info.maxDeltaEta   = cms.double(0.2)
     process.muonL1Info.fallbackToME1 = cms.bool(True)
+    process.muonL1Info.useStation2 = cms.bool(True)
+    process.muonL1Info.cosmicPropagationHypothesis = cms.bool(False)
+    process.muonL1Info.propagatorAlong = cms.ESInputTag("", "hltESPSteppingHelixPropagatorAlong")
+    process.muonL1Info.propagatorAny = cms.ESInputTag("", "SteppingHelixPropagatorAny")
+    process.muonL1Info.propagatorOpposite = cms.ESInputTag("", "hltESPSteppingHelixPropagatorOpposite")
     process.muonMatchHLTL1.maxDeltaR = cms.double(0.3)
     process.muonMatchHLTL1.maxDeltaEta   = cms.double(0.2)
     process.muonMatchHLTL1.fallbackToME1 = cms.bool(True)
+    process.muonMatchHLTL1.useStation2 = cms.bool(True)
+    process.muonMatchHLTL1.cosmicPropagationHypothesis = cms.bool(False)
+    process.muonMatchHLTL1.propagatorAlong = cms.ESInputTag("", "hltESPSteppingHelixPropagatorAlong")
+    process.muonMatchHLTL1.propagatorAny = cms.ESInputTag("", "SteppingHelixPropagatorAny")
+    process.muonMatchHLTL1.propagatorOpposite = cms.ESInputTag("", "hltESPSteppingHelixPropagatorOpposite")
     process.muonMatchHLTL2.maxDeltaR = cms.double(0.3)
     process.muonMatchHLTL2.maxDPtRel = cms.double(10.0)
     process.muonMatchHLTL3.maxDeltaR = cms.double(0.1)
     process.muonMatchHLTL3.maxDPtRel = cms.double(10.0)
+
+    from HLTrigger.Configuration.HLT_GRun_cff import fragment
+    process.hltESPSteppingHelixPropagatorAlong = fragment.hltESPSteppingHelixPropagatorAlong
+    process.hltESPSteppingHelixPropagatorOpposite = fragment.hltESPSteppingHelixPropagatorOpposite
 
     # Add MC gen matching
     if MC:
@@ -79,7 +93,7 @@ def changeToMiniAOD(process):
             triggerResults              = cms.InputTag('TriggerResults::HLT'),
             unpackFilterLabels          = cms.bool(True)
         )
-        process.load('PhysicsTools.PatAlgos.slimming.unpackedTracksAndVertices_cfi')
+        process.load('VertexCompositeAnalysis.VertexCompositeProducer.unpackedTracksAndVertices_cfi')
         process.eventFilter_HM.insert(0, process.unpackedTracksAndVertices)
         process.load('VertexCompositeAnalysis.VertexCompositeProducer.unpackedMuons_cfi')
         process.eventFilter_HM.insert(1, process.unpackedMuons)
@@ -89,8 +103,7 @@ def changeToMiniAOD(process):
         process.output_HM.outputCommands.append('keep patMuons_unpackedMuons_*_*')
         process.output_HM.outputCommands.append('drop patMuons_patMuonsWith*_*_*')
 
-
-    from HLTrigger.Configuration.CustomConfigs import MassReplaceInputTag
+    from FWCore.ParameterSet.MassReplace import massReplaceInputTag as MassReplaceInputTag
     process = MassReplaceInputTag(process,"offlinePrimaryVertices","unpackedTracksAndVertices")
     process = MassReplaceInputTag(process,"generalTracks","unpackedTracksAndVertices")
     process = MassReplaceInputTag(process,"muons","unpackedMuons")
