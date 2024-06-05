@@ -64,12 +64,12 @@ process.eventinfoana = cms.EDAnalyzer('ForEventPlane',
   centBinLabelTag = cms.InputTag("centralityBin","HFtowers"),
   centSrcTag = cms.InputTag("hiCentrality"),
 )
-
+'''
 # Add PbPb collision event selection
 process.load('VertexCompositeAnalysis.VertexCompositeProducer.collisionEventSelection_cff')
 process.load('VertexCompositeAnalysis.VertexCompositeProducer.clusterCompatibilityFilter_cfi')
 process.colEvtSel = cms.Sequence(process.primaryVertexFilter * process.clusterCompatibilityFilter)
-
+'''
 
 # Define the analysis steps
 process.pcentandep_step = cms.Path(process.cent_seq)
@@ -84,7 +84,7 @@ process.schedule = cms.Schedule(
     process.pcentandep_step,
     process.p
 )
-
+'''
 # Add the event selection filters
 process.Flag_colEvtSel = cms.Path(process.eventFilter_HM * process.colEvtSel)
 process.Flag_hfCoincFilter2Th4 = cms.Path(process.eventFilter_HM * process.hfCoincFilter2Th4)
@@ -94,6 +94,6 @@ eventFilterPaths = [ process.Flag_colEvtSel , process.Flag_primaryVertexFilter, 
 
 for P in eventFilterPaths:
     process.schedule.insert(0, P)
-
+'''
 from VertexCompositeAnalysis.VertexCompositeProducer.PATAlgos_cff import changeToMiniAOD
 changeToMiniAOD(process)
