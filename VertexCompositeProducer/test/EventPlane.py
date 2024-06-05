@@ -45,6 +45,26 @@ process.centralityBin.centralityVariable = cms.string("HFtowers")
 process.centralityBin.nonDefaultGlauberModel = cms.string("")
 process.cent_seq = cms.Sequence(process.centralityBin)
 
+# Add the VertexComposite producer
+process.load("VertexCompositeAnalysis.VertexCompositeProducer.generalDiMuCandidates_cff")
+process.generalMuMuMassMin0CandidatesWrongSign = process.generalMuMuMassMin0Candidates.clone(isWrongSign = cms.bool(True))
+from VertexCompositeAnalysis.VertexCompositeProducer.PATAlgos_cff import doPATMuons
+doPATMuons(process, False)
+
+# Add muon event selection
+process.twoMuons = cms.EDFilter("CandViewCountFilter", src = cms.InputTag("muons"), minNumber = cms.uint32(2))
+process.goodMuon = cms.EDFilter("MuonSelector",
+            src = cms.InputTag("muons"),
+            cut = process.generalMuMuMassMin0Candidates.muonSelection,
+            )
+process.twoGoodMuons = cms.EDFilter("CandViewCountFilter", src = cms.InputTag("goodMuon"), minNumber = cms.uint32(2))
+process.goodDimuon = cms.EDProducer("CandViewShallowCloneCombiner",
+            cut = process.generalMuMuMassMin0Candidates.candidateSelection,
+            checkCharge = cms.bool(False),
+            decay = cms.string('goodMuon@+ goodMuon@-')
+            )
+process.oneGoodDimuon = cms.EDFilter("CandViewCountFilter", src = cms.InputTag("goodDimuon"), minNumber = cms.uint32(1))
+process.dimuonEvtSel = cms.Sequence(process.twoMuons * process.goodMuon * process.twoGoodMuons * process.goodDimuon * process.oneGoodDimuon)
 
 process.load('VertexCompositeAnalysis.VertexCompositeProducer.unpackedTracksAndVertices_cfi')
 process.load('VertexCompositeAnalysis.VertexCompositeProducer.unpackedMuons_cfi')
