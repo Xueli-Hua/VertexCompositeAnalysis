@@ -45,20 +45,13 @@ process.centralityBin.centralityVariable = cms.string("HFtowers")
 process.centralityBin.nonDefaultGlauberModel = cms.string("")
 process.cent_seq = cms.Sequence(process.centralityBin)
 
-# Add PbPb event plane
-process.load("RecoHI.HiEvtPlaneAlgos.hiEvtPlaneFlat_cfi")
-process.hiEvtPlaneFlat.caloCentRef = cms.double(-1)
-process.hiEvtPlaneFlat.caloCentRefWidth = cms.double(-1)
-process.hiEvtPlaneFlat.vertexTag = cms.InputTag("offlinePrimaryVerticesRecovery")
-process.hiEvtPlaneFlat.useNtrk = cms.untracked.bool(False)
-#process.evtplane_seq = cms.Sequence(process.hiEvtPlaneFlat)
 
 process.load('VertexCompositeAnalysis.VertexCompositeProducer.unpackedTracksAndVertices_cfi')
 process.load('VertexCompositeAnalysis.VertexCompositeProducer.unpackedMuons_cfi')
 process.eventinfoana = cms.EDAnalyzer('ForEventPlane',
-  vtxInputTag = cms.untracked.InputTag("unpackedTracksAndVertices"),
-  trkInputTag = cms.untracked.InputTag("unpackedTracksAndVertices"),
-  muInputTag = cms.untracked.InputTag("unpackedMuons"),
+  vtxInputTag = cms.untracked.InputTag("offlinePrimaryVertices"),
+  trkInputTag = cms.untracked.InputTag("generalTracks"),
+  muInputTag = cms.untracked.InputTag("muons"),
   caloTowerInputTag = cms.untracked.InputTag("towerMaker"),
 
   isCentrality = cms.bool(True),
@@ -95,7 +88,7 @@ eventFilterPaths = [ process.Flag_colEvtSel , process.Flag_primaryVertexFilter, 
 
 for P in eventFilterPaths:
     process.schedule.insert(0, P)
-
+'''
 from VertexCompositeAnalysis.VertexCompositeProducer.PATAlgos_cff import changeToMiniAOD
 changeToMiniAOD(process)
-'''
+
