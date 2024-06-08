@@ -209,7 +209,7 @@ PATEventPlane::fillRECO(const edm::Event& iEvent, const edm::EventSetup& iSetup)
   iEvent.getByToken(tok_offlineBS_, beamspot);
   edm::Handle<reco::VertexCollection> vertices;
   iEvent.getByToken(tok_offlinePV_, vertices);
-  if(!vertices.isValid()) throw cms::Exception("PATCompositeAnalyzer") << "Primary vertices  collection not found!" << std::endl;
+  if(!vertices.isValid()) throw cms::Exception("PATEventPlane") << "Primary vertices  collection not found!" << std::endl;
 
 
   runNb = iEvent.id().run();
@@ -276,7 +276,10 @@ PATEventPlane::fillRECO(const edm::Event& iEvent, const edm::EventSetup& iSetup)
 
        //if (abs(mass-MASS_.at(443)) < WIDTH_.at(443) && pt < 0.2) {
        if (mass>2.9 && mass<3.2 && pt < 0.2) {
-        out->push_back(cand1);out->push_back(cand2);
+         hMassvsPt_dimu->Fill(mass,pt);
+         hEtavsPt_mu1->Fill(cand1.eta(),cand1.pt());
+         hEtavsPt_mu2->Fill(cand2.eta(),cand2.pt());
+         out->push_back(cand1);out->push_back(cand2);
       }
     }
   }
@@ -309,8 +312,12 @@ PATEventPlane::fillRECO(const edm::Event& iEvent, const edm::EventSetup& iSetup)
     all_trkqy += pt*sin(2*phi);
     all_trkPt += pt;
 
-    if(DauTrk == true) continue;
-
+    if(DauTrk == true) {
+      hEtavsPt_DauTrk->Fill(track->eta(),track->pt());
+      continue;
+    }
+    htrkpt->Fill(pt);
+    
     trkqx += pt*cos(2*phi);
     trkqy += pt*sin(2*phi);
     trkPt += pt;
@@ -324,8 +331,11 @@ PATEventPlane::fillRECO(const edm::Event& iEvent, const edm::EventSetup& iSetup)
   //
   edm::Handle<CaloTowerCollection> towers;
   iEvent.getByToken(caloTowerToken_, towers);
-  if(!towers.isValid()) return;
-
+  if(!towers.isValid()) {
+    throw cms::Exception("PATEventPlane") << "calo Tower is inValid!" << std::endl;
+    return;
+  }
+  
   double twqx = 0;
   double twqy = 0;
   double twEt = 0;
@@ -341,6 +351,10 @@ PATEventPlane::fillRECO(const edm::Event& iEvent, const edm::EventSetup& iSetup)
     twqx += et*cos(2*caloPhi);
     twqy += et*sin(2*caloPhi);
     twEt += et;
+
+    htwqx->Fill(twqx);
+    htwqy->Fill(twqy);
+    htwEt->Fill(twEt);
 
   }
   twQx = twqx/twEt;
@@ -359,6 +373,16 @@ PATEventPlane::beginJob()
   // Check inputs
   if(!doRecoNtuple_) throw cms::Exception("PATCompositeAnalyzer") << "No output for RECO Fix config!!" << std::endl;
   if(saveTree_) initTree();
+
+  htrkpt = fs->make<TH1D>("hTrk",";pT",100,0,10);
+  hEtavsPt_DauTrk = fs->make<TH2D>("hEtavsPt_DauTrk",";Eta;Pt",200,-10,10,100,0,10);
+  hMassvsPt_dimu = fs->make<TH2D>("hMassvsPt_dimu",";Mass;Pt",20,2.6,4.2,100,0,10);
+  hEtavsPt_mu1 = fs->make<TH2D>("hEtavsPt_mu1",";Eta;Pt",100,-10,10,100,0,10);
+  hEtavsPt_mu2 = fs->make<TH2D>("hEtavsPt_mu2",";Eta;Pt",100,-10,10,100,0,10);
+
+  htwEt->make<TH1D>("htwEt",";Et",100,0,100);
+  htwqx->make<TH1D>("htwqx",";qx",100,0,100);
+  htwqy->make<TH1D>("htwqy",";qy",100,0,100);
 }
 
 
@@ -394,6 +418,15 @@ PATEventPlane::initTree()
     PATCompositeNtuple->Branch("all_trkQy",&all_trkQy,"all_trkQy/D");
 
   } // doRecoNtuple_
+
+  TH1D* htrkpt;
+  TH2D* hEtavsPt_DauTrk;
+  TH2D* hMassvsPt_dimu;
+  TH2D* hEtavsPt_mu1;
+  TH2D* hEtavsPt_mu2;
+  TH1D* htwEt;
+  TH1D* htwqx;
+  TH1D* htwqy;
 
 }
 
