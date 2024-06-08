@@ -52,7 +52,7 @@ process.cent_seq = cms.Sequence(process.centralityBin)
 process.pcentandep_step = cms.Path(process.cent_seq)
 
 
-process.EvtPlane = cms.EDAnalyzer('PATCompositeTest',
+process.EvtPlane = cms.EDAnalyzer('PATEventPlane',
   doRecoNtuple = cms.untracked.bool(True),
   beamSpotSrc = cms.untracked.InputTag("offlineBeamSpot"),
   VertexCollection = cms.untracked.InputTag("offlinePrimaryVertices"),
