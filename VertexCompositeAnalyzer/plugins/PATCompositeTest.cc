@@ -76,10 +76,10 @@ typedef ROOT::Math::SVector<double, 6> SVector6;
 // class decleration
 //
 
-class PATCompositeTreeProducer : public edm::one::EDAnalyzer<edm::one::WatchRuns> {
+class PATCompositeTest : public edm::one::EDAnalyzer<edm::one::WatchRuns> {
 public:
-  explicit PATCompositeTreeProducer(const edm::ParameterSet&);
-  ~PATCompositeTreeProducer();
+  explicit PATCompositeTest(const edm::ParameterSet&);
+  ~PATCompositeTest();
 
 
 private:
@@ -89,8 +89,7 @@ private:
   virtual void analyze(const edm::Event&, const edm::EventSetup&);
   virtual void fillRECO(const edm::Event&, const edm::EventSetup&);
   virtual void endJob() ;
-  virtual void initHistogram();
-
+  virtual void initTree();
   // ----------member data ---------------------------
 
   edm::Service<TFileService> fs;
@@ -162,7 +161,7 @@ private:
 // constructors and destructor
 //
 
-PATCompositeTreeProducer::PATCompositeTreeProducer(const edm::ParameterSet& iConfig) :
+PATCompositeTest::PATCompositeTest(const edm::ParameterSet& iConfig) :
 {
   //options
   doRecoNtuple_ = iConfig.getUntrackedParameter<bool>("doRecoNtuple");
@@ -188,7 +187,7 @@ PATCompositeTreeProducer::PATCompositeTreeProducer(const edm::ParameterSet& iCon
 }
 
 
-PATCompositeTreeProducer::~PATCompositeTreeProducer()
+PATCompositeTest::~PATCompositeTest()
 {
 
   // do anything here that needs to be done at desctruction time
@@ -203,7 +202,7 @@ PATCompositeTreeProducer::~PATCompositeTreeProducer()
 
 // ------------ method called to for each event  ------------
 void
-PATCompositeTreeProducer::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup)
+PATCompositeTest::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup)
 {
   //check event
   if(doRecoNtuple_) fillRECO(iEvent,iSetup);
@@ -212,7 +211,7 @@ PATCompositeTreeProducer::analyze(const edm::Event& iEvent, const edm::EventSetu
 
 
 void
-PATCompositeTreeProducer::fillRECO(const edm::Event& iEvent, const edm::EventSetup& iSetup)
+PATCompositeTest::fillRECO(const edm::Event& iEvent, const edm::EventSetup& iSetup)
 {
   //get collection
   edm::Handle<reco::BeamSpot> beamspot;
@@ -266,26 +265,18 @@ PATCompositeTreeProducer::fillRECO(const edm::Event& iEvent, const edm::EventSet
 // ------------ method called once each job just before starting event
 //loop  ------------
 void
-PATCompositeTreeProducer::beginJob()
+PATCompositeTest::beginJob()
 {
   TH1D::SetDefaultSumw2();
 
   // Check inputs
   if(!doRecoNtuple_) throw cms::Exception("PATCompositeAnalyzer") << "No output for RECO Fix config!!" << std::endl;
-
-  if(saveHistogram_) initHistogram();
   if(saveTree_) initTree();
 }
 
 
-void
-PATCompositeTreeProducer::initHistogram()
-{
-}
-
-
 void 
-PATCompositeTreeProducer::initTree()
+PATCompositeTest::initTree()
 { 
   PATCompositeNtuple = fs->make< TTree>("VertexCompositeNtuple","VertexCompositeNtuple");
 
@@ -300,7 +291,6 @@ PATCompositeTreeProducer::initTree()
     PATCompositeNtuple->Branch("bestvtxX",&bestvx,"bestvtxX/F");
     PATCompositeNtuple->Branch("bestvtxY",&bestvy,"bestvtxY/F");
     PATCompositeNtuple->Branch("bestvtxZ",&bestvz,"bestvtxZ/F");
-    PATCompositeNtuple->Branch("candSize",&candSize,"candSize/i");
     
     if(isCentrality_) 
     {
@@ -317,7 +307,7 @@ PATCompositeTreeProducer::initTree()
 
 //--------------------------------------------------------------------------------------------------
 void 
-PATCompositeTreeProducer::beginRun(const edm::Run& iRun, const edm::EventSetup& iSetup)
+PATCompositeTest::beginRun(const edm::Run& iRun, const edm::EventSetup& iSetup)
 {
 }
 
@@ -325,9 +315,9 @@ PATCompositeTreeProducer::beginRun(const edm::Run& iRun, const edm::EventSetup& 
 // ------------ method called once each job just after ending the event
 //loop  ------------
 void 
-PATCompositeTreeProducer::endJob()
+PATCompositeTest::endJob()
 {
 }
 
 //define this as a plug-in
-DEFINE_FWK_MODULE(PATCompositeTreeProducer);
+DEFINE_FWK_MODULE(PATCompositeTest);
