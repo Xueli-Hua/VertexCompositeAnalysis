@@ -77,10 +77,10 @@ typedef ROOT::Math::SVector<double, 6> SVector6;
 // class decleration
 //
 
-class PATCompositeTest : public edm::one::EDAnalyzer<edm::one::WatchRuns> {
+class PATEventPlane : public edm::one::EDAnalyzer<edm::one::WatchRuns> {
 public:
-  explicit PATCompositeTest(const edm::ParameterSet&);
-  ~PATCompositeTest();
+  explicit PATEventPlane(const edm::ParameterSet&);
+  ~PATEventPlane();
 
 
 private:
@@ -127,21 +127,8 @@ private:
 
   double all_trkQx;
   double all_trkQy;
-  //Composite candidate info
 
-    
-  //dau candidate info
 
-  //dau info
-  
-  //grand-dau info
-    
-  //dau muon info
-
-  // gen info
-
-  // muon info
-  // track info
   bool isCentrality_;
 
   //token
@@ -156,12 +143,6 @@ private:
   edm::EDGetTokenT<reco::Centrality> tok_centSrc_;
   edm::EDGetTokenT<CaloTowerCollection> caloTowerToken_;
 
-
-  //trigger
-
-  //event selection
-
-  //prescale provider
 };
 
 //
@@ -172,14 +153,12 @@ private:
 // constructors and destructor
 //
 
-PATCompositeTest::PATCompositeTest(const edm::ParameterSet& iConfig)
+PATEventPlane::PATEventPlane(const edm::ParameterSet& iConfig)
 {
   //options
   doRecoNtuple_ = iConfig.getUntrackedParameter<bool>("doRecoNtuple");
-
   saveTree_ = iConfig.getUntrackedParameter<bool>("saveTree");
 
-  //cut variables
   //input tokens
   tok_offlineBS_ = consumes<reco::BeamSpot>(iConfig.getUntrackedParameter<edm::InputTag>("beamSpotSrc"));
   tok_offlinePV_ = consumes<reco::VertexCollection>(iConfig.getUntrackedParameter<edm::InputTag>("VertexCollection"));
@@ -199,7 +178,7 @@ PATCompositeTest::PATCompositeTest(const edm::ParameterSet& iConfig)
 }
 
 
-PATCompositeTest::~PATCompositeTest()
+PATEventPlane::~PATEventPlane()
 {
 
   // do anything here that needs to be done at desctruction time
@@ -214,7 +193,7 @@ PATCompositeTest::~PATCompositeTest()
 
 // ------------ method called to for each event  ------------
 void
-PATCompositeTest::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup)
+PATEventPlane::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup)
 {
   //check event
   if(doRecoNtuple_) fillRECO(iEvent,iSetup);
@@ -223,7 +202,7 @@ PATCompositeTest::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetu
 
 
 void
-PATCompositeTest::fillRECO(const edm::Event& iEvent, const edm::EventSetup& iSetup)
+PATEventPlane::fillRECO(const edm::Event& iEvent, const edm::EventSetup& iSetup)
 {
   //get collection
   edm::Handle<reco::BeamSpot> beamspot;
@@ -237,9 +216,6 @@ PATCompositeTest::fillRECO(const edm::Event& iEvent, const edm::EventSetup& iSet
   eventNb = iEvent.id().event();
   lsNb = iEvent.luminosityBlock();
 
-  //Trigger Information
-
-  //Event selection information
   
   centrality = -1;
   if(isCentrality_)
@@ -269,7 +245,6 @@ PATCompositeTest::fillRECO(const edm::Event& iEvent, const edm::EventSetup& iSet
   const math::XYZPoint bestvtx(bestvx, bestvy, bestvz);
   bestvzError = vtx.zError(), bestvxError = vtx.xError(), bestvyError = vtx.yError();
 
-  //RECO Candidate info
  
   //edm::Handle<reco::MuonCollection> recoMuons;
   edm::Handle<pat::MuonCollection> recoMuons;
@@ -377,7 +352,7 @@ PATCompositeTest::fillRECO(const edm::Event& iEvent, const edm::EventSetup& iSet
 // ------------ method called once each job just before starting event
 //loop  ------------
 void
-PATCompositeTest::beginJob()
+PATEventPlane::beginJob()
 {
   TH1D::SetDefaultSumw2();
 
@@ -388,7 +363,7 @@ PATCompositeTest::beginJob()
 
 
 void 
-PATCompositeTest::initTree()
+PATEventPlane::initTree()
 { 
   PATCompositeNtuple = fs->make< TTree>("EventPlane","EventPlane");
 
@@ -418,7 +393,6 @@ PATCompositeTest::initTree()
     PATCompositeNtuple->Branch("all_trkQx",&all_trkQx,"all_trkQx/D");
     PATCompositeNtuple->Branch("all_trkQy",&all_trkQy,"all_trkQy/D");
 
-    // particle info
   } // doRecoNtuple_
 
 }
@@ -426,7 +400,7 @@ PATCompositeTest::initTree()
 
 //--------------------------------------------------------------------------------------------------
 void 
-PATCompositeTest::beginRun(const edm::Run& iRun, const edm::EventSetup& iSetup)
+PATEventPlane::beginRun(const edm::Run& iRun, const edm::EventSetup& iSetup)
 {
 }
 
@@ -434,9 +408,9 @@ PATCompositeTest::beginRun(const edm::Run& iRun, const edm::EventSetup& iSetup)
 // ------------ method called once each job just after ending the event
 //loop  ------------
 void 
-PATCompositeTest::endJob()
+PATEventPlane::endJob()
 {
 }
 
 //define this as a plug-in
-DEFINE_FWK_MODULE(PATCompositeTest);
+DEFINE_FWK_MODULE(PATEventPlane);
