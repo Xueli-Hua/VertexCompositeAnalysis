@@ -96,8 +96,17 @@ private:
   edm::Service<TFileService> fs;
 
   TTree* PATCompositeNtuple;
+  TH1D* htrkpt;
+  TH2D* hEtavsPt_DauTrk;
+  TH2D* hMassvsPt_dimu;
+  TH2D* hEtavsPt_mu1;
+  TH2D* hEtavsPt_mu2;
+  TH1D* htwEt;
+  TH1D* htwqx;
+  TH1D* htwqy;
 
   bool   saveTree_;
+  bool   saveHistogram_;
 
   //options
   bool doRecoNtuple_;
@@ -158,6 +167,7 @@ PATEventPlane::PATEventPlane(const edm::ParameterSet& iConfig)
   //options
   doRecoNtuple_ = iConfig.getUntrackedParameter<bool>("doRecoNtuple");
   saveTree_ = iConfig.getUntrackedParameter<bool>("saveTree");
+  saveHistogram_ = iConfig.getUntrackedParameter<bool>("saveHistogram");
 
   //input tokens
   tok_offlineBS_ = consumes<reco::BeamSpot>(iConfig.getUntrackedParameter<edm::InputTag>("beamSpotSrc"));
@@ -373,16 +383,8 @@ PATEventPlane::beginJob()
   // Check inputs
   if(!doRecoNtuple_) throw cms::Exception("PATCompositeAnalyzer") << "No output for RECO Fix config!!" << std::endl;
   if(saveTree_) initTree();
-
-  htrkpt = fs->make<TH1D>("hTrk",";pT",100,0,10);
-  hEtavsPt_DauTrk = fs->make<TH2D>("hEtavsPt_DauTrk",";Eta;Pt",200,-10,10,100,0,10);
-  hMassvsPt_dimu = fs->make<TH2D>("hMassvsPt_dimu",";Mass;Pt",20,2.6,4.2,100,0,10);
-  hEtavsPt_mu1 = fs->make<TH2D>("hEtavsPt_mu1",";Eta;Pt",100,-10,10,100,0,10);
-  hEtavsPt_mu2 = fs->make<TH2D>("hEtavsPt_mu2",";Eta;Pt",100,-10,10,100,0,10);
-
-  htwEt->make<TH1D>("htwEt",";Et",100,0,100);
-  htwqx->make<TH1D>("htwqx",";qx",100,0,100);
-  htwqy->make<TH1D>("htwqy",";qy",100,0,100);
+  if(saveHistogram_) initHistogram();
+  
 }
 
 
@@ -419,15 +421,20 @@ PATEventPlane::initTree()
 
   } // doRecoNtuple_
 
-  TH1D* htrkpt;
-  TH2D* hEtavsPt_DauTrk;
-  TH2D* hMassvsPt_dimu;
-  TH2D* hEtavsPt_mu1;
-  TH2D* hEtavsPt_mu2;
-  TH1D* htwEt;
-  TH1D* htwqx;
-  TH1D* htwqy;
+}
 
+void
+PATCompositeTreeProducer::initHistogram()
+{
+  htrkpt = fs->make<TH1D>("hTrk",";pT",100,0,10);
+  hEtavsPt_DauTrk = fs->make<TH2D>("hEtavsPt_DauTrk",";Eta;Pt",200,-10,10,100,0,10);
+  hMassvsPt_dimu = fs->make<TH2D>("hMassvsPt_dimu",";Mass;Pt",20,2.6,4.2,100,0,10);
+  hEtavsPt_mu1 = fs->make<TH2D>("hEtavsPt_mu1",";Eta;Pt",100,-10,10,100,0,10);
+  hEtavsPt_mu2 = fs->make<TH2D>("hEtavsPt_mu2",";Eta;Pt",100,-10,10,100,0,10);
+
+  htwEt->make<TH1D>("htwEt",";Et",100,0,100);
+  htwqx->make<TH1D>("htwqx",";qx",100,0,100);
+  htwqy->make<TH1D>("htwqy",";qy",100,0,100);
 }
 
 
