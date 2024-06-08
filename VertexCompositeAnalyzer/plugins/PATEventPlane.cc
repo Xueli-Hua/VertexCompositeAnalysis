@@ -56,6 +56,7 @@
 #include "TrackingTools/PatternTools/interface/TSCBLBuilderNoMaterial.h"
 #include "CommonTools/UtilAlgos/interface/TFileService.h"
 
+#include "DataFormats/CaloTowers/interface/CaloTower.h"
 
 //
 // constants, enums and typedefs
@@ -97,7 +98,6 @@ private:
   TTree* PATCompositeNtuple;
 
   bool   saveTree_;
-  bool   saveHistogram_;
 
   //options
   bool doRecoNtuple_;
@@ -119,7 +119,16 @@ private:
   float bestvxError;
   float bestvyError;
   float bestvzError;
+
+  double trkQx;
+  double trkQy;
+  double twQx;
+  double twQy;
+
+  double all_trkQx;
+  double all_trkQy;
   //Composite candidate info
+
     
   //dau candidate info
 
@@ -140,10 +149,12 @@ private:
   edm::EDGetTokenT<reco::VertexCollection> tok_offlinePV_;
 
   edm::EDGetTokenT<pat::MuonCollection> tok_muoncol_;
+  //edm::EDGetTokenT<reco::MuonCollection> tok_muoncol_;
   edm::EDGetTokenT<reco::TrackCollection> tok_tracks_;
 
   edm::EDGetTokenT<int> tok_centBinLabel_;
   edm::EDGetTokenT<reco::Centrality> tok_centSrc_;
+  edm::EDGetTokenT<CaloTowerCollection> caloTowerToken_;
 
 
   //trigger
@@ -161,20 +172,21 @@ private:
 // constructors and destructor
 //
 
-PATCompositeTest::PATCompositeTest(const edm::ParameterSet& iConfig) :
+PATCompositeTest::PATCompositeTest(const edm::ParameterSet& iConfig)
 {
   //options
   doRecoNtuple_ = iConfig.getUntrackedParameter<bool>("doRecoNtuple");
 
   saveTree_ = iConfig.getUntrackedParameter<bool>("saveTree");
-  saveHistogram_ = iConfig.getUntrackedParameter<bool>("saveHistogram");
 
   //cut variables
   //input tokens
   tok_offlineBS_ = consumes<reco::BeamSpot>(iConfig.getUntrackedParameter<edm::InputTag>("beamSpotSrc"));
   tok_offlinePV_ = consumes<reco::VertexCollection>(iConfig.getUntrackedParameter<edm::InputTag>("VertexCollection"));
   tok_muoncol_ = consumes<pat::MuonCollection>(edm::InputTag(iConfig.getUntrackedParameter<edm::InputTag>("MuonCollection")));
+  //tok_muoncol_ = consumes<reco::MuonCollection>(edm::InputTag(iConfig.getUntrackedParameter<edm::InputTag>("MuonCollection")));
   tok_tracks_ = consumes<reco::TrackCollection>(edm::InputTag(iConfig.getUntrackedParameter<edm::InputTag>("TrackCollection")));
+  caloTowerToken_ = consumes<CaloTowerCollection>(iConfig.getUntrackedParameter<edm::InputTag>("caloTowerInputTag"));
 
 
   isCentrality_ = (iConfig.exists("isCentrality") ? iConfig.getParameter<bool>("isCentrality") : false);
@@ -259,6 +271,106 @@ PATCompositeTest::fillRECO(const edm::Event& iEvent, const edm::EventSetup& iSet
 
   //RECO Candidate info
  
+  //edm::Handle<reco::MuonCollection> recoMuons;
+  edm::Handle<pat::MuonCollection> recoMuons;
+  iEvent.getByToken(tok_muoncol_, recoMuons);
+
+  //reco::MuonCollection muonColl;
+  pat::MuonCollection muonColl;
+  for (const auto& muon : *recoMuons) {
+    const reco::TrackRef& trackRef = muon.track();
+    if(trackRef.isNull()) continue;
+    muonColl.push_back(muon);
+  }
+
+  //auto out = std::make_unique<std::vector<reco::Muon>>();
+  auto out = std::make_unique<std::vector<pat::Muon>>();
+  for (uint ic = 0; ic < muonColl.size(); ic++) {
+    //const reco::Muon& cand1 = muonColl[ic];
+    const pat::Muon& cand1 = muonColl[ic];
+
+    for(uint fc = ic+1; fc < muonColl.size(); fc++) {
+       //const reco::Muon& cand2 = muonColl[fc];
+       const pat::Muon& cand2 = muonColl[fc];
+
+       const auto cand1P4 = math::PtEtaPhiMLorentzVector(cand1.pt(), cand1.eta(), cand1.phi(), 0.10565837);
+       const auto cand2P4 = math::PtEtaPhiMLorentzVector(cand2.pt(), cand2.eta(), cand2.phi(), 0.10565837);
+
+       const double& mass = (cand1P4 + cand2P4).mass();
+       const double& pt = (cand1P4 + cand2P4).pt();
+
+       //if (abs(mass-MASS_.at(443)) < WIDTH_.at(443) && pt < 0.2) {
+       if (mass>2.9 && mass<3.2 && pt < 0.2) {
+        out->push_back(cand1);out->push_back(cand2);
+      }
+    }
+  }
+
+  //track info
+  double trkqx = 0;
+  double trkqy = 0;
+  double trkPt = 0;
+  trkQx = -1;
+  trkQy = -1;
+  bool DauTrk = false;
+
+  double all_trkqx= 0;
+  double all_trkqy = 0;
+  double all_trkPt = 0;
+  all_trkQx = -1;
+  all_trkQy = -1;
+
+  for(unsigned it=0; it<trackColl->size(); ++it){
+    DauTrk = false;
+    reco::TrackRef track(trackColl, it);
+    double pt  = track->pt();
+    double phi = track->phi();
+    //for (std::vector<reco::Muon>::const_iterator muon = out->begin(); muon < out->end(); muon++) {
+    for (std::vector<pat::Muon>::const_iterator muon = out->begin(); muon < out->end(); muon++) {
+        if (muon->innerTrack() == track) DauTrk = true;
+    }
+
+    all_trkqx += pt*cos(2*phi);
+    all_trkqy += pt*sin(2*phi);
+    all_trkPt += pt;
+
+    if(DauTrk == true) continue;
+
+    trkqx += pt*cos(2*phi);
+    trkqy += pt*sin(2*phi);
+    trkPt += pt;
+  }
+  trkQx = trkqx/trkPt;
+  trkQy = trkqy/trkPt;
+  all_trkQx = all_trkqx/all_trkPt;
+  all_trkQy = all_trkqy/all_trkPt;
+
+  //Calo tower info
+  //
+  edm::Handle<CaloTowerCollection> towers;
+  iEvent.getByToken(caloTowerToken_, towers);
+  if(!towers.isValid()) return;
+
+  double twqx = 0;
+  double twqy = 0;
+  double twEt = 0;
+  twQx = -1;
+  twQy = -1;
+  for(unsigned itw = 0; itw < towers->size(); ++itw){
+
+    const CaloTower & hit= (*towers)[itw];
+
+    double et = hit.et(bestvz);
+    double caloPhi = hit.phi();
+
+    twqx += et*cos(2*caloPhi);
+    twqy += et*sin(2*caloPhi);
+    twEt += et;
+
+  }
+  twQx = twqx/twEt;
+  twQy = twqy/twEt;
+
 }
 
 
@@ -278,7 +390,7 @@ PATCompositeTest::beginJob()
 void 
 PATCompositeTest::initTree()
 { 
-  PATCompositeNtuple = fs->make< TTree>("VertexCompositeNtuple","VertexCompositeNtuple");
+  PATCompositeNtuple = fs->make< TTree>("EventPlane","EventPlane");
 
   if(doRecoNtuple_)
   {
@@ -298,6 +410,13 @@ PATCompositeTest::initTree()
       PATCompositeNtuple->Branch("Ntrkoffline",&Ntrkoffline,"Ntrkoffline/I");
       PATCompositeNtuple->Branch("NtrkHP",&NtrkHP,"NtrkHP/I");
     }
+    
+    PATCompositeNtuple->Branch("trkQx",&trkQx,"trkQx/D");
+    PATCompositeNtuple->Branch("trkQy",&trkQy,"trkQy/D");
+    PATCompositeNtuple->Branch("twQx",&twQx,"twQx/D");
+    PATCompositeNtuple->Branch("twQy",&twQy,"twQy/D");
+    PATCompositeNtuple->Branch("all_trkQx",&all_trkQx,"all_trkQx/D");
+    PATCompositeNtuple->Branch("all_trkQy",&all_trkQy,"all_trkQy/D");
 
     // particle info
   } // doRecoNtuple_
