@@ -57,6 +57,7 @@
 #include "CommonTools/UtilAlgos/interface/TFileService.h"
 
 #include "DataFormats/CaloTowers/interface/CaloTower.h"
+#include "DataFormats/CaloTowers/interface/CaloTowerDefs.h"
 
 //
 // constants, enums and typedefs
@@ -91,6 +92,7 @@ private:
   virtual void fillRECO(const edm::Event&, const edm::EventSetup&);
   virtual void endJob() ;
   virtual void initTree();
+  virtual void initHistogram();
   // ----------member data ---------------------------
 
   edm::Service<TFileService> fs;
@@ -98,6 +100,8 @@ private:
   TTree* PATCompositeNtuple;
   TH1D* htrkpt;
   TH2D* hEtavsPt_DauTrk;
+  TH2D* houtmu;
+  TH2D* htrk;
   TH2D* hMassvsPt_dimu;
   TH2D* hEtavsPt_mu1;
   TH2D* hEtavsPt_mu2;
@@ -175,7 +179,7 @@ PATEventPlane::PATEventPlane(const edm::ParameterSet& iConfig)
   tok_muoncol_ = consumes<pat::MuonCollection>(edm::InputTag(iConfig.getUntrackedParameter<edm::InputTag>("MuonCollection")));
   //tok_muoncol_ = consumes<reco::MuonCollection>(edm::InputTag(iConfig.getUntrackedParameter<edm::InputTag>("MuonCollection")));
   tok_tracks_ = consumes<reco::TrackCollection>(edm::InputTag(iConfig.getUntrackedParameter<edm::InputTag>("TrackCollection")));
-  caloTowerToken_ = consumes<CaloTowerCollection>(iConfig.getUntrackedParameter<edm::InputTag>("caloTowerInputTag"));
+  caloTowerToken_ = consumes<CaloTowerCollection>(edm::InputTag(iConfig.getUntrackedParameter<edm::InputTag>("caloTowerInputTag")));
 
 
   isCentrality_ = (iConfig.exists("isCentrality") ? iConfig.getParameter<bool>("isCentrality") : false);
@@ -313,9 +317,14 @@ PATEventPlane::fillRECO(const edm::Event& iEvent, const edm::EventSetup& iSetup)
     reco::TrackRef track(trackColl, it);
     double pt  = track->pt();
     double phi = track->phi();
+    htrk->Fill(track->eta(),track->pt());
+
+    reco::TrackRef mutrack;
     //for (std::vector<reco::Muon>::const_iterator muon = out->begin(); muon < out->end(); muon++) {
     for (std::vector<pat::Muon>::const_iterator muon = out->begin(); muon < out->end(); muon++) {
-        if (muon->innerTrack() == track) DauTrk = true;
+	mutrack = muon->innerTrack();
+	houtmu->Fill(mutrack->eta(),mutrack->pt());
+        if (mutrack == track) DauTrk = true;
     }
 
     all_trkqx += pt*cos(2*phi);
@@ -341,10 +350,7 @@ PATEventPlane::fillRECO(const edm::Event& iEvent, const edm::EventSetup& iSetup)
   //
   edm::Handle<CaloTowerCollection> towers;
   iEvent.getByToken(caloTowerToken_, towers);
-  if(!towers.isValid()) {
-    throw cms::Exception("PATEventPlane") << "calo Tower is inValid!" << std::endl;
-    return;
-  }
+  if(!towers.isValid()) return;
   
   double twqx = 0;
   double twqy = 0;
@@ -424,17 +430,19 @@ PATEventPlane::initTree()
 }
 
 void
-PATCompositeTreeProducer::initHistogram()
+PATEventPlane::initHistogram()
 {
   htrkpt = fs->make<TH1D>("hTrk",";pT",100,0,10);
   hEtavsPt_DauTrk = fs->make<TH2D>("hEtavsPt_DauTrk",";Eta;Pt",200,-10,10,100,0,10);
+  houtmu = fs->make<TH2D>("houtmu",";Eta;Pt",200,-10,10,100,0,10);
+  htrk = fs->make<TH2D>("htrk",";Eta;Pt",200,-10,10,100,0,10);
   hMassvsPt_dimu = fs->make<TH2D>("hMassvsPt_dimu",";Mass;Pt",20,2.6,4.2,100,0,10);
   hEtavsPt_mu1 = fs->make<TH2D>("hEtavsPt_mu1",";Eta;Pt",100,-10,10,100,0,10);
   hEtavsPt_mu2 = fs->make<TH2D>("hEtavsPt_mu2",";Eta;Pt",100,-10,10,100,0,10);
 
-  htwEt->make<TH1D>("htwEt",";Et",100,0,100);
-  htwqx->make<TH1D>("htwqx",";qx",100,0,100);
-  htwqy->make<TH1D>("htwqy",";qy",100,0,100);
+  htwEt=fs->make<TH1D>("htwEt",";Et",100,0,100);
+  htwqx=fs->make<TH1D>("htwqx",";qx",100,0,100);
+  htwqy=fs->make<TH1D>("htwqy",";qy",100,0,100);
 }
 
 
