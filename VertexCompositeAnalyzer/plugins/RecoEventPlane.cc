@@ -78,10 +78,10 @@ typedef ROOT::Math::SVector<double, 6> SVector6;
 // class decleration
 //
 
-class PATEventPlane : public edm::one::EDAnalyzer<edm::one::WatchRuns> {
+class RecoEventPlane : public edm::one::EDAnalyzer<edm::one::WatchRuns> {
 public:
-  explicit PATEventPlane(const edm::ParameterSet&);
-  ~PATEventPlane();
+  explicit RecoEventPlane(const edm::ParameterSet&);
+  ~RecoEventPlane();
 
 
 private:
@@ -97,7 +97,7 @@ private:
 
   edm::Service<TFileService> fs;
 
-  TTree* PATCompositeNtuple;
+  TTree* EventPlaneNtuple;
   TH1D* htrkpt;
   TH2D* hEtavsPt_DauTrk;
   TH2D* houtmu;
@@ -148,8 +148,7 @@ private:
   edm::EDGetTokenT<reco::BeamSpot> tok_offlineBS_;
   edm::EDGetTokenT<reco::VertexCollection> tok_offlinePV_;
 
-  edm::EDGetTokenT<pat::MuonCollection> tok_muoncol_;
-  //edm::EDGetTokenT<reco::MuonCollection> tok_muoncol_;
+  edm::EDGetTokenT<reco::MuonCollection> tok_muoncol_;
   edm::EDGetTokenT<reco::TrackCollection> tok_tracks_;
 
   edm::EDGetTokenT<int> tok_centBinLabel_;
@@ -166,7 +165,7 @@ private:
 // constructors and destructor
 //
 
-PATEventPlane::PATEventPlane(const edm::ParameterSet& iConfig)
+RecoEventPlane::RecoEventPlane(const edm::ParameterSet& iConfig)
 {
   //options
   doRecoNtuple_ = iConfig.getUntrackedParameter<bool>("doRecoNtuple");
@@ -176,8 +175,7 @@ PATEventPlane::PATEventPlane(const edm::ParameterSet& iConfig)
   //input tokens
   tok_offlineBS_ = consumes<reco::BeamSpot>(iConfig.getUntrackedParameter<edm::InputTag>("beamSpotSrc"));
   tok_offlinePV_ = consumes<reco::VertexCollection>(iConfig.getUntrackedParameter<edm::InputTag>("VertexCollection"));
-  tok_muoncol_ = consumes<pat::MuonCollection>(edm::InputTag(iConfig.getUntrackedParameter<edm::InputTag>("MuonCollection")));
-  //tok_muoncol_ = consumes<reco::MuonCollection>(edm::InputTag(iConfig.getUntrackedParameter<edm::InputTag>("MuonCollection")));
+  tok_muoncol_ = consumes<reco::MuonCollection>(edm::InputTag(iConfig.getUntrackedParameter<edm::InputTag>("MuonCollection")));
   tok_tracks_ = consumes<reco::TrackCollection>(edm::InputTag(iConfig.getUntrackedParameter<edm::InputTag>("TrackCollection")));
   caloTowerToken_ = consumes<CaloTowerCollection>(edm::InputTag(iConfig.getUntrackedParameter<edm::InputTag>("caloTowerInputTag")));
 
@@ -192,7 +190,7 @@ PATEventPlane::PATEventPlane(const edm::ParameterSet& iConfig)
 }
 
 
-PATEventPlane::~PATEventPlane()
+RecoEventPlane::~RecoEventPlane()
 {
 
   // do anything here that needs to be done at desctruction time
@@ -207,23 +205,23 @@ PATEventPlane::~PATEventPlane()
 
 // ------------ method called to for each event  ------------
 void
-PATEventPlane::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup)
+RecoEventPlane::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup)
 {
   //check event
   if(doRecoNtuple_) fillRECO(iEvent,iSetup);
-  if(saveTree_) PATCompositeNtuple->Fill();
+  if(saveTree_) EventPlaneNtuple->Fill();
 }
 
 
 void
-PATEventPlane::fillRECO(const edm::Event& iEvent, const edm::EventSetup& iSetup)
+RecoEventPlane::fillRECO(const edm::Event& iEvent, const edm::EventSetup& iSetup)
 {
   //get collection
   edm::Handle<reco::BeamSpot> beamspot;
   iEvent.getByToken(tok_offlineBS_, beamspot);
   edm::Handle<reco::VertexCollection> vertices;
   iEvent.getByToken(tok_offlinePV_, vertices);
-  if(!vertices.isValid()) throw cms::Exception("PATEventPlane") << "Primary vertices  collection not found!" << std::endl;
+  if(!vertices.isValid()) throw cms::Exception("RecoEventPlane") << "Primary vertices  collection not found!" << std::endl;
 
 
   runNb = iEvent.id().run();
@@ -260,12 +258,10 @@ PATEventPlane::fillRECO(const edm::Event& iEvent, const edm::EventSetup& iSetup)
   bestvzError = vtx.zError(), bestvxError = vtx.xError(), bestvyError = vtx.yError();
 
  
-  //edm::Handle<reco::MuonCollection> recoMuons;
-  edm::Handle<pat::MuonCollection> recoMuons;
+  edm::Handle<reco::MuonCollection> recoMuons;
   iEvent.getByToken(tok_muoncol_, recoMuons);
 
-  //reco::MuonCollection muonColl;
-  pat::MuonCollection muonColl;
+  reco::MuonCollection muonColl;
   for (const auto& muon : *recoMuons) {
     const reco::TrackRef& trackRef = muon.track();
     if(trackRef.isNull()) continue;
@@ -275,12 +271,10 @@ PATEventPlane::fillRECO(const edm::Event& iEvent, const edm::EventSetup& iSetup)
   //auto out = std::make_unique<std::vector<reco::Muon>>();
   auto out = std::make_unique<std::vector<pat::Muon>>();
   for (uint ic = 0; ic < muonColl.size(); ic++) {
-    //const reco::Muon& cand1 = muonColl[ic];
-    const pat::Muon& cand1 = muonColl[ic];
+    const reco::Muon& cand1 = muonColl[ic];
 
     for(uint fc = ic+1; fc < muonColl.size(); fc++) {
-       //const reco::Muon& cand2 = muonColl[fc];
-       const pat::Muon& cand2 = muonColl[fc];
+       const reco::Muon& cand2 = muonColl[fc];
 
        const auto cand1P4 = math::PtEtaPhiMLorentzVector(cand1.pt(), cand1.eta(), cand1.phi(), 0.10565837);
        const auto cand2P4 = math::PtEtaPhiMLorentzVector(cand2.pt(), cand2.eta(), cand2.phi(), 0.10565837);
@@ -320,8 +314,7 @@ PATEventPlane::fillRECO(const edm::Event& iEvent, const edm::EventSetup& iSetup)
     htrk->Fill(track->eta(),track->pt());
 
     reco::TrackRef mutrack;
-    //for (std::vector<reco::Muon>::const_iterator muon = out->begin(); muon < out->end(); muon++) {
-    for (std::vector<pat::Muon>::const_iterator muon = out->begin(); muon < out->end(); muon++) {
+    for (std::vector<reco::Muon>::const_iterator muon = out->begin(); muon < out->end(); muon++) {
 	mutrack = muon->innerTrack();
 	houtmu->Fill(mutrack->eta(),mutrack->pt());
         if (mutrack == track) DauTrk = true;
@@ -382,12 +375,12 @@ PATEventPlane::fillRECO(const edm::Event& iEvent, const edm::EventSetup& iSetup)
 // ------------ method called once each job just before starting event
 //loop  ------------
 void
-PATEventPlane::beginJob()
+RecoEventPlane::beginJob()
 {
   TH1D::SetDefaultSumw2();
 
   // Check inputs
-  if(!doRecoNtuple_) throw cms::Exception("PATCompositeAnalyzer") << "No output for RECO Fix config!!" << std::endl;
+  if(!doRecoNtuple_) throw cms::Exception("EventPlaneAnalyzer") << "No output for RECO Fix config!!" << std::endl;
   if(saveTree_) initTree();
   if(saveHistogram_) initHistogram();
   
@@ -395,42 +388,42 @@ PATEventPlane::beginJob()
 
 
 void 
-PATEventPlane::initTree()
+RecoEventPlane::initTree()
 { 
-  PATCompositeNtuple = fs->make< TTree>("EventPlane","EventPlane");
+  EventPlaneNtuple = fs->make< TTree>("EventPlane","EventPlane");
 
   if(doRecoNtuple_)
   {
     // Event info
     
-    PATCompositeNtuple->Branch("RunNb",&runNb,"RunNb/i");
-    PATCompositeNtuple->Branch("LSNb",&lsNb,"LSNb/i");
-    PATCompositeNtuple->Branch("EventNb",&eventNb,"EventNb/i");
-    PATCompositeNtuple->Branch("nPV",&nPV,"nPV/S");
-    PATCompositeNtuple->Branch("bestvtxX",&bestvx,"bestvtxX/F");
-    PATCompositeNtuple->Branch("bestvtxY",&bestvy,"bestvtxY/F");
-    PATCompositeNtuple->Branch("bestvtxZ",&bestvz,"bestvtxZ/F");
+    EventPlaneNtuple->Branch("RunNb",&runNb,"RunNb/i");
+    EventPlaneNtuple->Branch("LSNb",&lsNb,"LSNb/i");
+    EventPlaneNtuple->Branch("EventNb",&eventNb,"EventNb/i");
+    EventPlaneNtuple->Branch("nPV",&nPV,"nPV/S");
+    EventPlaneNtuple->Branch("bestvtxX",&bestvx,"bestvtxX/F");
+    EventPlaneNtuple->Branch("bestvtxY",&bestvy,"bestvtxY/F");
+    EventPlaneNtuple->Branch("bestvtxZ",&bestvz,"bestvtxZ/F");
     
     if(isCentrality_) 
     {
-      PATCompositeNtuple->Branch("centrality",&centrality,"centrality/S");
-      PATCompositeNtuple->Branch("Ntrkoffline",&Ntrkoffline,"Ntrkoffline/I");
-      PATCompositeNtuple->Branch("NtrkHP",&NtrkHP,"NtrkHP/I");
+      EventPlaneNtuple->Branch("centrality",&centrality,"centrality/S");
+      EventPlaneNtuple->Branch("Ntrkoffline",&Ntrkoffline,"Ntrkoffline/I");
+      EventPlaneNtuple->Branch("NtrkHP",&NtrkHP,"NtrkHP/I");
     }
     
-    PATCompositeNtuple->Branch("trkQx",&trkQx,"trkQx/D");
-    PATCompositeNtuple->Branch("trkQy",&trkQy,"trkQy/D");
-    PATCompositeNtuple->Branch("twQx",&twQx,"twQx/D");
-    PATCompositeNtuple->Branch("twQy",&twQy,"twQy/D");
-    PATCompositeNtuple->Branch("all_trkQx",&all_trkQx,"all_trkQx/D");
-    PATCompositeNtuple->Branch("all_trkQy",&all_trkQy,"all_trkQy/D");
+    EventPlaneNtuple->Branch("trkQx",&trkQx,"trkQx/D");
+    EventPlaneNtuple->Branch("trkQy",&trkQy,"trkQy/D");
+    EventPlaneNtuple->Branch("twQx",&twQx,"twQx/D");
+    EventPlaneNtuple->Branch("twQy",&twQy,"twQy/D");
+    EventPlaneNtuple->Branch("all_trkQx",&all_trkQx,"all_trkQx/D");
+    EventPlaneNtuple->Branch("all_trkQy",&all_trkQy,"all_trkQy/D");
 
   } // doRecoNtuple_
 
 }
 
 void
-PATEventPlane::initHistogram()
+RecoEventPlane::initHistogram()
 {
   htrkpt = fs->make<TH1D>("hTrk",";pT",100,0,10);
   hEtavsPt_DauTrk = fs->make<TH2D>("hEtavsPt_DauTrk",";Eta;Pt",200,-10,10,100,0,10);
@@ -448,7 +441,7 @@ PATEventPlane::initHistogram()
 
 //--------------------------------------------------------------------------------------------------
 void 
-PATEventPlane::beginRun(const edm::Run& iRun, const edm::EventSetup& iSetup)
+RecoEventPlane::beginRun(const edm::Run& iRun, const edm::EventSetup& iSetup)
 {
 }
 
@@ -456,9 +449,9 @@ PATEventPlane::beginRun(const edm::Run& iRun, const edm::EventSetup& iSetup)
 // ------------ method called once each job just after ending the event
 //loop  ------------
 void 
-PATEventPlane::endJob()
+RecoEventPlane::endJob()
 {
 }
 
 //define this as a plug-in
-DEFINE_FWK_MODULE(PATEventPlane);
+DEFINE_FWK_MODULE(RecoEventPlane);
