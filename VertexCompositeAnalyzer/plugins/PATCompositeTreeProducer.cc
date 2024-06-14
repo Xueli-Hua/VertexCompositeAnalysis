@@ -199,6 +199,11 @@ private:
   float ephfmSumW;
   float eptrackmidSumW;
 
+  float ephfAngle[3];
+  float ephfQ[3];
+  float ephfAngleoff[3];
+  float ephfQoff[3];
+
   //Composite candidate info
   float mva[MAXCAN];
   float pt[MAXCAN];
@@ -678,6 +683,23 @@ PATCompositeTreeProducer::fillRECO(const edm::Event& iEvent, const edm::EventSet
     ephfmSumW = (eventplanes.isValid() ? (*eventplanes)[6].sumw() : -99.);
     ephfpSumW = (eventplanes.isValid() ? (*eventplanes)[7].sumw() : -99.);
     eptrackmidSumW = (eventplanes.isValid() ? (*eventplanes)[9].sumw() : -99.);
+
+    // full event plane psiFlat and psioffset, q=sqrt(px^2+py^2)=sqrt(sumSin^2+sumCos^2)
+    ephfAngle[0] = (eventplanes.isValid() ? (*eventplanes)[2].angle(2) : -99.);
+    ephfAngle[1] = (eventplanes.isValid() ? (*eventplanes)[8].angle(2) : -99.);
+    ephfAngle[2] = (eventplanes.isValid() ? (*eventplanes)[15].angle(2) : -99.);
+
+    ephfQ[0] = (eventplanes.isValid() ? (*eventplanes)[2].q(2) : -99.);
+    ephfQ[1] = (eventplanes.isValid() ? (*eventplanes)[8].q(2) : -99.);
+    ephfQ[2] = (eventplanes.isValid() ? (*eventplanes)[15].q(2) : -99.);
+
+    ephfAngleoff[0] = (eventplanes.isValid() ? (*eventplanes)[2].angle(1) : -99.);
+    ephfAngleoff[1] = (eventplanes.isValid() ? (*eventplanes)[8].angle(1) : -99.);
+    ephfAngleoff[2] = (eventplanes.isValid() ? (*eventplanes)[15].angle(1) : -99.);
+
+    ephfQoff[0] = (eventplanes.isValid() ? (*eventplanes)[2].q(1) : -99.);
+    ephfQoff[1] = (eventplanes.isValid() ? (*eventplanes)[8].q(1) : -99.);
+    ephfQoff[2] = (eventplanes.isValid() ? (*eventplanes)[15].q(1) : -99.);
   }
 
   nPV = vertices->size();
@@ -1365,6 +1387,11 @@ PATCompositeTreeProducer::initTree()
       PATCompositeNtuple->Branch("ephfpSumW",&ephfpSumW,"ephfpSumW/F");
       PATCompositeNtuple->Branch("ephfmSumW",&ephfmSumW,"ephfmSumW/F");
       PATCompositeNtuple->Branch("eptrackmidSumW",&eptrackmidSumW,"eptrackmidSumW/F");
+
+      PATCompositeNtuple->Branch("ephfAngle",ephfAngle,"ephfAngle[3]/F");
+      PATCompositeNtuple->Branch("ephfQ",ephfQ,"ephfQ[3]/F");
+      PATCompositeNtuple->Branch("ephfAngleoff",ephfAngleoff,"ephfAngleoff[3]/F");
+      PATCompositeNtuple->Branch("ephfQoff",ephfQoff,"ephfQoff[3]/F");
     }
     PATCompositeNtuple->Branch("trigPrescale",trigPrescale,Form("trigPrescale[%d]/F",NTRG_));
     PATCompositeNtuple->Branch("trigHLT",trigHLT,Form("trigHLT[%d]/O",NTRG_));
