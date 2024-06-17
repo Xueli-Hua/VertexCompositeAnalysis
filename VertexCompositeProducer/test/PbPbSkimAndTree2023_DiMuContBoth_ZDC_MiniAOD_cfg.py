@@ -15,7 +15,8 @@ process.options = cms.untracked.PSet(wantSummary = cms.untracked.bool(True))
 # Define the input source
 process.source = cms.Source("PoolSource",
     fileNames = cms.untracked.vstring(
-        'root://cms-xrd-global.cern.ch//store/hidata/HIRun2023A/HIPhysicsRawPrime0/MINIAOD/PromptReco-v2/000/374/668/00000/f9afd210-86f4-46c0-8a2a-05f48d59cc64.root'
+        #'root://cms-xrd-global.cern.ch//store/hidata/HIRun2023A/HIPhysicsRawPrime0/MINIAOD/PromptReco-v2/000/374/668/00000/f9afd210-86f4-46c0-8a2a-05f48d59cc64.root'
+        'root://cms-xrd-global.cern.ch//store/hidata/HIRun2023A/HIPhysicsRawPrime23/MINIAOD/PromptReco-v2/000/374/668/00000/1bdfa463-c230-42b3-9d0a-2af46479098c.root',
         #'root://cms-xrd-global.cern.ch//store/hidata/HIRun2023A/HIZeroBias0/MINIAOD/PromptReco-v2/000/375/695/00000/fdce424a-4085-45cd-bd49-f21bebe054dc.root',
         #'root://cms-xrd-global.cern.ch//store/hidata/HIRun2023A/HIMinimumBias0/MINIAOD/PromptReco-v2/000/374/668/00000/99ceb28c-542e-4b2c-ac5d-bf44588e288d.root',
     ),
