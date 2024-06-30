@@ -105,6 +105,8 @@ private:
   TH2D* hMassvsPt_dimu;
   TH2D* hEtavsPt_mu1;
   TH2D* hEtavsPt_mu2;
+  TH2D* htrkd1;
+  TH2D* htrkd2;
   TH1D* htwEt;
   TH1D* htwqx;
   TH1D* htwqy;
@@ -155,6 +157,11 @@ private:
   edm::EDGetTokenT<int> tok_centBinLabel_;
   edm::EDGetTokenT<reco::Centrality> tok_centSrc_;
   edm::EDGetTokenT<CaloTowerCollection> caloTowerToken_;
+ 
+  std::vector<double> d1Eta;
+  std::vector<double> d2Eta;
+  std::vector<double> d1Phi;
+  std::vector<double> d2Phi; 
 
 };
 
@@ -294,6 +301,10 @@ PATEventPlane::fillRECO(const edm::Event& iEvent, const edm::EventSetup& iSetup)
          hEtavsPt_mu1->Fill(cand1.eta(),cand1.pt());
          hEtavsPt_mu2->Fill(cand2.eta(),cand2.pt());
          out->push_back(cand1);out->push_back(cand2);
+	 d1Eta.push_back(cand1P4.eta());
+         d1Phi.push_back(cand1P4.phi());
+         d2Eta.push_back(cand2P4.eta());
+         d2Phi.push_back(cand2P4.phi());
       }
     }
   }
@@ -319,17 +330,24 @@ PATEventPlane::fillRECO(const edm::Event& iEvent, const edm::EventSetup& iSetup)
     double phi = track->phi();
     htrk->Fill(track->eta(),track->pt());
 
-    reco::TrackRef mutrack;
-    //for (std::vector<reco::Muon>::const_iterator muon = out->begin(); muon < out->end(); muon++) {
-    for (std::vector<pat::Muon>::const_iterator muon = out->begin(); muon < out->end(); muon++) {
-	mutrack = muon->innerTrack();
-	houtmu->Fill(mutrack->eta(),mutrack->pt());
-        if (mutrack == track) DauTrk = true;
-    }
-
     all_trkqx += pt*cos(2*phi);
     all_trkqy += pt*sin(2*phi);
     all_trkPt += pt;
+
+    double eta = track->eta();
+    for(unsigned i=0; i<d1Eta.size(); ++i)
+    {
+      if( fabs(eta-d1Eta[i]) <0.001 && fabs(phi-d1Phi[i]) <0.001 ) htrkd1->Fill(track->eta(),track->pt());
+      if( fabs(eta-d2Eta[i]) <0.001 && fabs(phi-d2Phi[i]) <0.001) htrkd2->Fill(track->eta(),track->pt());
+    }
+
+    reco::TrackRef mutrack;
+    //for (std::vector<reco::Muon>::const_iterator muon = out->begin(); muon < out->end(); muon++) {
+    for (std::vector<pat::Muon>::const_iterator muon = out->begin(); muon < out->end(); muon++) {
+        mutrack = muon->innerTrack();
+        houtmu->Fill(mutrack->eta(),mutrack->pt());
+        if (mutrack == track) DauTrk = true;
+    }
 
     if(DauTrk == true) {
       hEtavsPt_DauTrk->Fill(track->eta(),track->pt());
@@ -437,8 +455,10 @@ PATEventPlane::initHistogram()
   houtmu = fs->make<TH2D>("houtmu",";Eta;Pt",200,-10,10,100,0,10);
   htrk = fs->make<TH2D>("htrk",";Eta;Pt",200,-10,10,100,0,10);
   hMassvsPt_dimu = fs->make<TH2D>("hMassvsPt_dimu",";Mass;Pt",20,2.6,4.2,100,0,10);
-  hEtavsPt_mu1 = fs->make<TH2D>("hEtavsPt_mu1",";Eta;Pt",100,-10,10,100,0,10);
-  hEtavsPt_mu2 = fs->make<TH2D>("hEtavsPt_mu2",";Eta;Pt",100,-10,10,100,0,10);
+  hEtavsPt_mu1 = fs->make<TH2D>("hEtavsPt_mu1",";Eta;Pt",500,-10,10,500,0,10);
+  hEtavsPt_mu2 = fs->make<TH2D>("hEtavsPt_mu2",";Eta;Pt",500,-10,10,500,0,10);
+  htrkd1 = fs->make<TH2D>("htrkd1",";Eta;Pt",500,-10,10,500,0,10);
+  htrkd2 = fs->make<TH2D>("htrkd2",";Eta;Pt",500,-10,10,500,0,10);
 
   htwEt=fs->make<TH1D>("htwEt",";Et",100,0,100);
   htwqx=fs->make<TH1D>("htwqx",";qx",100,0,100);
