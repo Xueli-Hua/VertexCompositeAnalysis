@@ -85,9 +85,7 @@ process.load('VertexCompositeAnalysis.VertexCompositeProducer.unpackedTracksAndV
 process.load('VertexCompositeAnalysis.VertexCompositeProducer.unpackedMuons_cfi')
 process.PATInput = cms.Sequence(process.unpackedTracksAndVertices*process.unpackedMuons)
 process.PATInput_path = cms.Path(process.PATInput)
-
 process.schedule.insert(0, process.PATInput_path)
-
 
 from FWCore.ParameterSet.MassReplace import massReplaceInputTag as MassReplaceInputTag
 process = MassReplaceInputTag(process,"offlinePrimaryVertices","unpackedTracksAndVertices")

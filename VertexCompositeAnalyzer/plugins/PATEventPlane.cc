@@ -282,11 +282,9 @@ PATEventPlane::fillRECO(const edm::Event& iEvent, const edm::EventSetup& iSetup)
   //auto out = std::make_unique<std::vector<reco::Muon>>();
   auto out = std::make_unique<std::vector<pat::Muon>>();
   for (uint ic = 0; ic < muonColl.size(); ic++) {
-    //const reco::Muon& cand1 = muonColl[ic];
     const pat::Muon& cand1 = muonColl[ic];
 
     for(uint fc = ic+1; fc < muonColl.size(); fc++) {
-       //const reco::Muon& cand2 = muonColl[fc];
        const pat::Muon& cand2 = muonColl[fc];
 
        const auto cand1P4 = math::PtEtaPhiMLorentzVector(cand1.pt(), cand1.eta(), cand1.phi(), 0.10565837);
@@ -325,28 +323,27 @@ PATEventPlane::fillRECO(const edm::Event& iEvent, const edm::EventSetup& iSetup)
 
   for(unsigned it=0; it<trackColl->size(); ++it){
 	DauTrk = false;
-	//reco::TrackRef track(trackColl, it);
-	const auto& track = trackColl->at(i);
-	double pt  = track.pt();
-	double phi = track.phi();
-	htrk->Fill(track.eta(),track.pt());
+	reco::TrackRef track(trackColl, it);
+	double pt  = track->pt();
+	double phi = track->phi();
+	double eta = track->eta();
+	htrk->Fill(track->eta(),track->pt());
 
     	all_trkqx += pt*cos(2*phi);
     	all_trkqy += pt*sin(2*phi);
     	all_trkPt += pt;
 
-    	double eta = track.eta();
     	for (unsigned i=0; i<d1Eta.size(); ++i)
     	{
-            if( fabs(eta-d1Eta[i]) <0.001 && fabs(phi-d1Phi[i]) <0.001 ) htrkd1->Fill(track.eta(),track.pt());
-      	    if( fabs(eta-d2Eta[i]) <0.001 && fabs(phi-d2Phi[i]) <0.001) htrkd2->Fill(track.eta(),track.pt());
+            if( fabs(eta-d1Eta[i]) <0.001 && fabs(phi-d1Phi[i]) <0.001 ) htrkd1->Fill(track->eta(),track->pt());
+      	    if( fabs(eta-d2Eta[i]) <0.001 && fabs(phi-d2Phi[i]) <0.001) htrkd2->Fill(track->eta(),track->pt());
    	}
 
+	reco::TrackRef muonTrack;
     	for (std::vector<pat::Muon>::const_iterator muon = out->begin(); muon < out->end(); muon++) {
-            const auto& muonTrack = muon->innerTrack();
-            houtmu->Fill(muontrack.eta(),muontrack.pt());
-            if (muonTrack == track) DauTrk = true;
-	    //if (track.charge() == muonTrack.charge() && std::abs(muonTrack.eta() - track.eta()) < 1.E-4 && std::abs(reco::deltaPhi(muonTrack.phi(), track.phi())) < 1.E-4 && std::abs(muonTrack.pt() - track.pt()) / muonTrack.pt() < 1.E-4) DauTrk = true; 
+            muonTrack = muon->innerTrack();
+            //if (muonTrack == track) DauTrk = true;
+	    if (track->charge() == muonTrack->charge() && std::abs(muonTrack->eta() - track->eta()) < 1.E-4 && std::abs(reco::deltaPhi(muonTrack->phi(), track->phi())) < 1.E-4 && std::abs(muonTrack->pt() - track->pt()) / muonTrack->pt() < 1.E-4) DauTrk = true; 
     	}
 
     	if (DauTrk == true) {
