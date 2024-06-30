@@ -324,40 +324,40 @@ PATEventPlane::fillRECO(const edm::Event& iEvent, const edm::EventSetup& iSetup)
   all_trkQy = -1;
 
   for(unsigned it=0; it<trackColl->size(); ++it){
-    DauTrk = false;
-    reco::TrackRef track(trackColl, it);
-    double pt  = track->pt();
-    double phi = track->phi();
-    htrk->Fill(track->eta(),track->pt());
+	DauTrk = false;
+	//reco::TrackRef track(trackColl, it);
+	const auto& track = trackColl->at(i);
+	double pt  = track.pt();
+	double phi = track.phi();
+	htrk->Fill(track.eta(),track.pt());
 
-    all_trkqx += pt*cos(2*phi);
-    all_trkqy += pt*sin(2*phi);
-    all_trkPt += pt;
+    	all_trkqx += pt*cos(2*phi);
+    	all_trkqy += pt*sin(2*phi);
+    	all_trkPt += pt;
 
-    double eta = track->eta();
-    for(unsigned i=0; i<d1Eta.size(); ++i)
-    {
-      if( fabs(eta-d1Eta[i]) <0.001 && fabs(phi-d1Phi[i]) <0.001 ) htrkd1->Fill(track->eta(),track->pt());
-      if( fabs(eta-d2Eta[i]) <0.001 && fabs(phi-d2Phi[i]) <0.001) htrkd2->Fill(track->eta(),track->pt());
-    }
+    	double eta = track.eta();
+    	for (unsigned i=0; i<d1Eta.size(); ++i)
+    	{
+            if( fabs(eta-d1Eta[i]) <0.001 && fabs(phi-d1Phi[i]) <0.001 ) htrkd1->Fill(track.eta(),track.pt());
+      	    if( fabs(eta-d2Eta[i]) <0.001 && fabs(phi-d2Phi[i]) <0.001) htrkd2->Fill(track.eta(),track.pt());
+   	}
 
-    reco::TrackRef mutrack;
-    //for (std::vector<reco::Muon>::const_iterator muon = out->begin(); muon < out->end(); muon++) {
-    for (std::vector<pat::Muon>::const_iterator muon = out->begin(); muon < out->end(); muon++) {
-        mutrack = muon->innerTrack();
-        houtmu->Fill(mutrack->eta(),mutrack->pt());
-        if (mutrack == track) DauTrk = true;
-    }
+    	for (std::vector<pat::Muon>::const_iterator muon = out->begin(); muon < out->end(); muon++) {
+            const auto& muonTrack = muon->innerTrack();
+            houtmu->Fill(muontrack.eta(),muontrack.pt());
+            if (muonTrack == track) DauTrk = true;
+	    //if (track.charge() == muonTrack.charge() && std::abs(muonTrack.eta() - track.eta()) < 1.E-4 && std::abs(reco::deltaPhi(muonTrack.phi(), track.phi())) < 1.E-4 && std::abs(muonTrack.pt() - track.pt()) / muonTrack.pt() < 1.E-4) DauTrk = true; 
+    	}
 
-    if(DauTrk == true) {
-      hEtavsPt_DauTrk->Fill(track->eta(),track->pt());
-      continue;
-    }
-    htrkpt->Fill(pt);
+    	if (DauTrk == true) {
+      	    hEtavsPt_DauTrk->Fill(track->eta(),track->pt());
+      	    continue;
+    	}
+    	htrkpt->Fill(pt);
     
-    trkqx += pt*cos(2*phi);
-    trkqy += pt*sin(2*phi);
-    trkPt += pt;
+    	trkqx += pt*cos(2*phi);
+    	trkqy += pt*sin(2*phi);
+    	trkPt += pt;
   }
   trkQx = trkqx/trkPt;
   trkQy = trkqy/trkPt;
