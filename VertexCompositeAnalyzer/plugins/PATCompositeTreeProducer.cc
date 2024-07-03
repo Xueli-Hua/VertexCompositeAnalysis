@@ -189,20 +189,25 @@ private:
   float bestvxError;
   float bestvyError;
   float bestvzError;
-  float ephfpAngle[3];
-  float ephfmAngle[3];
-  float eptrackmidAngle[3];
-  float ephfpQ[3];
-  float ephfmQ[3];
-  float eptrackmidQ[3];
+  float ephfpAngle[2];
+  float ephfmAngle[2];
+  float eptrackmidAngle[2];
+  float ephfpQ[2];
+  float ephfmQ[2];
+  float eptrackmidQ[2];
   float ephfpSumW;
   float ephfmSumW;
   float eptrackmidSumW;
 
-  float ephfAngle[3];
-  float ephfQ[3];
-  float ephfAngleoff[3];
-  float ephfQoff[3];
+  float ephfAngle[2];
+  float ephfQx[2];
+  float ephfQy[2];
+  float ephfAngleoff[2];
+  float ephfQxoff[2];
+  float ephfQyoff[2];
+  float ephfAngleRaw[2];
+  float ephfQxRaw[2];
+  float ephfQyRaw[2];
 
   //Composite candidate info
   float mva[MAXCAN];
@@ -658,48 +663,45 @@ PATCompositeTreeProducer::fillRECO(const edm::Event& iEvent, const edm::EventSet
 
     ephfmAngle[0] = (eventplanes.isValid() ? (*eventplanes)[0].angle(2) : -99.);
     ephfmAngle[1] = (eventplanes.isValid() ? (*eventplanes)[6].angle(2) : -99.);
-    ephfmAngle[2] = (eventplanes.isValid() ? (*eventplanes)[13].angle(2) : -99.);
 
     ephfpAngle[0] = (eventplanes.isValid() ? (*eventplanes)[1].angle(2) : -99.);
     ephfpAngle[1] = (eventplanes.isValid() ? (*eventplanes)[7].angle(2) : -99.);
-    ephfpAngle[2] = (eventplanes.isValid() ? (*eventplanes)[14].angle(2) : -99.);
     
-    eptrackmidAngle[0] = -99.9;
+    eptrackmidAngle[0] = (eventplanes.isValid() ? (*eventplanes)[3].angle(2) : -99.);
     eptrackmidAngle[1] = (eventplanes.isValid() ? (*eventplanes)[9].angle(2) : -99.);
-    eptrackmidAngle[2] = (eventplanes.isValid() ? (*eventplanes)[16].angle(2) : -99.);
 
     ephfmQ[0] = (eventplanes.isValid() ? (*eventplanes)[0].q(2) : -99.);
     ephfmQ[1] = (eventplanes.isValid() ? (*eventplanes)[6].q(2) : -99.);
-    ephfmQ[2] = (eventplanes.isValid() ? (*eventplanes)[13].q(2) : -99.);
 
     ephfpQ[0] = (eventplanes.isValid() ? (*eventplanes)[1].q(2) : -99.);
     ephfpQ[1] = (eventplanes.isValid() ? (*eventplanes)[7].q(2) : -99.);
-    ephfpQ[2] = (eventplanes.isValid() ? (*eventplanes)[14].q(2) : -99.);
 
-    eptrackmidQ[0] = -99.9;
+    eptrackmidQ[0] = (eventplanes.isValid() ? (*eventplanes)[3].q(2) : -99.);
     eptrackmidQ[1] = (eventplanes.isValid() ? (*eventplanes)[9].q(2) : -99.);
-    eptrackmidQ[2] = (eventplanes.isValid() ? (*eventplanes)[16].q(2) : -99.);
     
-    ephfmSumW = (eventplanes.isValid() ? (*eventplanes)[6].sumw() : -99.);
-    ephfpSumW = (eventplanes.isValid() ? (*eventplanes)[7].sumw() : -99.);
-    eptrackmidSumW = (eventplanes.isValid() ? (*eventplanes)[9].sumw() : -99.);
+    ephfmSumW = (eventplanes.isValid() ? (*eventplanes)[0].sumw() : -99.);
+    ephfpSumW = (eventplanes.isValid() ? (*eventplanes)[1].sumw() : -99.);
+    eptrackmidSumW = (eventplanes.isValid() ? (*eventplanes)[3].sumw() : -99.);
 
     // full event plane psiFlat and psioffset, q=sqrt(px^2+py^2)=sqrt(sumSin^2+sumCos^2)
+    // Level   0   Neither recentering nor flattening is done.  The final weights are applied.
+    //         1   The sums over the sines and cosines are recentered.
+    //         2   Final results including both recentering and flattening.  Default if the level is not specified.
+    
     ephfAngle[0] = (eventplanes.isValid() ? (*eventplanes)[2].angle(2) : -99.);
     ephfAngle[1] = (eventplanes.isValid() ? (*eventplanes)[8].angle(2) : -99.);
-    ephfAngle[2] = (eventplanes.isValid() ? (*eventplanes)[15].angle(2) : -99.);
-
-    ephfQ[0] = (eventplanes.isValid() ? (*eventplanes)[2].q(2) : -99.);
-    ephfQ[1] = (eventplanes.isValid() ? (*eventplanes)[8].q(2) : -99.);
-    ephfQ[2] = (eventplanes.isValid() ? (*eventplanes)[15].q(2) : -99.);
+    ephfQx[0] = (eventplanes.isValid() ? (*eventplanes)[2].qx(2) : -99.);
+    ephfQy[1] = (eventplanes.isValid() ? (*eventplanes)[8].qy(2) : -99.);
 
     ephfAngleoff[0] = (eventplanes.isValid() ? (*eventplanes)[2].angle(1) : -99.);
     ephfAngleoff[1] = (eventplanes.isValid() ? (*eventplanes)[8].angle(1) : -99.);
-    ephfAngleoff[2] = (eventplanes.isValid() ? (*eventplanes)[15].angle(1) : -99.);
+    ephfQxoff[0] = (eventplanes.isValid() ? (*eventplanes)[2].qx(1) : -99.);
+    ephfQyoff[1] = (eventplanes.isValid() ? (*eventplanes)[8].qy(1) : -99.);
 
-    ephfQoff[0] = (eventplanes.isValid() ? (*eventplanes)[2].q(1) : -99.);
-    ephfQoff[1] = (eventplanes.isValid() ? (*eventplanes)[8].q(1) : -99.);
-    ephfQoff[2] = (eventplanes.isValid() ? (*eventplanes)[15].q(1) : -99.);
+    ephfAngleRaw[0] = (eventplanes.isValid() ? (*eventplanes)[2].angle(0) : -99.);
+    ephfAngleRaw[1] = (eventplanes.isValid() ? (*eventplanes)[8].angle(0) : -99.);
+    ephfQxRaw[0] = (eventplanes.isValid() ? (*eventplanes)[2].qx(0) : -99.);
+    ephfQyRaw[1] = (eventplanes.isValid() ? (*eventplanes)[8].qy(0) : -99.);
   }
 
   nPV = vertices->size();
@@ -1378,20 +1380,25 @@ PATCompositeTreeProducer::initTree()
       PATCompositeNtuple->Branch("NtrkHP",&NtrkHP,"NtrkHP/I");
     }
     if(isEventPlane_) {
-      PATCompositeNtuple->Branch("ephfpAngle",ephfpAngle,"ephfpAngle[3]/F");
-      PATCompositeNtuple->Branch("ephfmAngle",ephfmAngle,"ephfmAngle[3]/F");
-      PATCompositeNtuple->Branch("eptrackmidAngle",eptrackmidAngle,"eptrackmidAngle[3]/F");
-      PATCompositeNtuple->Branch("ephfpQ",ephfpQ,"ephfpQ[3]/F");
-      PATCompositeNtuple->Branch("ephfmQ",ephfmQ,"ephfmQ[3]/F");
-      PATCompositeNtuple->Branch("eptrackmidQ",eptrackmidQ,"eptrackmidQ[3]/F");
+      PATCompositeNtuple->Branch("ephfpAngle",ephfpAngle,"ephfpAngle[2]/F");
+      PATCompositeNtuple->Branch("ephfmAngle",ephfmAngle,"ephfmAngle[2]/F");
+      PATCompositeNtuple->Branch("eptrackmidAngle",eptrackmidAngle,"eptrackmidAngle[2]/F");
+      PATCompositeNtuple->Branch("ephfpQ",ephfpQ,"ephfpQ[2]/F");
+      PATCompositeNtuple->Branch("ephfmQ",ephfmQ,"ephfmQ[2]/F");
+      PATCompositeNtuple->Branch("eptrackmidQ",eptrackmidQ,"eptrackmidQ[2]/F");
       PATCompositeNtuple->Branch("ephfpSumW",&ephfpSumW,"ephfpSumW/F");
       PATCompositeNtuple->Branch("ephfmSumW",&ephfmSumW,"ephfmSumW/F");
       PATCompositeNtuple->Branch("eptrackmidSumW",&eptrackmidSumW,"eptrackmidSumW/F");
 
-      PATCompositeNtuple->Branch("ephfAngle",ephfAngle,"ephfAngle[3]/F");
-      PATCompositeNtuple->Branch("ephfQ",ephfQ,"ephfQ[3]/F");
-      PATCompositeNtuple->Branch("ephfAngleoff",ephfAngleoff,"ephfAngleoff[3]/F");
-      PATCompositeNtuple->Branch("ephfQoff",ephfQoff,"ephfQoff[3]/F");
+      PATCompositeNtuple->Branch("ephfAngle",ephfAngle,"ephfAngle[2]/F");
+      PATCompositeNtuple->Branch("ephfQx",ephfQx,"ephfQx[2]/F");
+      PATCompositeNtuple->Branch("ephfQy",ephfQy,"ephfQy[2]/F");
+      PATCompositeNtuple->Branch("ephfAngleoff",ephfAngleoff,"ephfAngleoff[2]/F");
+      PATCompositeNtuple->Branch("ephfQxoff",ephfQxoff,"ephfQxoff[2]/F");
+      PATCompositeNtuple->Branch("ephfQyoff",ephfQyoff,"ephfQyoff[2]/F");
+      PATCompositeNtuple->Branch("ephfAngleRaw",ephfAngleRaw,"ephfAngleRaw[2]/F");
+      PATCompositeNtuple->Branch("ephfQxRaw",ephfQxRaw,"ephfQxRaw[2]/F");
+      PATCompositeNtuple->Branch("ephfQyRaw",ephfQyRaw,"ephfQyRaw[2]/F");
     }
     PATCompositeNtuple->Branch("trigPrescale",trigPrescale,Form("trigPrescale[%d]/F",NTRG_));
     PATCompositeNtuple->Branch("trigHLT",trigHLT,Form("trigHLT[%d]/O",NTRG_));
