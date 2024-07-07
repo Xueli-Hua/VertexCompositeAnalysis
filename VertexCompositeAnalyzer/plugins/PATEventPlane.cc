@@ -59,6 +59,9 @@
 #include "DataFormats/CaloTowers/interface/CaloTower.h"
 #include "DataFormats/CaloTowers/interface/CaloTowerDefs.h"
 
+#include <iostream>
+#include <fstream>
+
 //
 // constants, enums and typedefs
 //
@@ -303,10 +306,11 @@ PATEventPlane::fillRECO(const edm::Event& iEvent, const edm::EventSetup& iSetup)
          d1Phi.push_back(cand1P4.phi());
          d2Eta.push_back(cand2P4.eta());
          d2Phi.push_back(cand2P4.phi());
+	 cout << "ic="<<ic<<";fc="<<fc<<", icPt icEta icPhi = " << cand1.pt() <<' '<< cand1.eta()<<' '<<cand1.phi()<<" fcPt fcEta fcPhi = " << cand2.pt() <<' '<< cand2.eta()<<' '<<cand2.phi()<<endl;
       }
     }
   }
-
+  
   //track info
   double trkqx = 0;
   double trkqy = 0;
@@ -343,11 +347,12 @@ PATEventPlane::fillRECO(const edm::Event& iEvent, const edm::EventSetup& iSetup)
     	for (std::vector<pat::Muon>::const_iterator muon = out->begin(); muon < out->end(); muon++) {
             muonTrack = muon->innerTrack();
             //if (muonTrack == track) DauTrk = true;
-	    if (track->charge() == muonTrack->charge() && std::abs(muonTrack->eta() - track->eta()) < 1.E-4 && std::abs(reco::deltaPhi(muonTrack->phi(), track->phi())) < 1.E-4 && std::abs(muonTrack->pt() - track->pt()) / muonTrack->pt() < 1.E-4) DauTrk = true; 
+	    if (track->charge() == muonTrack->charge() && std::abs(muonTrack->eta() - track->eta()) < 1.E-3 && std::abs(reco::deltaPhi(muonTrack->phi(), track->phi())) < 1.E-3 && std::abs(muonTrack->pt() - track->pt()) / muonTrack->pt() < 1.E-3) DauTrk = true; 
     	}
 
     	if (DauTrk == true) {
       	    hEtavsPt_DauTrk->Fill(track->eta(),track->pt());
+            cout << "Matched track Pt Eta Phi = " << track->pt() <<' '<< track->eta()<<' '<<track->phi()<<endl;
       	    continue;
     	}
     	htrkpt->Fill(pt);

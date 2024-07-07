@@ -24,7 +24,7 @@ config.Data.allowNonValidInputDataset = True
 config.section_('Site')
 #config.Data.ignoreLocality = True
 #config.Site.whitelist = ['T1_US_*','T2_US_*','T1_FR_*','T2_FR_*','T2_CH_CERN','T2_BE_IIHE']
-config.Site.storageSite = 'T2_CH_CERN'
+#config.Site.storageSite = 'T2_CH_CERN'
 
 
 dataMap = {
@@ -34,12 +34,15 @@ dataMap = {
           }
 
 ## Submit the muon PDs
-config.General.requestName = 'Jpsi_HIPhysicsRawPrime17_HIRun2023A-PromptRec_20240617'
-config.Data.inputDataset = '/HIPhysicsRawPrime17/HIRun2023A-PromptReco-v2/MINIAOD'
+config.General.requestName = 'Jpsi_HIPhysicsRawPrime0_HIRun2023A-PromptRec_Cen30_374961'
+config.Data.inputDataset = '/HIPhysicsRawPrime0/HIRun2023A-PromptReco-v2/MINIAOD'
 config.Data.unitsPerJob = 20
 #config.Data.totalUnits = 200
 config.JobType.maxMemoryMB = 2500
 config.JobType.maxJobRuntimeMin = 2100
 config.JobType.psetName = 'PbPbSkimAndTree2023_DiMuContBoth_ZDC_MiniAOD_cfg.py'
 config.Data.outputDatasetTag = config.General.requestName
-config.Data.outLFNDirBase = '/store/group/phys_heavyions/xueli/HIPhysicsRawPrime/' 
+#config.Data.outLFNDirBase = '/store/group/phys_heavyions/xueli/HIPhysicsRawPrime/' 
+
+config.Data.runRange = '374961'
+config.Site.storageSite = 'T3_CH_CERNBOX'

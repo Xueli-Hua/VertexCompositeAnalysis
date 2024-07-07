@@ -203,8 +203,6 @@ private:
   float ephfQx[2];
   float ephfQy[2];
   float ephfAngleoff[2];
-  float ephfQxoff[2];
-  float ephfQyoff[2];
   float ephfAngleRaw[2];
   float ephfQxRaw[2];
   float ephfQyRaw[2];
@@ -520,7 +518,7 @@ PATCompositeTreeProducer::analyze(const edm::Event& iEvent, const edm::EventSetu
   if(doMuonNtuple_) fillMUON(iEvent,iSetup);
   if(doTrackNtuple_) fillTRACK(iEvent,iSetup);
   if(doGenNtuple_) fillGEN(iEvent,iSetup);
-  if(saveTree_) PATCompositeNtuple->Fill();
+  if(saveTree_&&centrality>=60) PATCompositeNtuple->Fill();
 }
 
 
@@ -690,17 +688,19 @@ PATCompositeTreeProducer::fillRECO(const edm::Event& iEvent, const edm::EventSet
     
     ephfAngle[0] = (eventplanes.isValid() ? (*eventplanes)[2].angle(2) : -99.);
     ephfAngle[1] = (eventplanes.isValid() ? (*eventplanes)[8].angle(2) : -99.);
-    ephfQx[0] = (eventplanes.isValid() ? (*eventplanes)[2].qx(2) : -99.);
-    ephfQy[1] = (eventplanes.isValid() ? (*eventplanes)[8].qy(2) : -99.);
+    ephfQx[0] = (eventplanes.isValid() ? (*eventplanes)[2].sumCos(2) : -99.);
+    ephfQx[1] = (eventplanes.isValid() ? (*eventplanes)[8].sumCos(2) : -99.);
+    ephfQy[0] = (eventplanes.isValid() ? (*eventplanes)[2].sumSin(2) : -99.);
+    ephfQy[1] = (eventplanes.isValid() ? (*eventplanes)[8].sumSin(2) : -99.);
 
     ephfAngleoff[0] = (eventplanes.isValid() ? (*eventplanes)[2].angle(1) : -99.);
     ephfAngleoff[1] = (eventplanes.isValid() ? (*eventplanes)[8].angle(1) : -99.);
-    ephfQxoff[0] = (eventplanes.isValid() ? (*eventplanes)[2].qx(1) : -99.);
-    ephfQyoff[1] = (eventplanes.isValid() ? (*eventplanes)[8].qy(1) : -99.);
 
     ephfAngleRaw[0] = (eventplanes.isValid() ? (*eventplanes)[2].angle(0) : -99.);
     ephfAngleRaw[1] = (eventplanes.isValid() ? (*eventplanes)[8].angle(0) : -99.);
     ephfQxRaw[0] = (eventplanes.isValid() ? (*eventplanes)[2].qx(0) : -99.);
+    ephfQxRaw[1] = (eventplanes.isValid() ? (*eventplanes)[8].qx(0) : -99.);
+    ephfQyRaw[0] = (eventplanes.isValid() ? (*eventplanes)[2].qy(0) : -99.);
     ephfQyRaw[1] = (eventplanes.isValid() ? (*eventplanes)[8].qy(0) : -99.);
   }
 
@@ -1394,8 +1394,6 @@ PATCompositeTreeProducer::initTree()
       PATCompositeNtuple->Branch("ephfQx",ephfQx,"ephfQx[2]/F");
       PATCompositeNtuple->Branch("ephfQy",ephfQy,"ephfQy[2]/F");
       PATCompositeNtuple->Branch("ephfAngleoff",ephfAngleoff,"ephfAngleoff[2]/F");
-      PATCompositeNtuple->Branch("ephfQxoff",ephfQxoff,"ephfQxoff[2]/F");
-      PATCompositeNtuple->Branch("ephfQyoff",ephfQyoff,"ephfQyoff[2]/F");
       PATCompositeNtuple->Branch("ephfAngleRaw",ephfAngleRaw,"ephfAngleRaw[2]/F");
       PATCompositeNtuple->Branch("ephfQxRaw",ephfQxRaw,"ephfQxRaw[2]/F");
       PATCompositeNtuple->Branch("ephfQyRaw",ephfQyRaw,"ephfQyRaw[2]/F");
