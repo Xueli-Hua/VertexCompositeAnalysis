@@ -34,8 +34,8 @@ dataMap = {
           }
 
 ## Submit the muon PDs
-config.General.requestName = 'Jpsi_HIPhysicsRawPrime0_HIRun2023A-PromptRec_Cen30_374961'
-config.Data.inputDataset = '/HIPhysicsRawPrime0/HIRun2023A-PromptReco-v2/MINIAOD'
+config.General.requestName = 'Jpsi_HIPhysicsRawPrime1_HIRun2023A-PromptRec_Cen30'
+config.Data.inputDataset = '/HIPhysicsRawPrime1/HIRun2023A-PromptReco-v2/MINIAOD'
 config.Data.unitsPerJob = 20
 #config.Data.totalUnits = 200
 config.JobType.maxMemoryMB = 2500
@@ -44,5 +44,5 @@ config.JobType.psetName = 'PbPbSkimAndTree2023_DiMuContBoth_ZDC_MiniAOD_cfg.py'
 config.Data.outputDatasetTag = config.General.requestName
 #config.Data.outLFNDirBase = '/store/group/phys_heavyions/xueli/HIPhysicsRawPrime/' 
 
-config.Data.runRange = '374961'
+#config.Data.runRange = '374961'
 config.Site.storageSite = 'T3_CH_CERNBOX'
