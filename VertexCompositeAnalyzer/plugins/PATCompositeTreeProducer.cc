@@ -202,14 +202,12 @@ private:
   float ephfAngle[2];
   float ephfsumCos[2];
   float ephfsumSin[2];
-  float ephfsumw[2];
-  float ephfsumPtOrEt[2];
-
   float ephfAngleoff[2];
 
   float ephfAngleRaw[2];
   float ephfsumCosRaw[2];
   float ephfsumSinRaw[2];
+  float ephfsumPtOrEt;
 
   //Composite candidate info
   float mva[MAXCAN];
@@ -706,11 +704,8 @@ PATCompositeTreeProducer::fillRECO(const edm::Event& iEvent, const edm::EventSet
     ephfsumCosRaw[1] = (eventplanes.isValid() ? (*eventplanes)[8].sumCos(0) : -99.);
     ephfsumSinRaw[0] = (eventplanes.isValid() ? (*eventplanes)[2].sumSin(0) : -99.);
     ephfsumSinRaw[1] = (eventplanes.isValid() ? (*eventplanes)[8].sumSin(0) : -99.);
-    ephfsumw[0] = (eventplanes.isValid() ? (*eventplanes)[2].sumw() : -99.);
-    ephfsumw[1] = (eventplanes.isValid() ? (*eventplanes)[8].sumw() : -99.);
-    ephfsumPtOrEt[0] = (eventplanes.isValid() ? (*eventplanes)[2].sumPtOrEt() : -99.);
-    ephfsumPtOrEt[1] = (eventplanes.isValid() ? (*eventplanes)[8].sumPtOrEt() : -99.);
     
+    ephfsumPtOrEt = (eventplanes.isValid() ? (*eventplanes)[2].sumPtOrEt() : -99.);  
   }
 
   nPV = vertices->size();
@@ -1401,15 +1396,13 @@ PATCompositeTreeProducer::initTree()
 
       PATCompositeNtuple->Branch("ephfAngle",ephfAngle,"ephfAngle[2]/F");
       PATCompositeNtuple->Branch("ephfsumCos",ephfsumCos,"ephfsumCos[2]/F");
-      PATCompositeNtuple->Branch("ephfsumSin",ephfsumSin,"ephfsumSin[2]/F");
-      PATCompositeNtuple->Branch("ephfsumw",ephfsumw,"ephfsumw[2]/F");
-      PATCompositeNtuple->Branch("ephfsumPtOrEt",ephfsumPtOrEt,"ephfsumPtOrEt[2]/F");
-      
+      PATCompositeNtuple->Branch("ephfsumSin",ephfsumSin,"ephfsumSin[2]/F");      
       PATCompositeNtuple->Branch("ephfAngleoff",ephfAngleoff,"ephfAngleoff[2]/F");
       
       PATCompositeNtuple->Branch("ephfAngleRaw",ephfAngleRaw,"ephfAngleRaw[2]/F");
       PATCompositeNtuple->Branch("ephfsumCosRaw",ephfsumCosRaw,"ephfsumCosRaw[2]/F");
       PATCompositeNtuple->Branch("ephfsumSinRaw",ephfsumSinRaw,"ephfsumSinRaw[2]/F");
+      PATCompositeNtuple->Branch("ephfsumPtOrEt",&ephfsumPtOrEt,"ephfsumPtOrEt/F");
     }
     PATCompositeNtuple->Branch("trigPrescale",trigPrescale,Form("trigPrescale[%d]/F",NTRG_));
     PATCompositeNtuple->Branch("trigHLT",trigHLT,Form("trigHLT[%d]/O",NTRG_));
