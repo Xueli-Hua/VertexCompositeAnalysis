@@ -189,8 +189,27 @@ private:
   float bestvxError;
   float bestvyError;
   float bestvzError;
+
   float ephfpAngle[2];
+  float ephfpAngle[2];
+  float ephfpsumCos[2];
+  float ephfpsumSin[2];
+  float ephfpAngleoff[2];
+  float ephfpAngleRaw[2];
+  float ephfpsumCosRaw[2];
+  float ephfpsumSinRaw[2];
+  float ephfpsumPtOrEt;
+
   float ephfmAngle[2];
+  float ephfmAngle[2];
+  float ephfmsumCos[2];
+  float ephfmsumSin[2];
+  float ephfmAngleoff[2];
+  float ephfmAngleRaw[2];
+  float ephfmsumCosRaw[2];
+  float ephfmsumSinRaw[2];
+  float ephfmsumPtOrEt;
+
   float eptrackmidAngle[2];
   float ephfpQ[2];
   float ephfmQ[2];
@@ -661,12 +680,51 @@ PATCompositeTreeProducer::fillRECO(const edm::Event& iEvent, const edm::EventSet
     edm::Handle<reco::EvtPlaneCollection> eventplanes;
     iEvent.getByToken(tok_eventplaneSrc_, eventplanes);
 
+    // HF minus Event Plane PsiFlat, coff, soff, Psioff, PsiRaw, c, s, sumEt(=sumW)
+    // HF minus and plus are for preparing event plane resolution
+    // now only c, s, sumEt(or SumW) are used for Psi2 calculation, ie. sumCosRaw[0], sumSinRaw[0] and sumPtOrEt
+    // the other variables can be used to check.
+
     ephfmAngle[0] = (eventplanes.isValid() ? (*eventplanes)[0].angle(2) : -99.);
     ephfmAngle[1] = (eventplanes.isValid() ? (*eventplanes)[6].angle(2) : -99.);
+    ephfmsumCos[0] = (eventplanes.isValid() ? (*eventplanes)[0].sumCos(2) : -99.);
+    ephfmsumCos[1] = (eventplanes.isValid() ? (*eventplanes)[6].sumCos(2) : -99.);
+    ephfmsumSin[0] = (eventplanes.isValid() ? (*eventplanes)[0].sumSin(2) : -99.);
+    ephfmsumSin[1] = (eventplanes.isValid() ? (*eventplanes)[6].sumSin(2) : -99.);
 
+    ephfmAngleoff[0] = (eventplanes.isValid() ? (*eventplanes)[0].angle(1) : -99.);
+    ephfmAngleoff[1] = (eventplanes.isValid() ? (*eventplanes)[6].angle(1) : -99.);
+
+    ephfmAngleRaw[0] = (eventplanes.isValid() ? (*eventplanes)[0].angle(0) : -99.);
+    ephfmAngleRaw[1] = (eventplanes.isValid() ? (*eventplanes)[6].angle(0) : -99.);
+    ephfmsumCosRaw[0] = (eventplanes.isValid() ? (*eventplanes)[0].sumCos(0) : -99.);
+    ephfmsumCosRaw[1] = (eventplanes.isValid() ? (*eventplanes)[6].sumCos(0) : -99.);
+    ephfmsumSinRaw[0] = (eventplanes.isValid() ? (*eventplanes)[0].sumSin(0) : -99.);
+    ephfmsumSinRaw[1] = (eventplanes.isValid() ? (*eventplanes)[6].sumSin(0) : -99.);
+    
+    ephfmsumPtOrEt = (eventplanes.isValid() ? (*eventplanes)[0].sumPtOrEt() : -99.);
+
+    // HF plus Event Plane PsiFlat, coff, soff, Psioff, PsiRaw, c, s, sumEt(=sumW)
     ephfpAngle[0] = (eventplanes.isValid() ? (*eventplanes)[1].angle(2) : -99.);
     ephfpAngle[1] = (eventplanes.isValid() ? (*eventplanes)[7].angle(2) : -99.);
+    ephfpsumCos[0] = (eventplanes.isValid() ? (*eventplanes)[1].sumCos(2) : -99.);
+    ephfpsumCos[1] = (eventplanes.isValid() ? (*eventplanes)[7].sumCos(2) : -99.);
+    ephfpsumSin[0] = (eventplanes.isValid() ? (*eventplanes)[1].sumSin(2) : -99.);
+    ephfpsumSin[1] = (eventplanes.isValid() ? (*eventplanes)[7].sumSin(2) : -99.);
+
+    ephfpAngleoff[0] = (eventplanes.isValid() ? (*eventplanes)[1].angle(1) : -99.);
+    ephfpAngleoff[1] = (eventplanes.isValid() ? (*eventplanes)[7].angle(1) : -99.);
+
+    ephfpAngleRaw[0] = (eventplanes.isValid() ? (*eventplanes)[1].angle(0) : -99.);
+    ephfpAngleRaw[1] = (eventplanes.isValid() ? (*eventplanes)[7].angle(0) : -99.);
+    ephfpsumCosRaw[0] = (eventplanes.isValid() ? (*eventplanes)[1].sumCos(0) : -99.);
+    ephfpsumCosRaw[1] = (eventplanes.isValid() ? (*eventplanes)[7].sumCos(0) : -99.);
+    ephfpsumSinRaw[0] = (eventplanes.isValid() ? (*eventplanes)[1].sumSin(0) : -99.);
+    ephfpsumSinRaw[1] = (eventplanes.isValid() ? (*eventplanes)[7].sumSin(0) : -99.);
     
+    ephfpsumPtOrEt = (eventplanes.isValid() ? (*eventplanes)[1].sumPtOrEt() : -99.);
+
+    // Andre's part
     eptrackmidAngle[0] = (eventplanes.isValid() ? (*eventplanes)[3].angle(2) : -99.);
     eptrackmidAngle[1] = (eventplanes.isValid() ? (*eventplanes)[9].angle(2) : -99.);
 
@@ -1385,7 +1443,25 @@ PATCompositeTreeProducer::initTree()
     }
     if(isEventPlane_) {
       PATCompositeNtuple->Branch("ephfpAngle",ephfpAngle,"ephfpAngle[2]/F");
+      PATCompositeNtuple->Branch("ephfpAngle",ephfpAngle,"ephfpAngle[2]/F");
+      PATCompositeNtuple->Branch("ephfpsumCos",ephfpsumCos,"ephfpsumCos[2]/F");
+      PATCompositeNtuple->Branch("ephfpsumSin",ephfpsumSin,"ephfpsumSin[2]/F");      
+      PATCompositeNtuple->Branch("ephfpAngleoff",ephfpAngleoff,"ephfpAngleoff[2]/F");
+      PATCompositeNtuple->Branch("ephfpAngleRaw",ephfpAngleRaw,"ephfpAngleRaw[2]/F");
+      PATCompositeNtuple->Branch("ephfpsumCosRaw",ephfpsumCosRaw,"ephfpsumCosRaw[2]/F");
+      PATCompositeNtuple->Branch("ephfpsumSinRaw",ephfpsumSinRaw,"ephfpsumSinRaw[2]/F");
+      PATCompositeNtuple->Branch("ephfpsumPtOrEt",&ephfpsumPtOrEt,"ephfpsumPtOrEt/F");
+      
       PATCompositeNtuple->Branch("ephfmAngle",ephfmAngle,"ephfmAngle[2]/F");
+      PATCompositeNtuple->Branch("ephfmAngle",ephfmAngle,"ephfmAngle[2]/F");
+      PATCompositeNtuple->Branch("ephfmsumCos",ephfmsumCos,"ephfmsumCos[2]/F");
+      PATCompositeNtuple->Branch("ephfmsumSin",ephfmsumSin,"ephfmsumSin[2]/F");      
+      PATCompositeNtuple->Branch("ephfmAngleoff",ephfmAngleoff,"ephfmAngleoff[2]/F");
+      PATCompositeNtuple->Branch("ephfmAngleRaw",ephfmAngleRaw,"ephfmAngleRaw[2]/F");
+      PATCompositeNtuple->Branch("ephfmsumCosRaw",ephfmsumCosRaw,"ephfmsumCosRaw[2]/F");
+      PATCompositeNtuple->Branch("ephfmsumSinRaw",ephfmsumSinRaw,"ephfmsumSinRaw[2]/F");
+      PATCompositeNtuple->Branch("ephfmsumPtOrEt",&ephfmsumPtOrEt,"ephfmsumPtOrEt/F");
+      
       PATCompositeNtuple->Branch("eptrackmidAngle",eptrackmidAngle,"eptrackmidAngle[2]/F");
       PATCompositeNtuple->Branch("ephfpQ",ephfpQ,"ephfpQ[2]/F");
       PATCompositeNtuple->Branch("ephfmQ",ephfmQ,"ephfmQ[2]/F");
