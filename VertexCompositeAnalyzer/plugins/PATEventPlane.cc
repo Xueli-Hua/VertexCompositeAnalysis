@@ -419,7 +419,7 @@ PATEventPlane::initTree()
 { 
   PATCompositeNtuple = fs->make< TTree>("EventPlane","EventPlane");
 
-  if(doRecoNtuple_)
+  if(doRecoNtuple_&&NtrkHP>0)
   {
     // Event info
     
@@ -440,8 +440,6 @@ PATEventPlane::initTree()
     
     PATCompositeNtuple->Branch("trkQx",&trkQx,"trkQx/D");
     PATCompositeNtuple->Branch("trkQy",&trkQy,"trkQy/D");
-    PATCompositeNtuple->Branch("twQx",&twQx,"twQx/D");
-    PATCompositeNtuple->Branch("twQy",&twQy,"twQy/D");
     PATCompositeNtuple->Branch("all_trkQx",&all_trkQx,"all_trkQx/D");
     PATCompositeNtuple->Branch("all_trkQy",&all_trkQy,"all_trkQy/D");
 
