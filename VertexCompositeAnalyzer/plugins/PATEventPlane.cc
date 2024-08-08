@@ -328,6 +328,17 @@ PATEventPlane::fillRECO(const edm::Event& iEvent, const edm::EventSetup& iSetup)
   for(unsigned it=0; it<trackColl->size(); ++it){
 	DauTrk = false;
 	reco::TrackRef track(trackColl, it);
+
+	double dzvtx = track->dz(bestvtx);
+        double dxyvtx = track->dxy(bestvtx);
+        double dzerror = sqrt(track->dzError()*track->dzError()+bestvzError*bestvzError);
+        double dxyerror = sqrt(track->d0Error()*track->d0Error()+bestvxError*bestvyError);
+        
+        if(!track->quality(reco::TrackBase::highPurity)) continue;
+        if(fabs(track->ptError())/track->pt()>0.10) continue;
+        if(fabs(dzvtx/dzerror) > 3) continue;
+        if(fabs(dxyvtx/dxyerror) > 3) continue;
+	  
 	double pt  = track->pt();
 	double phi = track->phi();
 	double eta = track->eta();
