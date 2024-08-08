@@ -221,7 +221,7 @@ PATEventPlane::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup)
 {
   //check event
   if(doRecoNtuple_) fillRECO(iEvent,iSetup);
-  if(saveTree_) PATCompositeNtuple->Fill();
+  if(saveTree_&&NtrkHP>0) PATCompositeNtuple->Fill();
 }
 
 
@@ -419,7 +419,7 @@ PATEventPlane::initTree()
 { 
   PATCompositeNtuple = fs->make< TTree>("EventPlane","EventPlane");
 
-  if(doRecoNtuple_&&NtrkHP>0)
+  if(doRecoNtuple_)
   {
     // Event info
     
