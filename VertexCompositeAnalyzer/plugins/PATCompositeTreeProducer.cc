@@ -527,7 +527,7 @@ PATCompositeTreeProducer::analyze(const edm::Event& iEvent, const edm::EventSetu
   if(doMuonNtuple_) fillMUON(iEvent,iSetup);
   if(doTrackNtuple_) fillTRACK(iEvent,iSetup);
   if(doGenNtuple_) fillGEN(iEvent,iSetup);
-  if(saveTree_&&centrality>=60) PATCompositeNtuple->Fill();
+  if(saveTree_&&centrality>=80) PATCompositeNtuple->Fill();
 }
 
 

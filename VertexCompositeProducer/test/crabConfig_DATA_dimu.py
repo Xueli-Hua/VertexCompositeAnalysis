@@ -34,8 +34,8 @@ dataMap = {
           }
 
 ## Submit the muon PDs
-config.General.requestName = 'Jpsi_HIPhysicsRawPrime1_HIRun2023A-PromptRec_Cen30'
-config.Data.inputDataset = '/HIPhysicsRawPrime1/HIRun2023A-PromptReco-v2/MINIAOD'
+config.General.requestName = 'Jpsi_HIPhysicsRawPrime31_HIRun2023A-PromptRec_Cen40'
+config.Data.inputDataset = '/HIPhysicsRawPrime31/HIRun2023A-PromptReco-v2/MINIAOD'
 config.Data.unitsPerJob = 20
 #config.Data.totalUnits = 200
 config.JobType.maxMemoryMB = 2500
