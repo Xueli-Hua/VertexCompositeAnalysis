@@ -141,13 +141,13 @@ private:
   float bestvyError;
   float bestvzError;
 
-  double trkQx;
-  double trkQy;
-  double twQx;
-  double twQy;
+  Double_t trkQx;
+  Double_t trkQy;
+  Double_t twQx;
+  Double_t twQy;
 
-  double all_trkQx;
-  double all_trkQy;
+  Double_t all_trkQx;
+  Double_t all_trkQy;
 
   int nmuons = 0;
 
