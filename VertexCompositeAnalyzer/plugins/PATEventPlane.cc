@@ -363,9 +363,6 @@ PATEventPlane::fillRECO(const edm::Event& iEvent, const edm::EventSetup& iSetup)
             muonTrack = muon->innerTrack();
             //if (muonTrack == track) DauTrk = true;
 	    if (track->charge() == muonTrack->charge() && std::abs(muonTrack->eta() - track->eta()) < 1.E-3 && std::abs(reco::deltaPhi(muonTrack->phi(), track->phi())) < 1.E-3 && std::abs(muonTrack->pt() - track->pt()) / muonTrack->pt() < 1.E-3) DauTrk = true; 
-<<<<<<< HEAD
-    	}
-=======
     	    double deltaEta = std::abs(muonTrack->eta() - track->eta());
     	    double deltaPhi = std::abs(reco::deltaPhi(muonTrack->phi(), track->phi()));
 	    double deltaPt = std::abs(muonTrack->pt() - track->pt()) / muonTrack->pt() < 1.E-3);
@@ -373,7 +370,6 @@ PATEventPlane::fillRECO(const edm::Event& iEvent, const edm::EventSetup& iSetup)
 	    hdeltaPhi->Fill(deltaPhi);
 	    hdeltaPt->Fill(deltaPt);
 	}
->>>>>>> a4fe5606df626a8e10c7eb6284547c332869587c
 
     	if (DauTrk == true) {
       	    hEtavsPt_DauTrk->Fill(track->eta(),track->pt());
