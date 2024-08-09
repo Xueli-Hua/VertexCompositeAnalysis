@@ -149,7 +149,7 @@ private:
   double all_trkQx;
   double all_trkQy;
 
-  int nmuons;
+  int nmuons = 0;
 
 
   bool isCentrality_;
@@ -315,7 +315,7 @@ PATEventPlane::fillRECO(const edm::Event& iEvent, const edm::EventSetup& iSetup)
       }
     }
   }
-  nmuons = out->size();
+  nmuons += out->size();
   
   //track info
   double trkqx = 0;
