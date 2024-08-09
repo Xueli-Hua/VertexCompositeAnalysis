@@ -433,6 +433,8 @@ PATEventPlane::beginJob()
   if(!doRecoNtuple_) throw cms::Exception("PATCompositeAnalyzer") << "No output for RECO Fix config!!" << std::endl;
   if(saveTree_) initTree();
   if(saveHistogram_) initHistogram();
+
+  cout << "nMuons = " << nmuons <<  endl;
   
 }
 
@@ -465,7 +467,6 @@ PATEventPlane::initTree()
     PATCompositeNtuple->Branch("trkQy",&trkQy,"trkQy/D");
     PATCompositeNtuple->Branch("all_trkQx",&all_trkQx,"all_trkQx/D");
     PATCompositeNtuple->Branch("all_trkQy",&all_trkQy,"all_trkQy/D");
-    PATCompositeNtuple->Branch("nmuons",&nmuons,"nmuons/I");
 
   } // doRecoNtuple_
 
