@@ -433,8 +433,6 @@ PATEventPlane::beginJob()
   if(!doRecoNtuple_) throw cms::Exception("PATCompositeAnalyzer") << "No output for RECO Fix config!!" << std::endl;
   if(saveTree_) initTree();
   if(saveHistogram_) initHistogram();
-
-  cout << "nMuons = " << nmuons <<  endl;
   
 }
 
@@ -507,6 +505,7 @@ PATEventPlane::beginRun(const edm::Run& iRun, const edm::EventSetup& iSetup)
 void 
 PATEventPlane::endJob()
 {
+	cout << "nMuons = " << nmuons <<  endl;
 }
 
 //define this as a plug-in
