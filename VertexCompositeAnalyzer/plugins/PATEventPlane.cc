@@ -149,6 +149,8 @@ private:
   double all_trkQx;
   double all_trkQy;
 
+  int nmuons;
+
 
   bool isCentrality_;
 
@@ -313,7 +315,7 @@ PATEventPlane::fillRECO(const edm::Event& iEvent, const edm::EventSetup& iSetup)
       }
     }
   }
-  int nmuons = out->size();
+  nmuons = out->size();
   
   //track info
   double trkqx = 0;
@@ -365,7 +367,7 @@ PATEventPlane::fillRECO(const edm::Event& iEvent, const edm::EventSetup& iSetup)
 	    if (track->charge() == muonTrack->charge() && std::abs(muonTrack->eta() - track->eta()) < 1.E-3 && std::abs(reco::deltaPhi(muonTrack->phi(), track->phi())) < 1.E-3 && std::abs(muonTrack->pt() - track->pt()) / muonTrack->pt() < 1.E-3) DauTrk = true; 
     	    double deltaEta = std::abs(muonTrack->eta() - track->eta());
     	    double deltaPhi = std::abs(reco::deltaPhi(muonTrack->phi(), track->phi()));
-	    double deltaPt = std::abs(muonTrack->pt() - track->pt()) / muonTrack->pt() < 1.E-3);
+	    double deltaPt = std::abs(muonTrack->pt() - track->pt()) / muonTrack->pt();
 	    hdeltaEta->Fill(deltaEta);
 	    hdeltaPhi->Fill(deltaPhi);
 	    hdeltaPt->Fill(deltaPt);
@@ -463,6 +465,7 @@ PATEventPlane::initTree()
     PATCompositeNtuple->Branch("trkQy",&trkQy,"trkQy/D");
     PATCompositeNtuple->Branch("all_trkQx",&all_trkQx,"all_trkQx/D");
     PATCompositeNtuple->Branch("all_trkQy",&all_trkQy,"all_trkQy/D");
+    PATCompositeNtuple->Branch("nmuons",&nmuons,"nmuons/I");
 
   } // doRecoNtuple_
 
