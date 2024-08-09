@@ -110,6 +110,9 @@ private:
   TH2D* hEtavsPt_mu2;
   TH2D* htrkd1;
   TH2D* htrkd2;
+  TH1D* hdeltaEta;
+  TH1D* hdeltaPhi;
+  TH1D* hdeltaPt;
   TH1D* htwEt;
   TH1D* htwqx;
   TH1D* htwqy;
@@ -310,6 +313,7 @@ PATEventPlane::fillRECO(const edm::Event& iEvent, const edm::EventSetup& iSetup)
       }
     }
   }
+  int nmuons = out->size();
   
   //track info
   double trkqx = 0;
@@ -359,7 +363,17 @@ PATEventPlane::fillRECO(const edm::Event& iEvent, const edm::EventSetup& iSetup)
             muonTrack = muon->innerTrack();
             //if (muonTrack == track) DauTrk = true;
 	    if (track->charge() == muonTrack->charge() && std::abs(muonTrack->eta() - track->eta()) < 1.E-3 && std::abs(reco::deltaPhi(muonTrack->phi(), track->phi())) < 1.E-3 && std::abs(muonTrack->pt() - track->pt()) / muonTrack->pt() < 1.E-3) DauTrk = true; 
+<<<<<<< HEAD
     	}
+=======
+    	    double deltaEta = std::abs(muonTrack->eta() - track->eta());
+    	    double deltaPhi = std::abs(reco::deltaPhi(muonTrack->phi(), track->phi()));
+	    double deltaPt = std::abs(muonTrack->pt() - track->pt()) / muonTrack->pt() < 1.E-3);
+	    hdeltaEta->Fill(deltaEta);
+	    hdeltaPhi->Fill(deltaPhi);
+	    hdeltaPt->Fill(deltaPt);
+	}
+>>>>>>> a4fe5606df626a8e10c7eb6284547c332869587c
 
     	if (DauTrk == true) {
       	    hEtavsPt_DauTrk->Fill(track->eta(),track->pt());
@@ -470,6 +484,10 @@ PATEventPlane::initHistogram()
   hEtavsPt_mu2 = fs->make<TH2D>("hEtavsPt_mu2",";Eta;Pt",500,-10,10,500,0,10);
   htrkd1 = fs->make<TH2D>("htrkd1",";Eta;Pt",500,-10,10,500,0,10);
   htrkd2 = fs->make<TH2D>("htrkd2",";Eta;Pt",500,-10,10,500,0,10);
+
+  hdeltaEta = fs->make<TH1D>("hdeltaEta",";#Delta#eta",1000000,0,1);
+  hdeltaPhi = fs->make<TH1D>("hdeltaPhi",";#Delta#phi",1000000,0,1);
+  hdeltaPt = fs->make<TH1D>("hdeltaPt",";#Deltap_{T}",1000000,0,1);
 
   htwEt=fs->make<TH1D>("htwEt",";Et",100,0,100);
   htwqx=fs->make<TH1D>("htwqx",";qx",100,0,100);
