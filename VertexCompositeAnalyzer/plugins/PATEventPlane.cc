@@ -363,6 +363,10 @@ PATEventPlane::fillRECO(const edm::Event& iEvent, const edm::EventSetup& iSetup)
 	reco::TrackRef muonTrack;
     	for (std::vector<pat::Muon>::const_iterator muon = out->begin(); muon < out->end(); muon++) {
             muonTrack = muon->innerTrack();
+	    cout << "muonTrack: charge = " << muonTrack->charge() << endl
+	    cout << "muonTrack: eta = " << muonTrack->eta() << endl
+	    cout << "muonTrack: phi = " << muonTrack->phi() << endl
+	    cout << "muonTrack: pt = " << muonTrack->pt() << endl
             //if (muonTrack == track) DauTrk = true;
 	    if (track->charge() == muonTrack->charge() && std::abs(muonTrack->eta() - track->eta()) < 0.1 && std::abs(reco::deltaPhi(muonTrack->phi(), track->phi())) < 0.1 && std::abs(muonTrack->pt() - track->pt()) / muonTrack->pt() < 0.1) DauTrk = true; 
     	    double deltaEta = std::abs(muonTrack->eta() - track->eta());
