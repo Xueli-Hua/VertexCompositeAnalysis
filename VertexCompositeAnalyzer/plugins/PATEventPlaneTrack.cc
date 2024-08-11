@@ -301,21 +301,23 @@ PATEventPlaneTrack::fillRECO(const edm::Event& iEvent, const edm::EventSetup& iS
   { 
     const auto& trk = (*v0candidates)[it];
     bool isCohJpsi;
-
+	  
+    const ushort& nDau = trk.numberOfDaughters();
+    if(nDau!=2) throw cms::Exception("PATCompositeAnalyzer") << "Expected " << 2 << " daughters but V0 candidate has " << nDau << " daughters!" << std::endl;
+    
     pt[it] = trk.pt();
     mass[it] = trk.mass();
 
     if (mass[it] > cohJpsiMassMin && mass[it] < cohJpsiMassMax && pt[it] < cohJpsiPtMax) isCohJpsi = true;
     if (isCohJpsi == false) continue;
 
-    const ushort& nDau = trk.numberOfDaughters();
-    if(nDau!=2) throw cms::Exception("PATCompositeAnalyzer") << "Expected " << 2 << " daughters but V0 candidate has " << nDau << " daughters!" << std::endl;
-
+    
     for(ushort iDau=0; iDau<nDau; iDau++)
     {
       const auto& dau = *(trk.daughter(iDau));
       dauEta.push_back(dau.eta());
       dauPhi.push_back(dau.phi());
+      cout << "idau Pt Eta Phi = " << dau.pt() <<' '<< dau.eta()<<' '<<dau.phi()<<endl;
     }
   }
   nmuons += dauEta.size();
@@ -359,7 +361,7 @@ PATEventPlaneTrack::fillRECO(const edm::Event& iEvent, const edm::EventSetup& iS
 
     	for (unsigned i=0; i<dauEta.size(); ++i)
     	{
-            if( fabs(eta-dauEta[i]) <0.001 && fabs(phi-dauPhi[i]) <0.001 ) DauTrk = true; 
+            if( abs(eta-dauEta[i]) <0.001 && abs(reco::deltaPhi(dauPhi[i], phi)) < 1.E-3 && abs(dauPt[i] - pt) / dauPt[i] < 1.E-4) DauTrk = true; 
 	    double deltaEta = std::abs(dauEta[i] - eta);
     	    double deltaPhi = std::abs(reco::deltaPhi(dauEta[i], phi));
 	    double deltaPt = std::abs(dauEta[i] - pt) / pt;
@@ -370,7 +372,7 @@ PATEventPlaneTrack::fillRECO(const edm::Event& iEvent, const edm::EventSetup& iS
 
     	if (DauTrk == true) {
       	    hEtavsPt_DauTrk->Fill(track->eta(),track->pt());
-	    cout << "it = " << it << "DauTrk = "<< DauTrk << endl;
+	    cout << "it = " << it << "; DauTrk = "<< DauTrk << endl;
             cout << "Matched track Pt Eta Phi = " << track->pt() <<' '<< track->eta()<<' '<<track->phi()<<endl;
       	    continue;
     	}
