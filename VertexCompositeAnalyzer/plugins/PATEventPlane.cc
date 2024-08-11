@@ -257,7 +257,10 @@ PATEventPlane::fillRECO(const edm::Event& iEvent, const edm::EventSetup& iSetup)
   }
   
   NtrkHP = -1;
-  const auto& trackColl = iEvent.getHandle(tok_tracks_);
+  edm::Handle<reco::TrackCollection> trackColl;
+  iEvent.getByToken(tok_tracks_, trackColl);
+  //const auto& trackColl = iEvent.getHandle(tok_tracks_);
+  
   if(trackColl.isValid()) 
   {
     NtrkHP = 0;
@@ -276,24 +279,25 @@ PATEventPlane::fillRECO(const edm::Event& iEvent, const edm::EventSetup& iSetup)
 
  
   //edm::Handle<reco::MuonCollection> recoMuons;
-  edm::Handle<pat::MuonCollection> recoMuons;
-  iEvent.getByToken(tok_muoncol_, recoMuons);
+  edm::Handle<pat::MuonCollection> muonColl;
+  iEvent.getByToken(tok_muoncol_, muonColl);
+ 
 
   //reco::MuonCollection muonColl;
-  pat::MuonCollection muonColl;
-  for (const auto& muon : *recoMuons) {
-    const reco::TrackRef& trackRef = muon.track();
-    if(trackRef.isNull()) continue;
-    muonColl.push_back(muon);
-  }
+  //pat::MuonCollection muonColl;
+  //for (const auto& muon : *recoMuons) {
+    //const reco::TrackRef& trackRef = muon.track();
+    //if(trackRef.isNull()) continue;
+    //muonColl.push_back(muon);
+  //}
 
   //auto out = std::make_unique<std::vector<reco::Muon>>();
   auto out = std::make_unique<std::vector<pat::Muon>>();
-  for (uint ic = 0; ic < muonColl.size(); ic++) {
-    const pat::Muon& cand1 = muonColl[ic];
+  for (uint ic = 0; ic < muonColl->size(); ic++) {
+    const pat::Muon& cand1 = (*muonColl)[ic];
 
-    for(uint fc = ic+1; fc < muonColl.size(); fc++) {
-       const pat::Muon& cand2 = muonColl[fc];
+    for(uint fc = ic+1; fc < muonColl->size(); fc++) {
+       const pat::Muon& cand2 = (*muonColl)[fc];
 
        const auto cand1P4 = math::PtEtaPhiMLorentzVector(cand1.pt(), cand1.eta(), cand1.phi(), 0.10565837);
        const auto cand2P4 = math::PtEtaPhiMLorentzVector(cand2.pt(), cand2.eta(), cand2.phi(), 0.10565837);
@@ -363,12 +367,20 @@ PATEventPlane::fillRECO(const edm::Event& iEvent, const edm::EventSetup& iSetup)
 	reco::TrackRef muonTrack;
     	for (std::vector<pat::Muon>::const_iterator muon = out->begin(); muon < out->end(); muon++) {
             muonTrack = muon->innerTrack();
-	    cout << "muonTrack: charge = " << muonTrack->charge() << endl
-	    cout << "muonTrack: eta = " << muonTrack->eta() << endl
-	    cout << "muonTrack: phi = " << muonTrack->phi() << endl
-	    cout << "muonTrack: pt = " << muonTrack->pt() << endl
-            //if (muonTrack == track) DauTrk = true;
-	    if (track->charge() == muonTrack->charge() && std::abs(muonTrack->eta() - track->eta()) < 0.1 && std::abs(reco::deltaPhi(muonTrack->phi(), track->phi())) < 0.1 && std::abs(muonTrack->pt() - track->pt()) / muonTrack->pt() < 0.1) DauTrk = true; 
+            if (muonTrack != track && track->charge() == muonTrack->charge() && std::abs(muonTrack->eta() - track->eta()) < 1.E-3 && std::abs(reco::deltaPhi(muonTrack->phi(), track->phi())) < 1.E-3 && std::abs(muonTrack->pt() - track->pt()) / muonTrack->pt() < 1.E-3) {
+		    cout << "it = " << it << "DauTrk = "<< DauTrk << endl;
+		    cout << "pt,eta,phi matched, but muon trackref and track trackref are unequal"<< endl;;
+		    cout << "muonTrack: charge = " << muonTrack->charge() << endl;
+	            cout << "muonTrack: eta = " << muonTrack->eta() << endl;
+        	    cout << "muonTrack: phi = " << muonTrack->phi() << endl;
+	            cout << "muonTrack: pt = " << muonTrack->pt() << endl;
+        	    cout << "Track: charge = " << track->charge() << endl;
+	            cout << "Track: eta = " << track->eta() << endl;
+        	    cout << "Track: phi = " << track->phi() << endl;
+	            cout << "Track: pt = " << track->pt() << endl;
+		    DauTrk = false;
+	    }
+	    if (track->charge() == muonTrack->charge() && std::abs(muonTrack->eta() - track->eta()) < 2.E-4 && std::abs(reco::deltaPhi(muonTrack->phi(), track->phi())) < 2.E-4 && std::abs(muonTrack->pt() - track->pt()) / muonTrack->pt() < 1.E-4) DauTrk = true; 
     	    double deltaEta = std::abs(muonTrack->eta() - track->eta());
     	    double deltaPhi = std::abs(reco::deltaPhi(muonTrack->phi(), track->phi()));
 	    double deltaPt = std::abs(muonTrack->pt() - track->pt()) / muonTrack->pt();
@@ -379,6 +391,7 @@ PATEventPlane::fillRECO(const edm::Event& iEvent, const edm::EventSetup& iSetup)
 
     	if (DauTrk == true) {
       	    hEtavsPt_DauTrk->Fill(track->eta(),track->pt());
+	    cout << "it = " << it << "DauTrk = "<< DauTrk << endl;
             cout << "Matched track Pt Eta Phi = " << track->pt() <<' '<< track->eta()<<' '<<track->phi()<<endl;
       	    continue;
     	}
@@ -487,9 +500,9 @@ PATEventPlane::initHistogram()
   htrkd1 = fs->make<TH2D>("htrkd1",";Eta;Pt",500,-10,10,500,0,10);
   htrkd2 = fs->make<TH2D>("htrkd2",";Eta;Pt",500,-10,10,500,0,10);
 
-  hdeltaEta = fs->make<TH1D>("hdeltaEta",";#Delta#eta",1000000,0,1);
-  hdeltaPhi = fs->make<TH1D>("hdeltaPhi",";#Delta#phi",1000000,0,1);
-  hdeltaPt = fs->make<TH1D>("hdeltaPt",";#Deltap_{T}",1000000,0,1);
+  hdeltaEta = fs->make<TH1D>("hdeltaEta",";#Delta#eta",10000,0,0.01);
+  hdeltaPhi = fs->make<TH1D>("hdeltaPhi",";#Delta#phi",10000,0,0.01);
+  hdeltaPt = fs->make<TH1D>("hdeltaPt",";#Deltap_{T}",10000,0,0.001);
 
   htwEt=fs->make<TH1D>("htwEt",";Et",100,0,100);
   htwqx=fs->make<TH1D>("htwqx",";qx",100,0,100);
