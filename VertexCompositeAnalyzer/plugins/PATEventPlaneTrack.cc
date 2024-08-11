@@ -183,6 +183,7 @@ private:
  
   std::vector<double> dauEta;
   std::vector<double> dauPhi;
+  std::vector<double> dauPt;
 
 };
 
@@ -317,6 +318,7 @@ PATEventPlaneTrack::fillRECO(const edm::Event& iEvent, const edm::EventSetup& iS
       const auto& dau = *(trk.daughter(iDau));
       dauEta.push_back(dau.eta());
       dauPhi.push_back(dau.phi());
+      dauPt.push_back(dau.pt());
       cout << "idau Pt Eta Phi = " << dau.pt() <<' '<< dau.eta()<<' '<<dau.phi()<<endl;
     }
   }
@@ -361,13 +363,20 @@ PATEventPlaneTrack::fillRECO(const edm::Event& iEvent, const edm::EventSetup& iS
 
     	for (unsigned i=0; i<dauEta.size(); ++i)
     	{
-            if( abs(eta-dauEta[i]) <0.001 && abs(reco::deltaPhi(dauPhi[i], phi)) < 1.E-3 && abs(dauPt[i] - pt) / dauPt[i] < 1.E-4) DauTrk = true; 
+            if( abs(dauEta[i] - eta) < 1.E-3 && abs(reco::deltaPhi(dauPhi[i], phi)) < 1.E-3 && abs(dauPt[i] - pt) / dauPt[i] < 1.E-4) DauTrk = true; 
 	    double deltaEta = std::abs(dauEta[i] - eta);
-    	    double deltaPhi = std::abs(reco::deltaPhi(dauEta[i], phi));
-	    double deltaPt = std::abs(dauEta[i] - pt) / pt;
+    	    double deltaPhi = std::abs(reco::deltaPhi(dauPhi[i], phi));
+	    double deltaPt = std::abs(dauPt[i] - pt) / pt;
 	    hdeltaEta->Fill(deltaEta);
 	    hdeltaPhi->Fill(deltaPhi);
 	    hdeltaPt->Fill(deltaPt);
+	    cout << "it = " << it << "DauTrk = "<< DauTrk << endl;
+	    cout << "muonTrack: eta = " << dauEta[i] << endl;
+            cout << "muonTrack: phi = " << dauPhi[i] << endl;
+	    cout << "muonTrack: pt = " << dauPt[i] << endl;
+	    cout << "Track: eta = " << eta << endl;
+            cout << "Track: phi = " << phi << endl;
+	    cout << "Track: pt = " << pt << endl;
    	}
 
     	if (DauTrk == true) {
