@@ -77,6 +77,8 @@ typedef ROOT::Math::SMatrix<double, 3, 3, ROOT::Math::MatRepSym<double, 3> > SMa
 typedef ROOT::Math::SVector<double, 3> SVector3;
 typedef ROOT::Math::SVector<double, 6> SVector6;
 
+template<class T>;
+
 //
 // class decleration
 //
@@ -149,6 +151,7 @@ private:
   bool isCentrality_;
 
   //Composite candidate info
+  uint candSize;
   //float mva[MAXCAN];
   float pt[MAXCAN];
   //float eta[MAXCAN];
@@ -293,6 +296,10 @@ PATEventPlaneTrack::fillRECO(const edm::Event& iEvent, const edm::EventSetup& iS
   //RECO Candidate info
   candSize = v0candidates->size();
   if(candSize>MAXCAN) throw cms::Exception("PATEventPlaneTrack") << "Number of candidates (" << candSize << ") exceeds limit!" << std::endl; 
+  float cohJpsiMassMin = 2.8;
+  float cohJpsiMassMax = 3.2;
+  float cohJpsiPtMax = 0.2;
+
   for(uint it=0; it<candSize; ++it)
   { 
     const auto& trk = (*v0candidates)[it];
@@ -305,8 +312,8 @@ PATEventPlaneTrack::fillRECO(const edm::Event& iEvent, const edm::EventSetup& iS
     //y[it] = trk.rapidity();
     //flavor[it] = (trk.pdgId()!=0 ? trk.pdgId()/fabs(trk.pdgId()) : 0.);
 
-    if (mass>2.8 && mass<3.2 && pt < 0.2) isCohJpsi = true;
-    if (isCohJpsi = false) continue;
+    if (mass>cohJpsiMassMin && mass<cohJpsiMassMax && pt < cohJpsiPtMax) isCohJpsi = true;
+    if (isCohJpsi == false) continue;
 
     auto DauMu = std::make_unique<std::vector<T>>();
     for(ushort iDau=0; iDau<nDau; iDau++)
@@ -472,8 +479,6 @@ PATEventPlaneTrack::initHistogram()
   hdeltaEta = fs->make<TH1D>("hdeltaEta",";#Delta#eta",10000,0,0.01);
   hdeltaPhi = fs->make<TH1D>("hdeltaPhi",";#Delta#phi",10000,0,0.01);
   hdeltaPt = fs->make<TH1D>("hdeltaPt",";#Deltap_{T}",10000,0,0.001);
-
-  htwEt=fs->make<TH1D>("htwEt",";Et",100,0,100);
 }
 
 
