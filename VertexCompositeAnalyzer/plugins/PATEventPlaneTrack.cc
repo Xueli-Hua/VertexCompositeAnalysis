@@ -56,6 +56,11 @@
 #include "TrackingTools/PatternTools/interface/TSCBLBuilderNoMaterial.h"
 #include "CommonTools/UtilAlgos/interface/TFileService.h"
 
+#include "DataFormats/CaloTowers/interface/CaloTower.h"
+#include "DataFormats/CaloTowers/interface/CaloTowerDefs.h"
+
+#include <iostream>
+#include <fstream>
 
 //
 // constants, enums and typedefs
@@ -76,12 +81,11 @@ typedef ROOT::Math::SVector<double, 6> SVector6;
 // class decleration
 //
 
-class PATCompositeTreeProducer : public edm::one::EDAnalyzer<edm::one::WatchRuns> {
+class PATEventPlane : public edm::one::EDAnalyzer<edm::one::WatchRuns> {
 public:
-  explicit PATCompositeTreeProducer(const edm::ParameterSet&);
-  ~PATCompositeTreeProducer();
+  explicit PATEventPlane(const edm::ParameterSet&);
+  ~PATEventPlane();
 
-  using MVACollection = std::vector<float>;
 
 private:
   virtual void beginJob();
@@ -89,100 +93,47 @@ private:
   virtual void endRun(const edm::Run&, const edm::EventSetup&) {};
   virtual void analyze(const edm::Event&, const edm::EventSetup&);
   virtual void fillRECO(const edm::Event&, const edm::EventSetup&);
-  virtual void fillMUON(const edm::Event&, const edm::EventSetup&);
-  virtual void fillTRACK(const edm::Event&, const edm::EventSetup&);
-  virtual void fillGEN(const edm::Event&, const edm::EventSetup&);
   virtual void endJob() ;
-  virtual void initHistogram();
   virtual void initTree();
-  reco::GenParticleRef findLastPar(const reco::GenParticleRef&);
-  reco::GenParticleRef findMother(const reco::GenParticleRef&);
-  bool findDaughters(std::vector<reco::GenParticleRef>&, const reco::GenParticleRef&);
-
+  virtual void initHistogram();
   // ----------member data ---------------------------
 
   edm::Service<TFileService> fs;
 
   TTree* PATCompositeNtuple;
-  TH2F*  hMassVsMVA[6][10];
-  TH2F*  hpTVsMVA[6][10];
-  TH2F*  hetaVsMVA[6][10];
-  TH2F*  hyVsMVA[6][10];
-  TH2F*  hVtxProbVsMVA[6][10];
-  TH2F*  h3DCosPointingAngleVsMVA[6][10];
-  TH2F*  h3DPointingAngleVsMVA[6][10];
-  TH2F*  h2DCosPointingAngleVsMVA[6][10];
-  TH2F*  h2DPointingAngleVsMVA[6][10];
-  TH2F*  h3DDecayLengthSignificanceVsMVA[6][10];
-  TH2F*  h3DDecayLengthVsMVA[6][10];
-  TH2F*  h2DDecayLengthSignificanceVsMVA[6][10];
-  TH2F*  h2DDecayLengthVsMVA[6][10];
-  TH2F*  h3DDCAVsMVA[6][10];
-  TH2F*  h2DDCAVsMVA[6][10];
-  TH2F*  hzDCASignificanceDaugtherVsMVA[MAXDAU][6][10];
-  TH2F*  hxyDCASignificanceDaugtherVsMVA[MAXDAU][6][10];
-  TH2F*  hNHitDVsMVA[MAXDAU][6][10];
-  TH2F*  hpTDVsMVA[MAXDAU][6][10];
-  TH2F*  hpTerrDVsMVA[MAXDAU][6][10];
-  TH2F*  hEtaDVsMVA[MAXDAU][6][10];
-  TH2F*  hdedxHarmonic2DVsMVA[MAXDAU][6][10];
-  TH2F*  hdedxHarmonic2DVsP[MAXDAU][6][10];
+  TH1D* htrkpt;
+  TH2D* hEtavsPt_DauTrk;
+  TH2D* houtmu;
+  TH2D* htrk;
+  TH2D* hMassvsPt_dimu;
+  TH2D* hEtavsPt_mu1;
+  TH2D* hEtavsPt_mu2;
+  TH2D* htrkd1;
+  TH2D* htrkd2;
+  TH1D* hdeltaEta;
+  TH1D* hdeltaPhi;
+  TH1D* hdeltaPt;
+  TH1D* htwEt;
+  TH1D* htwqx;
+  TH1D* htwqy;
 
   bool   saveTree_;
   bool   saveHistogram_;
-  bool   saveAllHistogram_;
-  double massHistPeak_;
-  double massHistWidth_;
-  int    massHistBins_;
 
   //options
   bool doRecoNtuple_;
-  bool doGenNtuple_;
-  bool doMuonNtuple_;
-  bool doTrackNtuple_;
-  bool doGenMatching_;
-  bool doGenMatchingTOF_;
-  bool decayInGen_;
-  bool twoLayerDecay_;
-  bool threeProngDecay_;
-  bool doMuon_;
-  bool doMuonFull_;
-  bool isGammaGamma_;
-  const std::vector<int> PID_dau_;
-  const ushort NDAU_;
-  const ushort NGDAU_ = MAXGDAU;
 
   //cut variables
-  double multMax_;
-  double multMin_;
-  double deltaR_; //deltaR for Gen matching
-
-  std::vector<double> pTBins_;
-  std::vector<double> yBins_;
 
   //tree branches
   //event info
   uint  runNb;
   uint  eventNb;
   uint  lsNb;
-  float trigPrescale[MAXTRG];
   short centrality;
   int   Ntrkoffline;
   int   NtrkHP;
-  int   Npixel;
-  int   NpixelTracks;
   short nPV;
-  uint candSize;
-  bool  trigHLT[MAXTRG];
-  bool  evtSel[MAXSEL];
-  float HFsumETPlus;
-  float HFsumETMinus;
-  float PFHFmaxETPlus;
-  float PFHFmaxETMinus;
-  float PFHFsumETPlus;
-  float PFHFsumETMinus;
-  float ZDCPlus;
-  float ZDCMinus;
   float bestvx;
   float bestvy;
   float bestvz;
@@ -190,218 +141,36 @@ private:
   float bestvyError;
   float bestvzError;
 
-  float ephfpAngleRaw[2];
-  float ephfpsumCosRaw[2];
-  float ephfpsumSinRaw[2];
-  float ephfpsumPtOrEt;
+  Double_t trkQx;
+  Double_t trkQy;
+  Double_t twQx;
+  Double_t twQy;
 
-  float ephfmAngleRaw[2];
-  float ephfmsumCosRaw[2];
-  float ephfmsumSinRaw[2];
-  float ephfmsumPtOrEt;
+  Double_t all_trkQx;
+  Double_t all_trkQy;
 
-  float eptrackmidAngle[2];
-  float ephfpQ[2];
-  float ephfmQ[2];
-  float eptrackmidQ[2];
-  float eptrackmidSumW;
+  int nmuons = 0;
 
-  float ephfAngle[2];
-  float ephfsumCos[2];
-  float ephfsumSin[2];
-  float ephfAngleoff[2];
 
-  float ephfAngleRaw[2];
-  float ephfsumCosRaw[2];
-  float ephfsumSinRaw[2];
-  float ephfsumPtOrEt;
-
-  //Composite candidate info
-  float mva[MAXCAN];
-  float pt[MAXCAN];
-  float eta[MAXCAN];
-  float phi[MAXCAN];
-  float flavor[MAXCAN];
-  float y[MAXCAN];
-  float mass[MAXCAN];
-  float VtxProb[MAXCAN];
-  float dlos[MAXCAN];
-  float dl[MAXCAN];
-  float dlerror[MAXCAN];
-  float agl[MAXCAN];
-  float vtxChi2[MAXCAN];
-  float ndf[MAXCAN];
-  float agl_abs[MAXCAN];
-  float agl2D[MAXCAN];
-  float agl2D_abs[MAXCAN];
-  float dlos2D[MAXCAN];
-  float dl2D[MAXCAN];
-  bool isSwap[MAXCAN];
-  bool matchGEN[MAXCAN];
-  int idmom_reco[MAXCAN];
-    
-  //dau candidate info
-  float grand_mass[MAXCAN];
-  float grand_VtxProb[MAXCAN];
-  float grand_dlos[MAXCAN];
-  float grand_dl[MAXCAN];
-  float grand_dlerror[MAXCAN];
-  float grand_agl[MAXCAN];
-  float grand_vtxChi2[MAXCAN];
-  float grand_ndf[MAXCAN];
-  float grand_agl_abs[MAXCAN];
-  float grand_agl2D[MAXCAN];
-  float grand_agl2D_abs[MAXCAN];
-  float grand_dlos2D[MAXCAN];
-
-  //dau info
-  float dzos[MAXDAU][MAXCAN];
-  float dxyos[MAXDAU][MAXCAN];
-  float nhit[MAXDAU][MAXCAN];
-  bool  trkquality[MAXDAU][MAXCAN];
-  float ptDau[MAXDAU][MAXCAN];
-  float ptErr[MAXDAU][MAXCAN];
-  float pDau[MAXDAU][MAXCAN];
-  float etaDau[MAXDAU][MAXCAN];
-  float phiDau[MAXDAU][MAXCAN];
-  short chargeDau[MAXDAU][MAXCAN];
-  int   pid[MAXDAU][MAXCAN];
-  float tof[MAXDAU][MAXCAN];
-  float H2dedx[MAXDAU][MAXCAN];
-  float T4dedx[MAXDAU][MAXCAN];
-  float trkChi[MAXDAU][MAXCAN];
-   
-  //grand-dau info
-  float grand_dzos[MAXGDAU][MAXCAN];
-  float grand_dxyos[MAXGDAU][MAXCAN];
-  float grand_nhit[MAXGDAU][MAXCAN];
-  bool  grand_trkquality[MAXGDAU][MAXCAN];
-  float grand_pt[MAXGDAU][MAXCAN];
-  float grand_ptErr[MAXGDAU][MAXCAN];
-  float grand_p[MAXGDAU][MAXCAN];
-  float grand_eta[MAXGDAU][MAXCAN];
-  short grand_charge[MAXGDAU][MAXCAN];
-  float grand_H2dedx[MAXGDAU][MAXCAN];
-  float grand_T4dedx[MAXGDAU][MAXCAN];
-  float grand_trkChi[MAXGDAU][MAXCAN];
-    
-  //dau muon info
-  bool  onestmuon[MAXDAU][MAXCAN];
-  bool  pfmuon[MAXDAU][MAXCAN];
-  bool  glbmuon[MAXDAU][MAXCAN];
-  bool  trkmuon[MAXDAU][MAXCAN];
-  bool  tightmuon[MAXDAU][MAXCAN];
-  bool  softmuon[MAXDAU][MAXCAN];
-  bool  hybridmuon[MAXDAU][MAXCAN];
-  bool  hpmuon[MAXDAU][MAXCAN];
-  std::vector<std::vector<UChar_t> > trgmuon[MAXDAU];
-  short nmatchedst[MAXDAU][MAXCAN];
-  short ntrackerlayer[MAXDAU][MAXCAN];
-  short npixellayer[MAXDAU][MAXCAN];
-  short npixelhit[MAXDAU][MAXCAN];
-  short nmuonhit[MAXDAU][MAXCAN];
-  float glbtrkchi[MAXDAU][MAXCAN];
-  float muonbestdxy[MAXDAU][MAXCAN];
-  float muonbestdz[MAXDAU][MAXCAN];
-  float muondxy[MAXDAU][MAXCAN];
-  float muondz[MAXDAU][MAXCAN];
-  short nmatchedch[MAXDAU][MAXCAN];
-  float matchedenergy[MAXDAU][MAXCAN];
-  float dx_seg[MAXDAU][MAXCAN];
-  float dy_seg[MAXDAU][MAXCAN];
-  float dxSig_seg[MAXDAU][MAXCAN];
-  float dySig_seg[MAXDAU][MAXCAN];
-  float ddxdz_seg[MAXDAU][MAXCAN];
-  float ddydz_seg[MAXDAU][MAXCAN];
-  float ddxdzSig_seg[MAXDAU][MAXCAN];
-  float ddydzSig_seg[MAXDAU][MAXCAN];
-
-  // gen info
-  std::vector<reco::GenParticleRef> genVec_;
-  float weight_gen;
-  std::vector<float> weightLHE_gen;
-  uint candSize_gen;
-  float pt_gen[MAXCAN];
-  float eta_gen[MAXCAN];
-  float y_gen[MAXCAN];
-  short status_gen[MAXCAN];
-  int pid_gen[MAXCAN];
-  int idmom_gen[MAXCAN];
-  int iddecay_gen[MAXCAN];
-  short idxrec_gen[MAXCAN];
-  int idDau_gen[MAXDAU][MAXCAN];
-  short chargeDau_gen[MAXDAU][MAXCAN];
-  float ptDau_gen[MAXDAU][MAXCAN];
-  float etaDau_gen[MAXDAU][MAXCAN];
-  float phiDau_gen[MAXDAU][MAXCAN];
-
-  // muon info
-  uint candSize_mu;
-  float pt_mu[MAXCAN];
-  float eta_mu[MAXCAN];
-  float phi_mu[MAXCAN];
-  bool  onestmuon_mu[MAXCAN];
-  bool  glbmuon_mu[MAXCAN];
-  bool  softmuon_mu[MAXCAN];
-  bool  hpmuon_mu[MAXCAN];
-  std::vector<std::vector<UChar_t> > trgmuon_mu;
-  short ntrackerlayer_mu[MAXCAN];
-  short npixellayer_mu[MAXCAN];
-  float muondxy_mu[MAXCAN];
-  float muondz_mu[MAXCAN];
-
-  // track info
-  uint candSize_trk;
-  float pt_trk[MAXCAN];
-  float eta_trk[MAXCAN];
-  float phi_trk[MAXCAN];
-  bool  hp_trk[MAXCAN];
-  short pTErr_trk[MAXCAN];
-  float dXYsig_trk[MAXCAN];
-  float dZsig_trk[MAXCAN];
-
-  bool useAnyMVA_;
-  bool isSkimMVA_;
   bool isCentrality_;
-  bool isEventPlane_;
-  bool usePF_;
-  bool useDeDxData_;
 
   //token
   edm::EDGetTokenT<reco::BeamSpot> tok_offlineBS_;
   edm::EDGetTokenT<reco::VertexCollection> tok_offlinePV_;
-  edm::EDGetTokenT<pat::CompositeCandidateCollection> patCompositeCandidateCollection_Token_;
-  edm::EDGetTokenT<MVACollection> MVAValues_Token_;
-
-  edm::EDGetTokenT<edm::ValueMap<reco::DeDxData> > Dedx_Token1_;
-  edm::EDGetTokenT<edm::ValueMap<reco::DeDxData> > Dedx_Token2_;
-  edm::EDGetTokenT<reco::GenParticleCollection> tok_genParticle_;
-  edm::EDGetTokenT<GenEventInfoProduct> tok_genInfo_;
-  edm::EDGetTokenT<LHEEventProduct> tok_genLHE_;
 
   edm::EDGetTokenT<pat::MuonCollection> tok_muoncol_;
+  //edm::EDGetTokenT<reco::MuonCollection> tok_muoncol_;
   edm::EDGetTokenT<reco::TrackCollection> tok_tracks_;
-  edm::EDGetTokenT<reco::PFCandidateCollection> tok_pfcands_;
 
   edm::EDGetTokenT<int> tok_centBinLabel_;
   edm::EDGetTokenT<reco::Centrality> tok_centSrc_;
+  edm::EDGetTokenT<CaloTowerCollection> caloTowerToken_;
+ 
+  std::vector<double> d1Eta;
+  std::vector<double> d2Eta;
+  std::vector<double> d1Phi;
+  std::vector<double> d2Phi; 
 
-  edm::EDGetTokenT<reco::EvtPlaneCollection> tok_eventplaneSrc_;
-
-  //trigger
-  const std::vector<std::string> triggerNames_;
-  const std::vector<std::string> filterNames_;
-  edm::EDGetTokenT<edm::TriggerResults> tok_triggerResults_;
-  const ushort NTRG_;
-
-  //event selection
-  const std::vector<std::string> eventFilters_;
-  edm::EDGetTokenT<edm::TriggerResults> tok_filterResults_;
-  const ushort NSEL_;
-  const std::string selectEvents_;
-
-  //prescale provider
-  HLTPrescaleProvider hltPrescaleProvider_;
 };
 
 //
@@ -412,70 +181,21 @@ private:
 // constructors and destructor
 //
 
-PATCompositeTreeProducer::PATCompositeTreeProducer(const edm::ParameterSet& iConfig) :
-  PID_dau_(iConfig.getUntrackedParameter<std::vector<int> >("PID_dau")),
-  NDAU_(PID_dau_.size()>MAXDAU ? MAXDAU : PID_dau_.size()),
-  patCompositeCandidateCollection_Token_(consumes<pat::CompositeCandidateCollection>(iConfig.getUntrackedParameter<edm::InputTag>("VertexCompositeCollection"))),
-  triggerNames_(iConfig.getUntrackedParameter<std::vector<std::string> >("triggerPathNames")),
-  filterNames_(iConfig.getUntrackedParameter<std::vector<std::string> >("triggerFilterNames")),
-  NTRG_(triggerNames_.size()>MAXTRG ? MAXTRG : triggerNames_.size()),
-  eventFilters_(iConfig.getUntrackedParameter<std::vector<std::string> >("eventFilterNames")),
-  NSEL_(eventFilters_.size()>MAXSEL ? MAXSEL : eventFilters_.size()),
-  selectEvents_(iConfig.getUntrackedParameter<std::string>("selectEvents")),
-  hltPrescaleProvider_(iConfig, consumesCollector(), *this)
+PATEventPlane::PATEventPlane(const edm::ParameterSet& iConfig)
 {
   //options
   doRecoNtuple_ = iConfig.getUntrackedParameter<bool>("doRecoNtuple");
-  doGenNtuple_ = iConfig.getUntrackedParameter<bool>("doGenNtuple");
-  doMuonNtuple_ = iConfig.getUntrackedParameter<bool>("doMuonNtuple");
-  doTrackNtuple_ = iConfig.getUntrackedParameter<bool>("doTrackNtuple");
-  twoLayerDecay_ = iConfig.getUntrackedParameter<bool>("twoLayerDecay");
-  threeProngDecay_ = iConfig.getUntrackedParameter<bool>("threeProngDecay");
-  doGenMatching_ = iConfig.getUntrackedParameter<bool>("doGenMatching");
-  doGenMatchingTOF_ = iConfig.getUntrackedParameter<bool>("doGenMatchingTOF");
-  decayInGen_ = iConfig.getUntrackedParameter<bool>("decayInGen");
-  doMuon_ = iConfig.getUntrackedParameter<bool>("doMuon");
-  doMuonFull_ = iConfig.getUntrackedParameter<bool>("doMuonFull");
-  isGammaGamma_ = iConfig.getUntrackedParameter<bool>("isGammaGamma");
-
   saveTree_ = iConfig.getUntrackedParameter<bool>("saveTree");
   saveHistogram_ = iConfig.getUntrackedParameter<bool>("saveHistogram");
-  saveAllHistogram_ = iConfig.getUntrackedParameter<bool>("saveAllHistogram");
-  massHistPeak_ = iConfig.getUntrackedParameter<double>("massHistPeak");
-  massHistWidth_ = iConfig.getUntrackedParameter<double>("massHistWidth");
-  massHistBins_ = iConfig.getUntrackedParameter<int>("massHistBins");
-
-  //cut variables
-  multMax_ = iConfig.getUntrackedParameter<double>("multMax", -1);
-  multMin_ = iConfig.getUntrackedParameter<double>("multMin", -1);
-  deltaR_ = iConfig.getUntrackedParameter<double>("deltaR", 0.03);
-
-  pTBins_ = iConfig.getUntrackedParameter<std::vector<double> >("pTBins");
-  yBins_  = iConfig.getUntrackedParameter<std::vector<double> >("yBins");
 
   //input tokens
   tok_offlineBS_ = consumes<reco::BeamSpot>(iConfig.getUntrackedParameter<edm::InputTag>("beamSpotSrc"));
   tok_offlinePV_ = consumes<reco::VertexCollection>(iConfig.getUntrackedParameter<edm::InputTag>("VertexCollection"));
-  MVAValues_Token_ = consumes<MVACollection>(iConfig.getParameter<edm::InputTag>("MVACollection"));
-  tok_genParticle_ = consumes<reco::GenParticleCollection>(edm::InputTag(iConfig.getUntrackedParameter<edm::InputTag>("GenParticleCollection")));
-  tok_genInfo_ = consumes<GenEventInfoProduct>(edm::InputTag("generator"));
-  tok_genLHE_ = consumes<LHEEventProduct>(edm::InputTag("externalLHEProducer",""));
-
   tok_muoncol_ = consumes<pat::MuonCollection>(edm::InputTag(iConfig.getUntrackedParameter<edm::InputTag>("MuonCollection")));
+  //tok_muoncol_ = consumes<reco::MuonCollection>(edm::InputTag(iConfig.getUntrackedParameter<edm::InputTag>("MuonCollection")));
   tok_tracks_ = consumes<reco::TrackCollection>(edm::InputTag(iConfig.getUntrackedParameter<edm::InputTag>("TrackCollection")));
+  caloTowerToken_ = consumes<CaloTowerCollection>(edm::InputTag(iConfig.getUntrackedParameter<edm::InputTag>("caloTowerInputTag")));
 
-  usePF_ = (iConfig.exists("usePF") ? iConfig.getParameter<bool>("usePF") : false);
-  if (usePF_)
-  {
-    tok_pfcands_ = consumes<reco::PFCandidateCollection>(edm::InputTag(iConfig.getUntrackedParameter<edm::InputTag>("PFCandidateCollection")));
-  }
-
-  useDeDxData_ = (iConfig.exists("useDeDxData") ? iConfig.getParameter<bool>("useDeDxData") : false);
-  if(useDeDxData_)
-  {
-    Dedx_Token1_ = consumes<edm::ValueMap<reco::DeDxData> >(edm::InputTag("dedxHarmonic2"));
-    Dedx_Token2_ = consumes<edm::ValueMap<reco::DeDxData> >(edm::InputTag("dedxTruncated40"));
-  }
 
   isCentrality_ = (iConfig.exists("isCentrality") ? iConfig.getParameter<bool>("isCentrality") : false);
   if(isCentrality_)
@@ -484,19 +204,10 @@ PATCompositeTreeProducer::PATCompositeTreeProducer(const edm::ParameterSet& iCon
     tok_centSrc_ = consumes<reco::Centrality>(iConfig.getParameter<edm::InputTag>("centralitySrc"));
   }
 
-  isEventPlane_ = (iConfig.exists("isEventPlane") ? iConfig.getParameter<bool>("isEventPlane") : false);
-  if(isEventPlane_) tok_eventplaneSrc_ = consumes<reco::EvtPlaneCollection>(iConfig.getParameter<edm::InputTag>("eventplaneSrc"));
-
-  useAnyMVA_ = (iConfig.exists("useAnyMVA") ? iConfig.getParameter<bool>("useAnyMVA") : false);
-  if(useAnyMVA_) MVAValues_Token_ = consumes<MVACollection>(iConfig.getParameter<edm::InputTag>("MVACollection"));
-  isSkimMVA_ = iConfig.getUntrackedParameter<bool>("isSkimMVA");
-  
-  tok_triggerResults_ = consumes<edm::TriggerResults>(iConfig.getUntrackedParameter<edm::InputTag>("TriggerResultCollection"));
-  tok_filterResults_ = consumes<edm::TriggerResults>(iConfig.getUntrackedParameter<edm::InputTag>("FilterResultCollection"));
 }
 
 
-PATCompositeTreeProducer::~PATCompositeTreeProducer()
+PATEventPlane::~PATEventPlane()
 {
 
   // do anything here that needs to be done at desctruction time
@@ -511,126 +222,34 @@ PATCompositeTreeProducer::~PATCompositeTreeProducer()
 
 // ------------ method called to for each event  ------------
 void
-PATCompositeTreeProducer::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup)
+PATEventPlane::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup)
 {
   //check event
-  if(selectEvents_!="")
-  {
-    edm::Handle<edm::TriggerResults> filterResults;
-    iEvent.getByToken(tok_filterResults_, filterResults);
-    const auto& filterNames = iEvent.triggerNames(*filterResults);
-    const auto& index = filterNames.triggerIndex(selectEvents_);
-    if(index<filterNames.size() && filterResults->wasrun(index) && !filterResults->accept(index)) return;
-  }
-  genVec_.clear();
   if(doRecoNtuple_) fillRECO(iEvent,iSetup);
-  if(doMuonNtuple_) fillMUON(iEvent,iSetup);
-  if(doTrackNtuple_) fillTRACK(iEvent,iSetup);
-  if(doGenNtuple_) fillGEN(iEvent,iSetup);
-  if(saveTree_&&centrality>=80) PATCompositeNtuple->Fill();
+  if(saveTree_&&NtrkHP>0) PATCompositeNtuple->Fill();
 }
 
 
 void
-PATCompositeTreeProducer::fillRECO(const edm::Event& iEvent, const edm::EventSetup& iSetup)
+PATEventPlane::fillRECO(const edm::Event& iEvent, const edm::EventSetup& iSetup)
 {
   //get collection
   edm::Handle<reco::BeamSpot> beamspot;
   iEvent.getByToken(tok_offlineBS_, beamspot);
   edm::Handle<reco::VertexCollection> vertices;
   iEvent.getByToken(tok_offlinePV_, vertices);
-  if(!vertices.isValid()) throw cms::Exception("PATCompositeAnalyzer") << "Primary vertices  collection not found!" << std::endl;
+  if(!vertices.isValid()) throw cms::Exception("PATEventPlane") << "Primary vertices  collection not found!" << std::endl;
 
-  edm::Handle<pat::CompositeCandidateCollection> v0candidates;
-  iEvent.getByToken(patCompositeCandidateCollection_Token_, v0candidates);
-  if(!v0candidates.isValid()) throw cms::Exception("PATCompositeAnalyzer") << "V0 candidate collection not found!" << std::endl;
-
-  edm::Handle<MVACollection> mvavalues;
-  if(useAnyMVA_)
-  {
-    iEvent.getByToken(MVAValues_Token_, mvavalues);
-    if(!mvavalues.isValid()) throw cms::Exception("PATCompositeAnalyzer") << "MVA collection not found!" << std::endl;
-    assert( (*mvavalues).size() == v0candidates->size() );
-  }
-
-  edm::Handle<edm::ValueMap<reco::DeDxData> > dEdxHandle1 , dEdxHandle2;
-  if(useDeDxData_)
-  {
-    iEvent.getByToken(Dedx_Token1_, dEdxHandle1);
-    iEvent.getByToken(Dedx_Token2_, dEdxHandle2);
-  }
 
   runNb = iEvent.id().run();
   eventNb = iEvent.id().event();
   lsNb = iEvent.luminosityBlock();
 
-  //Trigger Information
-  edm::Handle<edm::TriggerResults> triggerResults;
-  iEvent.getByToken(tok_triggerResults_, triggerResults);
-  if(triggerNames_.size()>0)
-  {
-    const edm::TriggerNames& triggerNames = iEvent.triggerNames(*triggerResults);
-    for(ushort iTr=0; iTr<NTRG_; iTr++)
-    {
-      //Initiliaze the arrays
-      trigHLT[iTr] = false;
-      trigPrescale[iTr] = -9;
-      //Find the trigger index
-      const auto& trigName = triggerNames_.at(iTr);
-      std::vector<ushort> trgIdxFound;
-      for(ushort trgIdx=0; trgIdx<triggerNames.size(); trgIdx++)
-      {
-        if(triggerNames.triggerName(trgIdx).find(trigName)!=std::string::npos && triggerResults->wasrun(trgIdx)) { trgIdxFound.push_back(trgIdx); }
-      }
-      short triggerIndex = -1;
-      if(trgIdxFound.size()>1)
-      {
-        for(const auto& trgIdx : trgIdxFound) { if(triggerResults->accept(trgIdx)) { triggerIndex = trgIdx; break; } }
-        if(triggerIndex<0) triggerIndex = trgIdxFound[0];
-      }
-      else if(trgIdxFound.size()==1) triggerIndex = trgIdxFound[0];
-      else continue;
-      //Check if trigger fired
-      bool isTriggerFired = false;
-      if(triggerResults->accept(triggerIndex)) isTriggerFired = true;
-      //Get the trigger prescale
-      float prescaleValue = -1;
-      if(hltPrescaleProvider_.hltConfigProvider().inited() && hltPrescaleProvider_.prescaleSet(iEvent,iSetup)>=0)
-      {
-        const auto& presInfo = hltPrescaleProvider_.prescaleValuesInDetail<double>(iEvent, iSetup, triggerNames.triggerName(triggerIndex));
-        const auto& hltPres = presInfo.second;
-        const short& l1Pres = ((presInfo.first.size()==1) ? presInfo.first.at(0).second : ((presInfo.first.size()>1) ? 1 : -1));
-        prescaleValue = hltPres*l1Pres;
-      }
-      trigPrescale[iTr] = prescaleValue;
-      if(isTriggerFired) trigHLT[iTr] = true;
-    }
-  }
-
-  //Event selection information
-  edm::Handle<edm::TriggerResults> filterResults;
-  iEvent.getByToken(tok_filterResults_, filterResults);
-  if(eventFilters_.size()>0)
-  {
-    const edm::TriggerNames& filterNames = iEvent.triggerNames(*filterResults);
-    for(ushort iFr=0; iFr<eventFilters_.size(); ++iFr)
-    {
-      evtSel[iFr] = false;
-      const auto& index = filterNames.triggerIndex(eventFilters_.at(iFr));
-      if(index < filterNames.size()) evtSel[iFr] = (filterResults->wasrun(index) && filterResults->accept(index));
-    }
-  }
-
+  
   centrality = -1;
   if(isCentrality_)
   {
     const auto& cent = iEvent.getHandle(tok_centSrc_);
-    HFsumETPlus = (cent.isValid() ? cent->EtHFtowerSumPlus() : -1.);
-    HFsumETMinus = (cent.isValid() ? cent->EtHFtowerSumMinus() : -1.);
-    Npixel = (cent.isValid() ? cent->multiplicityPixel() : -1);
-    NpixelTracks = (cent.isValid() ? cent->NpixelTracks() : -1);
-    ZDCPlus = (cent.isValid() ? cent->zdcSumPlus() : -1.);
-    ZDCMinus = (cent.isValid() ? cent->zdcSumMinus() : -1.);
     Ntrkoffline = (cent.isValid() ? cent->Ntracks() : -1);
     edm::Handle<int> cbin;
     iEvent.getByToken(tok_centBinLabel_, cbin);
@@ -638,93 +257,14 @@ PATCompositeTreeProducer::fillRECO(const edm::Event& iEvent, const edm::EventSet
   }
   
   NtrkHP = -1;
-  const auto& trackColl = iEvent.getHandle(tok_tracks_);
+  edm::Handle<reco::TrackCollection> trackColl;
+  iEvent.getByToken(tok_tracks_, trackColl);
+  //const auto& trackColl = iEvent.getHandle(tok_tracks_);
+  
   if(trackColl.isValid()) 
   {
     NtrkHP = 0;
     for (const auto& trk : *trackColl) { if (trk.quality(reco::TrackBase::highPurity)) NtrkHP++; }
-  }
-
-  PFHFmaxETPlus = -1, PFHFmaxETMinus = -1, PFHFsumETPlus = -1, PFHFsumETMinus = -1;
-  if (usePF_)
-  {
-    const auto& pfCandColl = iEvent.getHandle(tok_pfcands_);
-    if(pfCandColl.isValid())
-    {
-      for (const auto& pf : *pfCandColl) {
-        const auto aeta = std::abs(pf.eta());
-        if (pf.particleId() < 6 || aeta < 3.0 || aeta > 6.0) continue;
-        if (pf.eta() > 0 && PFHFmaxETPlus < pf.energy())
-          PFHFmaxETPlus = pf.energy();
-        if (pf.eta() < 0 && PFHFmaxETMinus < pf.energy())
-          PFHFmaxETMinus = pf.energy();
-        (pf.eta() > 0 ? PFHFsumETPlus : PFHFsumETMinus) += pf.energy();
-      }
-    }
-  }
-
-  if(isEventPlane_)
-  {
-    edm::Handle<reco::EvtPlaneCollection> eventplanes;
-    iEvent.getByToken(tok_eventplaneSrc_, eventplanes);
-
-    // HF minus Event Plane PsiFlat, coff, soff, Psioff, PsiRaw, c, s, sumEt(=sumW)
-    // HF minus and plus are for preparing event plane resolution
-    // now only c, s, sumEt(or SumW) are used for Psi2 calculation, ie. sumCosRaw[0], sumSinRaw[0] and sumPtOrEt
-    // the other variables can be used to check.
-
-    ephfmAngleRaw[0] = (eventplanes.isValid() ? (*eventplanes)[0].angle(0) : -99.);
-    ephfmAngleRaw[1] = (eventplanes.isValid() ? (*eventplanes)[6].angle(0) : -99.);
-    ephfmsumCosRaw[0] = (eventplanes.isValid() ? (*eventplanes)[0].sumCos(0) : -99.);
-    ephfmsumCosRaw[1] = (eventplanes.isValid() ? (*eventplanes)[6].sumCos(0) : -99.);
-    ephfmsumSinRaw[0] = (eventplanes.isValid() ? (*eventplanes)[0].sumSin(0) : -99.);
-    ephfmsumSinRaw[1] = (eventplanes.isValid() ? (*eventplanes)[6].sumSin(0) : -99.);
-    ephfmsumPtOrEt = (eventplanes.isValid() ? (*eventplanes)[0].sumPtOrEt() : -99.);
-
-    // HF plus Event Plane PsiFlat, coff, soff, Psioff, PsiRaw, c, s, sumEt(=sumW)
-    
-    ephfpAngleRaw[0] = (eventplanes.isValid() ? (*eventplanes)[1].angle(0) : -99.);
-    ephfpAngleRaw[1] = (eventplanes.isValid() ? (*eventplanes)[7].angle(0) : -99.);
-    ephfpsumCosRaw[0] = (eventplanes.isValid() ? (*eventplanes)[1].sumCos(0) : -99.);
-    ephfpsumCosRaw[1] = (eventplanes.isValid() ? (*eventplanes)[7].sumCos(0) : -99.);
-    ephfpsumSinRaw[0] = (eventplanes.isValid() ? (*eventplanes)[1].sumSin(0) : -99.);
-    ephfpsumSinRaw[1] = (eventplanes.isValid() ? (*eventplanes)[7].sumSin(0) : -99.); 
-    ephfpsumPtOrEt = (eventplanes.isValid() ? (*eventplanes)[1].sumPtOrEt() : -99.);
-
-    // Andre's part
-    eptrackmidAngle[0] = (eventplanes.isValid() ? (*eventplanes)[3].angle(2) : -99.);
-    eptrackmidAngle[1] = (eventplanes.isValid() ? (*eventplanes)[9].angle(2) : -99.);
-    ephfmQ[0] = (eventplanes.isValid() ? (*eventplanes)[0].q(2) : -99.);
-    ephfmQ[1] = (eventplanes.isValid() ? (*eventplanes)[6].q(2) : -99.);
-    ephfpQ[0] = (eventplanes.isValid() ? (*eventplanes)[1].q(2) : -99.);
-    ephfpQ[1] = (eventplanes.isValid() ? (*eventplanes)[7].q(2) : -99.);
-    eptrackmidQ[0] = (eventplanes.isValid() ? (*eventplanes)[3].q(2) : -99.);
-    eptrackmidQ[1] = (eventplanes.isValid() ? (*eventplanes)[9].q(2) : -99.);
-    eptrackmidSumW = (eventplanes.isValid() ? (*eventplanes)[3].sumw() : -99.);
-
-    // full event plane psiFlat and psioffset, q=sqrt(px^2+py^2)=sqrt(sumSin^2+sumCos^2)
-    // Level   0   Neither recentering nor flattening is done.  The final weights are applied.
-    //         1   The sums over the sines and cosines are recentered.
-    //         2   Final results including both recentering and flattening.  Default if the level is not specified.
-    
-    ephfAngle[0] = (eventplanes.isValid() ? (*eventplanes)[2].angle(2) : -99.);
-    ephfAngle[1] = (eventplanes.isValid() ? (*eventplanes)[8].angle(2) : -99.);
-    ephfsumCos[0] = (eventplanes.isValid() ? (*eventplanes)[2].sumCos(2) : -99.);
-    ephfsumCos[1] = (eventplanes.isValid() ? (*eventplanes)[8].sumCos(2) : -99.);
-    ephfsumSin[0] = (eventplanes.isValid() ? (*eventplanes)[2].sumSin(2) : -99.);
-    ephfsumSin[1] = (eventplanes.isValid() ? (*eventplanes)[8].sumSin(2) : -99.);
-
-    ephfAngleoff[0] = (eventplanes.isValid() ? (*eventplanes)[2].angle(1) : -99.);
-    ephfAngleoff[1] = (eventplanes.isValid() ? (*eventplanes)[8].angle(1) : -99.);
-
-    ephfAngleRaw[0] = (eventplanes.isValid() ? (*eventplanes)[2].angle(0) : -99.);
-    ephfAngleRaw[1] = (eventplanes.isValid() ? (*eventplanes)[8].angle(0) : -99.);
-    ephfsumCosRaw[0] = (eventplanes.isValid() ? (*eventplanes)[2].sumCos(0) : -99.);
-    ephfsumCosRaw[1] = (eventplanes.isValid() ? (*eventplanes)[8].sumCos(0) : -99.);
-    ephfsumSinRaw[0] = (eventplanes.isValid() ? (*eventplanes)[2].sumSin(0) : -99.);
-    ephfsumSinRaw[1] = (eventplanes.isValid() ? (*eventplanes)[8].sumSin(0) : -99.);
-    
-    ephfsumPtOrEt = (eventplanes.isValid() ? (*eventplanes)[2].sumPtOrEt() : -99.);  
   }
 
   nPV = vertices->size();
@@ -737,639 +277,187 @@ PATCompositeTreeProducer::fillRECO(const edm::Event& iEvent, const edm::EventSet
   const math::XYZPoint bestvtx(bestvx, bestvy, bestvz);
   bestvzError = vtx.zError(), bestvxError = vtx.xError(), bestvyError = vtx.yError();
 
-  //RECO Candidate info
-  candSize = v0candidates->size();
-  if(candSize>MAXCAN) throw cms::Exception("PATCompositeAnalyzer") << "Number of candidates (" << candSize << ") exceeds limit!" << std::endl; 
-  for(uint it=0; it<candSize; ++it)
-  { 
-    const auto& trk = (*v0candidates)[it];
-
-    pt[it] = trk.pt();
-    eta[it] = trk.eta();
-    phi[it] = trk.phi();
-    mass[it] = trk.mass();
-    y[it] = trk.rapidity();
-    flavor[it] = (trk.pdgId()!=0 ? trk.pdgId()/fabs(trk.pdgId()) : 0.);
-
-    mva[it] = (useAnyMVA_ ? (*mvavalues)[it] : 0.0);
-
-    //vtxChi2
-    vtxChi2[it] = trk.userFloat("vertexChi2");
-    ndf[it] = trk.userFloat("vertexNdof");
-    VtxProb[it] = TMath::Prob(vtxChi2[it],ndf[it]);
-
-    const double& secvz = trk.vz(), secvx = trk.vx(), secvy = trk.vy();
-    const double& px = trk.px(), py = trk.py(), pz = trk.pz();
-
-    //PAngle
-    const TVector3 ptosvec(secvx-bestvx, secvy-bestvy, secvz-bestvz);
-    const TVector3 secvec(px, py, pz);
-    const TVector3 ptosvec2D(secvx-bestvx, secvy-bestvy, 0);
-    const TVector3 secvec2D(px,py,0);
-
-    agl[it] = std::cos(secvec.Angle(ptosvec));
-    agl_abs[it] = secvec.Angle(ptosvec);
-    agl2D[it] = std::cos(secvec2D.Angle(ptosvec2D));
-    agl2D_abs[it] = secvec2D.Angle(ptosvec2D);
-        
-    //Decay length 3D
-    const SMatrixSym3D& trkCovMat = *trk.userData<reco::Vertex::CovarianceMatrix>("vertexCovariance");
-    const SMatrixSym3D& totalCov = vtx.covariance() + trkCovMat;
-    const SVector3 distanceVector(secvx-bestvx, secvy-bestvy, secvz-bestvz);
-
-    dl[it] = ROOT::Math::Mag(distanceVector);
-    dlerror[it] = std::sqrt(ROOT::Math::Similarity(totalCov, distanceVector))/dl[it];
-    dlos[it] = dl[it]/dlerror[it];
-
-    //Decay length 2D
-    const SVector6 v1(vtx.covariance(0,0), vtx.covariance(0,1), vtx.covariance(1,1), 0, 0, 0);
-    const SVector6 v2(trkCovMat(0,0), trkCovMat(0,1), trkCovMat(1,1), 0, 0, 0);
-    const SMatrixSym3D& totalCov2D = SMatrixSym3D(v1) + SMatrixSym3D(v2);
-    const SVector3 distanceVector2D(secvx-bestvx, secvy-bestvy, 0);
-
-    dl2D[it] = ROOT::Math::Mag(distanceVector2D);
-    const double& dl2Derror = std::sqrt(ROOT::Math::Similarity(totalCov2D, distanceVector2D))/dl2D[it];
-    dlos2D[it] = dl2D[it]/dl2Derror;
-
-    const ushort& nDau = trk.numberOfDaughters();
-    if(nDau!=NDAU_) throw cms::Exception("PATCompositeAnalyzer") << "Expected " << NDAU_ << " daughters but V0 candidate has " << nDau << " daughters!" << std::endl;
-
-    //Gen match
-    if(doGenMatching_)
-    {
-      isSwap[it] = false;
-      bool foundMom = true;
-      reco::GenParticleRef genMom;
-      for(ushort iDau=0; iDau<nDau; iDau++)
-      {
-        const auto& recDau = dynamic_cast<const pat::Muon*>(trk.daughter(iDau));
-        const auto& genDau = (recDau ? recDau->genParticleRef() : reco::GenParticleRef());
-        const auto& mom = findMother(genDau);
-        if(!recDau || genDau.isNull() || mom.isNull()) { foundMom = false; break; }
-        if(iDau==0) genMom = mom;
-        else if(genMom!=mom) { foundMom = false; break; }
-        if(fabs(recDau->mass() - genDau->mass())>0.01) { isSwap[it] = true; }
-      }
-      matchGEN[it] = foundMom;
-      isSwap[it] = (foundMom ? isSwap[it] : false);
-      idmom_reco[it] = (foundMom ? genMom->pdgId() : -77);
-      genVec_.push_back(foundMom ? genMom : reco::GenParticleRef());
-    }
-
-    for(ushort iDau=0; iDau<nDau; iDau++)
-    {
-      const auto& dau = *(trk.daughter(iDau));
-
-      ptDau[iDau][it] = dau.pt();
-      pDau[iDau][it] = dau.p();
-      etaDau[iDau][it] = dau.eta();
-      phiDau[iDau][it] = dau.phi();
-      chargeDau[iDau][it] = dau.charge();
-
-      pid[iDau][it] = -77;
-      if(doGenMatchingTOF_)
-      {
-        const auto& recDau = dynamic_cast<const pat::Muon*>(trk.daughter(iDau));
-        const auto& genDau = (recDau ? recDau->genParticleRef() : reco::GenParticleRef());
-        if(genDau.isNonnull()) { pid[iDau][it] = genDau->pdgId(); }
-      }
-
-      //trk info
-      if(!twoLayerDecay_)
-      {
-        const auto& dtrk = dau.get<reco::TrackRef>();
-
-        //trk quality
-        trkquality[iDau][it] = (dtrk.isNonnull() ? dtrk->quality(reco::TrackBase::highPurity) : false);
-
-        //trk dEdx
-        H2dedx[iDau][it] = -999.9;
-        if(dtrk.isNonnull() && dEdxHandle1.isValid())
-        {
-          const edm::ValueMap<reco::DeDxData>& dEdxTrack = *dEdxHandle1.product();
-          H2dedx[iDau][it] = dEdxTrack[dtrk].dEdx();
-        }
-        T4dedx[iDau][it] = -999.9;
-        if(dtrk.isNonnull() && dEdxHandle2.isValid())
-        {
-          const edm::ValueMap<reco::DeDxData>& dEdxTrack = *dEdxHandle2.product();
-          T4dedx[iDau][it] = dEdxTrack[dtrk].dEdx();
-        }
-
-        //track Chi2
-        trkChi[iDau][it] = (dtrk.isNonnull() ? dtrk->normalizedChi2() : 99.);
-
-        //track pT error
-        ptErr[iDau][it] = (dtrk.isNonnull() ? dtrk->ptError() : -1.);
-
-        //trkNHits
-        nhit[iDau][it] = (dtrk.isNonnull() ? dtrk->numberOfValidHits() : -1);
-
-        //DCA
-        dzos[iDau][it] = 99.;
-        dxyos[iDau][it] = 99.;
-        if (dtrk.isNonnull())
-        {
-          const double& dzbest = dtrk->dz(bestvtx);
-          const double& dxybest = dtrk->dxy(bestvtx);
-          const double& dzerror = std::sqrt(dtrk->dzError()*dtrk->dzError() + bestvzError*bestvzError);
-          const double& dxyerror = std::sqrt(dtrk->d0Error()*dtrk->d0Error() + bestvxError*bestvyError);
-          dzos[iDau][it] = dzbest/dzerror;
-          dxyos[iDau][it] = dxybest/dxyerror;
-        }
-      }
  
-      if(doMuon_)
-      {
-        const auto& muon = (dau.isMuon() ? *dynamic_cast<const pat::Muon*>(trk.daughter(iDau)) : pat::Muon());
-
-        // Tight ID Muon POG Run 2
-        glbmuon[iDau][it] = (dau.isMuon() ? muon.isGlobalMuon() : false);
-        pfmuon[iDau][it]  = (dau.isMuon() ? muon.isPFMuon() : false);
-        glbtrkchi[iDau][it] = (muon.globalTrack().isNonnull() ? muon.globalTrack()->normalizedChi2() : 99.);
-        nmuonhit[iDau][it] = (muon.globalTrack().isNonnull() ? muon.globalTrack()->hitPattern().numberOfValidMuonHits() : -1);
-        nmatchedst[iDau][it] = (dau.isMuon() ? muon.numberOfMatchedStations() : -1);
-        npixelhit[iDau][it] = (muon.innerTrack().isNonnull() ? muon.innerTrack()->hitPattern().numberOfValidPixelHits() : -1);
-        ntrackerlayer[iDau][it] = (muon.innerTrack().isNonnull() ? muon.innerTrack()->hitPattern().trackerLayersWithMeasurement() : -1);
-        muonbestdxy[iDau][it] = (muon.muonBestTrack().isNonnull() ? muon.muonBestTrack()->dxy(bestvtx) : 99.);
-        muonbestdz[iDau][it] = (muon.muonBestTrack().isNonnull() ? muon.muonBestTrack()->dz(bestvtx) : 99.);
-        tightmuon[iDau][it] = (
-                               glbmuon[iDau][it] &&
-                               pfmuon[iDau][it] &&
-                               (glbtrkchi[iDau][it] < 10.) &&
-                               (nmuonhit[iDau][it] > 0) &&
-                               (nmatchedst[iDau][it] > 1) &&
-                               (npixelhit[iDau][it] > 0) &&
-                               (ntrackerlayer[iDau][it] > 5) &&
-                               (fabs(muonbestdxy[iDau][it]) < 0.2) &&
-                               (fabs(muonbestdz[iDau][it]) < 0.5)
-                               );
-
-        // Soft ID Muon POG Run 2
-        onestmuon[iDau][it] = (dau.isMuon() ? muon::isGoodMuon(muon, muon::SelectionType::TMOneStationTight) : false);
-        npixellayer[iDau][it] = (muon.innerTrack().isNonnull() ? muon.innerTrack()->hitPattern().pixelLayersWithMeasurement() : -1);
-        hpmuon[iDau][it] = (muon.innerTrack().isNonnull() ? muon.innerTrack()->quality(reco::TrackBase::highPurity) : false);
-        muondxy[iDau][it] = (muon.innerTrack().isNonnull() ? muon.innerTrack()->dxy(bestvtx) : 99.);
-        muondz[iDau][it] = (muon.innerTrack().isNonnull() ? muon.innerTrack()->dz(bestvtx) : 99.);
-        softmuon[iDau][it] = (
-                              onestmuon[iDau][it] &&
-                              (ntrackerlayer[iDau][it] > 5) &&
-                              (npixellayer[iDau][it] > 0) &&
-                              hpmuon[iDau][it] &&
-                              (fabs(muondxy[iDau][it]) < 0.3) &&
-                              (fabs(muondz[iDau][it]) < 20.)
-                              );
-
-        // Hybrid Soft ID HIN PAG Run 2 PbPb
-        trkmuon[iDau][it] = (dau.isMuon() ? muon.isTrackerMuon() : false);
-        hybridmuon[iDau][it] = (
-                                glbmuon[iDau][it] &&
-                                (ntrackerlayer[iDau][it] > 5) &&
-                                (npixellayer[iDau][it] > 0) &&
-                                (fabs(muondxy[iDau][it]) < 0.3) &&
-                                (fabs(muondz[iDau][it]) < 20.)
-                                );
-
-        // Muon Trigger Matching
-        if(it==0)
-        {
-          trgmuon[iDau].clear();
-          trgmuon[iDau] = std::vector<std::vector<UChar_t>>(filterNames_.size(), std::vector<UChar_t>(candSize, 0));
-        }
-        if(dau.isMuon())
-        {
-          for(ushort iTr=0; iTr<filterNames_.size(); iTr++)
-          {
-            const auto& muHLTMatchesFilter = muon.triggerObjectMatchesByFilter(filterNames_.at(iTr));
-            if(muHLTMatchesFilter.size()>0) trgmuon[iDau][iTr][it] = 1;
-          }
-        }
-
-        if(doMuonFull_)
-        {
-          nmatchedch[iDau][it] = (dau.isMuon() ? muon.numberOfMatches() : -1);
-          matchedenergy[iDau][it] = (dau.isMuon() ? muon.calEnergy().hadMax : -99.);
-
-          dx_seg[iDau][it] = 999.9;
-          dy_seg[iDau][it] = 999.9;
-          dxSig_seg[iDau][it] = 999.9;
-          dySig_seg[iDau][it] = 999.9;
-          ddxdz_seg[iDau][it] = 999.9;
-          ddydz_seg[iDau][it] = 999.9;
-          ddxdzSig_seg[iDau][it] = 999.9;
-          ddydzSig_seg[iDau][it] = 999.9;
-          const std::vector<reco::MuonChamberMatch>& muchmatches = muon.matches();
-          for(ushort ich=0; ich<muchmatches.size(); ich++)
-          {
-            const double& x_exp = muchmatches[ich].x;
-            const double& y_exp = muchmatches[ich].y;
-            const double& xerr_exp = muchmatches[ich].xErr;
-            const double& yerr_exp = muchmatches[ich].yErr;
-            const double& dxdz_exp = muchmatches[ich].dXdZ;
-            const double& dydz_exp = muchmatches[ich].dYdZ;
-            const double& dxdzerr_exp = muchmatches[ich].dXdZErr;
-            const double& dydzerr_exp = muchmatches[ich].dYdZErr;
-
-            const std::vector<reco::MuonSegmentMatch>& musegmatches = muchmatches[ich].segmentMatches;
-            for(ushort jseg=0; jseg<musegmatches.size(); jseg++)
-            {
-              const double& x_seg = musegmatches[jseg].x;
-              const double& y_seg = musegmatches[jseg].y;
-              const double& xerr_seg = musegmatches[jseg].xErr;
-              const double& yerr_seg = musegmatches[jseg].yErr;
-              const double& dxdz_seg = musegmatches[jseg].dXdZ;
-              const double& dydz_seg = musegmatches[jseg].dYdZ;
-              const double& dxdzerr_seg = musegmatches[jseg].dXdZErr;
-              const double& dydzerr_seg = musegmatches[jseg].dYdZErr;
-
-              const double& dseg = std::sqrt((x_seg-x_exp)*(x_seg-x_exp) + (y_seg-y_exp)*(y_seg-y_exp));
-              const double& dxerr_seg = std::sqrt(xerr_seg*xerr_seg + xerr_exp*xerr_exp);
-              const double& dyerr_seg = std::sqrt(yerr_seg*yerr_seg + yerr_exp*yerr_exp);
-              const double& ddxdzerr_seg = std::sqrt(dxdzerr_seg*dxdzerr_seg + dxdzerr_exp*dxdzerr_exp);
-              const double& ddydzerr_seg = std::sqrt(dydzerr_seg*dydzerr_seg + dydzerr_exp*dydzerr_exp);
-
-              if(dseg < std::sqrt(dx_seg[iDau][it]*dx_seg[iDau][it] + dy_seg[iDau][it]*dy_seg[iDau][it]))
-              {
-                dx_seg[iDau][it] = x_seg - x_exp;
-                dy_seg[iDau][it] = y_seg - y_exp;
-                dxSig_seg[iDau][it] = dx_seg[iDau][it] / dxerr_seg;
-                dySig_seg[iDau][it] = dy_seg[iDau][it] / dyerr_seg;
-                ddxdz_seg[iDau][it] = dxdz_seg - dxdz_exp;
-                ddydz_seg[iDau][it] = dydz_seg - dydz_exp;
-                ddxdzSig_seg[iDau][it] = ddxdz_seg[iDau][it] / ddxdzerr_seg;
-                ddydzSig_seg[iDau][it] = ddydz_seg[iDau][it] / ddydzerr_seg;
-              }
-            }
-          }
-        }
-      }
-    }
+  //edm::Handle<reco::MuonCollection> recoMuons;
+  edm::Handle<pat::MuonCollection> muonColl;
+  iEvent.getByToken(tok_muoncol_, muonColl);
  
-    if(twoLayerDecay_)
-    {
-      const auto& d = *(trk.daughter(0));
-      grand_mass[it] = d.mass();
-      for(ushort iGDau=0; iGDau<NGDAU_; iGDau++)
-      {
-        if(!d.daughter(iGDau)) continue;
-        const auto& gd = *(d.daughter(iGDau));
-        const auto& gdau = gd.get<reco::TrackRef>();
 
-        //trk quality
-        grand_trkquality[iGDau][it] = (gdau.isNonnull() ? gdau->quality(reco::TrackBase::highPurity) : false);
+  //reco::MuonCollection muonColl;
+  //pat::MuonCollection muonColl;
+  //for (const auto& muon : *recoMuons) {
+    //const reco::TrackRef& trackRef = muon.track();
+    //if(trackRef.isNull()) continue;
+    //muonColl.push_back(muon);
+  //}
 
-        //trk dEdx
-        grand_H2dedx[iGDau][it] = -999.9;
-        if(gdau.isNonnull() && dEdxHandle1.isValid())
-        {
-          const edm::ValueMap<reco::DeDxData>& dEdxTrack = *dEdxHandle1.product();
-          grand_H2dedx[iGDau][it] = dEdxTrack[gdau].dEdx();
-        }   
-        grand_T4dedx[iGDau][it] = -999.9;
-        if(gdau.isNonnull() && dEdxHandle2.isValid())
-        {
-          const edm::ValueMap<reco::DeDxData>& dEdxTrack = *dEdxHandle2.product();
-          grand_T4dedx[iGDau][it] = dEdxTrack[gdau].dEdx();
-        }
+  //auto out = std::make_unique<std::vector<reco::Muon>>();
+  auto out = std::make_unique<std::vector<pat::Muon>>();
+  for (uint ic = 0; ic < muonColl->size(); ic++) {
+    const pat::Muon& cand1 = (*muonColl)[ic];
 
-        //track pt
-        grand_pt[iGDau][it] = gd.pt();
+    for(uint fc = ic+1; fc < muonColl->size(); fc++) {
+       const pat::Muon& cand2 = (*muonColl)[fc];
 
-        //track momentum
-        grand_p[iGDau][it] = gd.p();
+       const auto cand1P4 = math::PtEtaPhiMLorentzVector(cand1.pt(), cand1.eta(), cand1.phi(), 0.10565837);
+       const auto cand2P4 = math::PtEtaPhiMLorentzVector(cand2.pt(), cand2.eta(), cand2.phi(), 0.10565837);
 
-        //track eta
-        grand_eta[iGDau][it] = gd.eta();
+       const double& mass = (cand1P4 + cand2P4).mass();
+       const double& pt = (cand1P4 + cand2P4).pt();
 
-        //track charge
-        grand_charge[iGDau][it] = gd.charge();
-
-        //track Chi2
-        grand_trkChi[iGDau][it] = (gdau.isNonnull() ? gdau->normalizedChi2() : 99.);
-
-        //track pT error
-        grand_ptErr[iGDau][it] = (gdau.isNonnull() ? gdau->ptError() : -1.);
-
-        //trkNHits
-        grand_nhit[iGDau][it] = (gdau.isNonnull() ? gdau->numberOfValidHits() : -1);
-
-        //DCA
-        grand_dzos[iGDau][it] = 99.;
-        grand_dxyos[iGDau][it] = 99.;
-        if(gdau.isNonnull())
-        {
-          const double& gdzbest = gdau->dz(bestvtx);
-          const double& gdxybest = gdau->dxy(bestvtx);
-          const double& gdzerror = std::sqrt(gdau->dzError()*gdau->dzError() + bestvzError*bestvzError);
-          const double& gdxyerror = std::sqrt(gdau->d0Error()*gdau->d0Error() + bestvxError*bestvyError);
-          grand_dzos[iGDau][it] = gdzbest/gdzerror;
-          grand_dxyos[iGDau][it] = gdxybest/gdxyerror;
-        }
-      }
-   
-      //vtxChi2
-      grand_vtxChi2[it] = d.vertexChi2();
-      grand_ndf[it] = d.vertexNdof();
-      grand_VtxProb[it] = TMath::Prob(grand_vtxChi2[it], grand_ndf[it]);
-
-      //PAngle
-      const double& secvz = d.vz(), secvx = d.vx(), secvy = d.vy();
-      const TVector3 ptosvec(secvx-bestvx, secvy-bestvy, secvz-bestvz);
-      const TVector3 secvec(d.px(), d.py(), d.pz());            
-      const TVector3 ptosvec2D(secvx-bestvx, secvy-bestvy, 0);
-      const TVector3 secvec2D(d.px(), d.py(), 0);
-
-      grand_agl[it] = std::cos(secvec.Angle(ptosvec));
-      grand_agl_abs[it] = secvec.Angle(ptosvec);
-      grand_agl2D[it] = std::cos(secvec2D.Angle(ptosvec2D));
-      grand_agl2D_abs[it] = secvec2D.Angle(ptosvec2D);
-
-      //Decay length 3D
-      const SMatrixSym3D& totalCov = vtx.covariance() + d.vertexCovariance();
-      const SVector3 distanceVector(secvx-bestvx, secvy-bestvy, secvz-bestvz);
-
-      grand_dl[it] = ROOT::Math::Mag(distanceVector);
-      grand_dlerror[it] = std::sqrt(ROOT::Math::Similarity(totalCov, distanceVector))/grand_dl[it];
-      grand_dlos[it] = grand_dl[it]/grand_dlerror[it];
-
-      //Decay length 2D
-      const SVector6 v1(vtx.covariance(0,0), vtx.covariance(0,1), vtx.covariance(1,1), 0, 0, 0);
-      const SVector6 v2(d.vertexCovariance(0,0), d.vertexCovariance(0,1), d.vertexCovariance(1,1), 0, 0, 0);
-      const SMatrixSym3D totalCov2D = SMatrixSym3D(v1) + SMatrixSym3D(v2);
-      const SVector3 distanceVector2D(secvx-bestvx, secvy-bestvy, 0);
-
-      const double& gdl2D = ROOT::Math::Mag(distanceVector2D);
-      const double& gdl2Derror = std::sqrt(ROOT::Math::Similarity(totalCov2D, distanceVector2D))/gdl2D;
-      grand_dlos2D[it] = gdl2D/gdl2Derror;
-    }
-
-    if(saveHistogram_)
-    {
-      for(unsigned int ipt=0;ipt<pTBins_.size()-1;ipt++)
-      {
-        for(unsigned int iy=0;iy<yBins_.size()-1;iy++)
-        {
-          if(pt[it]<pTBins_[ipt+1] && pt[it]>pTBins_[ipt] && y[it]<yBins_[iy+1] && y[it]>yBins_[iy])
-          {
-            hMassVsMVA[iy][ipt]->Fill(mva[it], mass[it]);
-
-            if(saveAllHistogram_)
-            {
-              hpTVsMVA[iy][ipt]->Fill(mva[it], pt[it]);
-              hetaVsMVA[iy][ipt]->Fill(mva[it], eta[it]);
-              hyVsMVA[iy][ipt]->Fill(mva[it], y[it]);
-              hVtxProbVsMVA[iy][ipt]->Fill(mva[it], VtxProb[it]);
-              h3DCosPointingAngleVsMVA[iy][ipt]->Fill(mva[it], agl[it]);
-              h3DPointingAngleVsMVA[iy][ipt]->Fill(mva[it], agl_abs[it]);
-              h2DCosPointingAngleVsMVA[iy][ipt]->Fill(mva[it], agl2D[it]);
-              h2DPointingAngleVsMVA[iy][ipt]->Fill(mva[it], agl2D_abs[it]);
-              h3DDecayLengthSignificanceVsMVA[iy][ipt]->Fill(mva[it], dlos[it]);
-              h3DDecayLengthVsMVA[iy][ipt]->Fill(mva[it], dl[it]);
-              h2DDecayLengthSignificanceVsMVA[iy][ipt]->Fill(mva[it], dlos2D[it]);
-              h2DDecayLengthVsMVA[iy][ipt]->Fill(mva[it], dl2D[it]);
-              for (ushort iDau=0; iDau<NDAU_; iDau++)
-              {
-                hzDCASignificanceDaugtherVsMVA[iDau][iy][ipt]->Fill(mva[it], dzos[iDau][it]);
-                hxyDCASignificanceDaugtherVsMVA[iDau][iy][ipt]->Fill(mva[it], dxyos[iDau][it]);
-                hNHitDVsMVA[iDau][iy][ipt]->Fill(mva[it], nhit[iDau][it]);
-                hpTDVsMVA[iDau][iy][ipt]->Fill(mva[it], ptDau[iDau][it]);
-                hpTerrDVsMVA[iDau][iy][ipt]->Fill(mva[it], ptErr[iDau][it]/ptDau[iDau][it]);
-                hEtaDVsMVA[iDau][iy][ipt]->Fill(mva[it], etaDau[iDau][it]);
-                hdedxHarmonic2DVsMVA[iDau][iy][ipt]->Fill(mva[it], H2dedx[iDau][it]);
-                hdedxHarmonic2DVsP[iDau][iy][ipt]->Fill(pDau[iDau][it], H2dedx[iDau][it]);
-              }
-            }
-          }
-        }
+       //if (abs(mass-MASS_.at(443)) < WIDTH_.at(443) && pt < 0.2) {
+       if (mass>2.9 && mass<3.2 && pt < 0.2) {
+         hMassvsPt_dimu->Fill(mass,pt);
+         hEtavsPt_mu1->Fill(cand1.eta(),cand1.pt());
+         hEtavsPt_mu2->Fill(cand2.eta(),cand2.pt());
+         out->push_back(cand1);out->push_back(cand2);
+	 d1Eta.push_back(cand1P4.eta());
+         d1Phi.push_back(cand1P4.phi());
+         d2Eta.push_back(cand2P4.eta());
+         d2Phi.push_back(cand2P4.phi());
+	 cout << "ic="<<ic<<";fc="<<fc<<", icPt icEta icPhi = " << cand1.pt() <<' '<< cand1.eta()<<' '<<cand1.phi()<<" fcPt fcEta fcPhi = " << cand2.pt() <<' '<< cand2.eta()<<' '<<cand2.phi()<<endl;
       }
     }
   }
-}
-
-void
-PATCompositeTreeProducer::fillMUON(const edm::Event& iEvent, const edm::EventSetup& iSetup)
-{
-  edm::Handle<pat::MuonCollection> muoncol;
-  iEvent.getByToken(tok_muoncol_, muoncol);
-  if(!muoncol.isValid()) throw cms::Exception("PATCompositeAnalyzer") << "PAT muon collection not found!" << std::endl;
-
-  //RECO Muon info
-  candSize_mu = muoncol->size();
-  if(candSize_mu>MAXCAN) throw cms::Exception("PATCompositeAnalyzer") << "Number of muons (" << candSize_mu << ") exceeds limit!" << std::endl;
-  for(uint it=0; it<candSize_mu; ++it)
-  {
-    const auto& muon = (*muoncol)[it];
-    pt_mu[it] = muon.pt();
-    eta_mu[it] = muon.eta();
-    phi_mu[it] = muon.phi();
-
-    glbmuon_mu[it] = muon.isGlobalMuon();
-    ntrackerlayer_mu[it] = (muon.innerTrack().isNonnull() ? muon.innerTrack()->hitPattern().trackerLayersWithMeasurement() : -1);
-    // Soft ID Muon POG Run 2
-    onestmuon_mu[it] = muon::isGoodMuon(muon, muon::SelectionType::TMOneStationTight);
-    npixellayer_mu[it] = (muon.innerTrack().isNonnull() ? muon.innerTrack()->hitPattern().pixelLayersWithMeasurement() : -1);
-    hpmuon_mu[it] = (muon.innerTrack().isNonnull() ? muon.innerTrack()->quality(reco::TrackBase::highPurity) : false);
-    const math::XYZPoint bestvtx(bestvx, bestvy, bestvz);
-    muondxy_mu[it] = (muon.innerTrack().isNonnull() ? muon.innerTrack()->dxy(bestvtx) : 99.);
-    muondz_mu[it] = (muon.innerTrack().isNonnull() ? muon.innerTrack()->dz(bestvtx) : 99.);
-    softmuon_mu[it] = (
-                       onestmuon_mu[it] &&
-                       (ntrackerlayer_mu[it] > 5) &&
-                       (npixellayer_mu[it] > 0) &&
-                       hpmuon_mu[it] &&
-                       (fabs(muondxy_mu[it]) < 0.3) &&
-                       (fabs(muondz_mu[it]) < 20.)
-                       );
-
-    // Muon Trigger Matching
-    if(it==0)
-    {
-      trgmuon_mu.clear();
-      trgmuon_mu = std::vector<std::vector<UChar_t>>(filterNames_.size(), std::vector<UChar_t>(candSize_mu, 0));
-    }
-    for(ushort iTr=0; iTr<filterNames_.size(); iTr++)
-    {
-      const auto& muHLTMatchesFilter = muon.triggerObjectMatchesByFilter(filterNames_.at(iTr));
-      if(muHLTMatchesFilter.size()>0) trgmuon_mu[iTr][it] = 1;
-    }
-  }
-}
-
-void
-PATCompositeTreeProducer::fillTRACK(const edm::Event& iEvent, const edm::EventSetup& iSetup)
-{
-  edm::Handle<reco::TrackCollection> trackColl;
-  iEvent.getByToken(tok_tracks_, trackColl);
-  if(!trackColl.isValid()) throw cms::Exception("PATCompositeAnalyzer") << "track collection not found!" << std::endl;
-
-  //RECO Track info
-  candSize_trk = trackColl->size();
-  if(candSize_trk>MAXCAN) throw cms::Exception("PATCompositeAnalyzer") << "Number of tracks (" << candSize_trk << ") exceeds limit!" << std::endl;
-
-  for(uint it=0; it<candSize_trk; ++it)
-  {
-    const auto& track = (*trackColl)[it];
-    pt_trk[it] = track.pt();
-    eta_trk[it] = track.eta();
-    phi_trk[it] = track.phi();
-
-    pTErr_trk[it] = fabs(track.ptError())/track.pt();
-    hp_trk[it] = track.quality(reco::TrackBase::highPurity);
-
-    math::XYZPoint bestvtx(bestvx, bestvy, bestvz);
-    double dzvtx = track.dz(bestvtx);
-    double dxyvtx = track.dxy(bestvtx);
-    double dzerror = sqrt(track.dzError()*track.dzError()+bestvzError*bestvzError);
-    double dxyerror = sqrt(track.d0Error()*track.d0Error()+bestvxError*bestvyError);
-    dZsig_trk[it] = fabs(dzvtx/dzerror);
-    dXYsig_trk[it] = fabs(dxyvtx/dxyerror);
-  }
-}
-
-void
-PATCompositeTreeProducer::fillGEN(const edm::Event& iEvent, const edm::EventSetup& iSetup)
-{
-  edm::Handle<GenEventInfoProduct> geninfo;
-  iEvent.getByToken(tok_genInfo_, geninfo);
-  weight_gen = (geninfo.isValid() ? geninfo->weight() : -1.0);
-
-  edm::Handle<LHEEventProduct> lhe;
-  iEvent.getByToken(tok_genLHE_, lhe);
-  weightLHE_gen.clear();
-  if(lhe.isValid() && geninfo.isValid())
-  {
-    const auto&  asdd = lhe->originalXWGTUP();
-    for(uint idx=0; idx<lhe->weights().size(); ++idx)
-    {
-      const auto&  asdde = lhe->weights()[idx].wgt;
-      weightLHE_gen.push_back(geninfo->weight()*asdde/asdd);
-    }
-  }
-
-  edm::Handle<reco::GenParticleCollection> genpars;
-  iEvent.getByToken(tok_genParticle_, genpars);
-  if(!genpars.isValid()) throw cms::Exception("PATCompositeAnalyzer") << "Gen matching cannot be done without Gen collection!" << std::endl;
-
-  candSize_gen = 0;
-  for(uint idx=0; idx<genpars->size(); ++idx)
-  {
-    const auto& trk = reco::GenParticleRef(genpars, idx);
-    std::vector<reco::GenParticleRef> dauVec;
-
-    if (trk.isNull()) continue; //check gen particle ref
-
-    if(isGammaGamma_ && idx<MAXDAU)
-    {
-      idDau_gen[idx][0] = (trk.isNonnull() ? trk->pdgId() : 99999);
-      chargeDau_gen[idx][0] = (trk.isNonnull() ? trk->charge() : 9);
-      ptDau_gen[idx][0] = (trk.isNonnull() ? trk->pt() : -1.);
-      etaDau_gen[idx][0] = (trk.isNonnull() ? trk->eta() : 9.);
-      phiDau_gen[idx][0] = (trk.isNonnull() ? trk->phi() : 9.);
-
-      candSize_gen = 1;
-      continue;
-    } 
+  nmuons += out->size();
   
-    if (trk->status()!=2 && trk->status()!=62) continue; //check gen particle status
-    if(!findDaughters(dauVec, trk)) continue; //check if has the daughters
+  //track info
+  double trkqx = 0;
+  double trkqy = 0;
+  double trkPt = 0;
+  trkQx = -1;
+  trkQy = -1;
+  bool DauTrk = false;
 
-    pt_gen[candSize_gen] = trk->pt();
-    eta_gen[candSize_gen] = trk->eta();
-    y_gen[candSize_gen] = trk->rapidity();
-    pid_gen[candSize_gen] = trk->pdgId();
-    status_gen[candSize_gen] = trk->status();
-    iddecay_gen[candSize_gen] = fabs(findMother(dauVec[0])->pdgId());
+  double all_trkqx= 0;
+  double all_trkqy = 0;
+  double all_trkPt = 0;
+  all_trkQx = -1;
+  all_trkQy = -1;
 
-    const auto& recIt = std::find(genVec_.begin(), genVec_.end(), trk);
-    idxrec_gen[candSize_gen] = (recIt!=genVec_.end() ? std::distance(genVec_.begin(), recIt) : -1);
+  for(unsigned it=0; it<trackColl->size(); ++it){
+	DauTrk = false;
+	reco::TrackRef track(trackColl, it);
 
-    const auto& mom = findMother(trk);
-    idmom_gen[candSize_gen] = (mom.isNonnull() ? mom->pdgId() : -77);
+	double dzvtx = track->dz(bestvtx);
+        double dxyvtx = track->dxy(bestvtx);
+        double dzerror = sqrt(track->dzError()*track->dzError()+bestvzError*bestvzError);
+        double dxyerror = sqrt(track->d0Error()*track->d0Error()+bestvxError*bestvyError);
+        
+        if(!track->quality(reco::TrackBase::highPurity)) continue;
+        if(fabs(track->ptError())/track->pt()>0.10) continue;
+        if(fabs(dzvtx/dzerror) > 3) continue;
+        if(fabs(dxyvtx/dxyerror) > 3) continue;
+	  
+	double pt  = track->pt();
+	double phi = track->phi();
+	double eta = track->eta();
+	htrk->Fill(track->eta(),track->pt());
 
-    if(decayInGen_)
-    {
-      for(ushort iDau=0; iDau<NDAU_; iDau++)
-      {
-        const auto& Dd = dauVec[iDau];
-        idDau_gen[iDau][candSize_gen] = (Dd.isNonnull() ? Dd->pdgId() : 99999);
-        chargeDau_gen[iDau][candSize_gen] = (Dd.isNonnull() ? Dd->charge() : 9);
-        ptDau_gen[iDau][candSize_gen] = (Dd.isNonnull() ? Dd->pt() : -1.);
-        etaDau_gen[iDau][candSize_gen] = (Dd.isNonnull() ? Dd->eta() : 9.);
-        phiDau_gen[iDau][candSize_gen] = (Dd.isNonnull() ? Dd->phi() : 9.);
-      }
-    }
+    	all_trkqx += pt*cos(2*phi);
+    	all_trkqy += pt*sin(2*phi);
+    	all_trkPt += pt;
 
-    candSize_gen++;
+    	for (unsigned i=0; i<d1Eta.size(); ++i)
+    	{
+            if( fabs(eta-d1Eta[i]) <0.001 && fabs(phi-d1Phi[i]) <0.001 ) htrkd1->Fill(track->eta(),track->pt());
+      	    if( fabs(eta-d2Eta[i]) <0.001 && fabs(phi-d2Phi[i]) <0.001) htrkd2->Fill(track->eta(),track->pt());
+   	}
+
+	reco::TrackRef muonTrack;
+    	for (std::vector<pat::Muon>::const_iterator muon = out->begin(); muon < out->end(); muon++) {
+            muonTrack = muon->innerTrack();
+            if (muonTrack != track && track->charge() == muonTrack->charge() && std::abs(muonTrack->eta() - track->eta()) < 1.E-3 && std::abs(reco::deltaPhi(muonTrack->phi(), track->phi())) < 1.E-3 && std::abs(muonTrack->pt() - track->pt()) / muonTrack->pt() < 1.E-3) {
+		    cout << "it = " << it << "DauTrk = "<< DauTrk << endl;
+		    cout << "pt,eta,phi matched, but muon trackref and track trackref are unequal"<< endl;;
+		    cout << "muonTrack: charge = " << muonTrack->charge() << endl;
+	            cout << "muonTrack: eta = " << muonTrack->eta() << endl;
+        	    cout << "muonTrack: phi = " << muonTrack->phi() << endl;
+	            cout << "muonTrack: pt = " << muonTrack->pt() << endl;
+        	    cout << "Track: charge = " << track->charge() << endl;
+	            cout << "Track: eta = " << track->eta() << endl;
+        	    cout << "Track: phi = " << track->phi() << endl;
+	            cout << "Track: pt = " << track->pt() << endl;
+		    DauTrk = false;
+	    }
+	    if (track->charge() == muonTrack->charge() && std::abs(muonTrack->eta() - track->eta()) < 2.E-4 && std::abs(reco::deltaPhi(muonTrack->phi(), track->phi())) < 2.E-4 && std::abs(muonTrack->pt() - track->pt()) / muonTrack->pt() < 1.E-4) DauTrk = true; 
+    	    double deltaEta = std::abs(muonTrack->eta() - track->eta());
+    	    double deltaPhi = std::abs(reco::deltaPhi(muonTrack->phi(), track->phi()));
+	    double deltaPt = std::abs(muonTrack->pt() - track->pt()) / muonTrack->pt();
+	    hdeltaEta->Fill(deltaEta);
+	    hdeltaPhi->Fill(deltaPhi);
+	    hdeltaPt->Fill(deltaPt);
+	}
+
+    	if (DauTrk == true) {
+      	    hEtavsPt_DauTrk->Fill(track->eta(),track->pt());
+	    cout << "it = " << it << "DauTrk = "<< DauTrk << endl;
+            cout << "Matched track Pt Eta Phi = " << track->pt() <<' '<< track->eta()<<' '<<track->phi()<<endl;
+      	    continue;
+    	}
+    	htrkpt->Fill(pt);
+    
+    	trkqx += pt*cos(2*phi);
+    	trkqy += pt*sin(2*phi);
+    	trkPt += pt;
   }
+  trkQx = trkqx/trkPt;
+  trkQy = trkqy/trkPt;
+  all_trkQx = all_trkqx/all_trkPt;
+  all_trkQy = all_trkqy/all_trkPt;
+
+  //Calo tower info
+  //
+  edm::Handle<CaloTowerCollection> towers;
+  iEvent.getByToken(caloTowerToken_, towers);
+  if(!towers.isValid()) return;
+  
+  double twqx = 0;
+  double twqy = 0;
+  double twEt = 0;
+  twQx = -1;
+  twQy = -1;
+  for(unsigned itw = 0; itw < towers->size(); ++itw){
+
+    const CaloTower & hit= (*towers)[itw];
+
+    double et = hit.et(bestvz);
+    double caloPhi = hit.phi();
+
+    twqx += et*cos(2*caloPhi);
+    twqy += et*sin(2*caloPhi);
+    twEt += et;
+
+    htwqx->Fill(twqx);
+    htwqy->Fill(twqy);
+    htwEt->Fill(twEt);
+
+  }
+  twQx = twqx/twEt;
+  twQy = twqy/twEt;
+
 }
 
 
 // ------------ method called once each job just before starting event
 //loop  ------------
 void
-PATCompositeTreeProducer::beginJob()
+PATEventPlane::beginJob()
 {
   TH1D::SetDefaultSumw2();
 
   // Check inputs
-  if((!threeProngDecay_ && NDAU_!=2) || (threeProngDecay_ && NDAU_!=3))
-  {
-    throw cms::Exception("PATCompositeAnalyzer") << "Want threeProngDecay but PID daughter vector size is: " << NDAU_ << " !" << std::endl;
-  }
-  if(!doRecoNtuple_ && !doGenNtuple_) throw cms::Exception("PATCompositeAnalyzer") << "No output for either RECO or GEN!! Fix config!!" << std::endl;
-  if(twoLayerDecay_ && doMuon_) throw cms::Exception("PATCompositeAnalyzer") << "Muons cannot be coming from two layer decay!! Fix config!!" << std::endl;
-
-  if(saveHistogram_) initHistogram();
+  if(!doRecoNtuple_) throw cms::Exception("PATCompositeAnalyzer") << "No output for RECO Fix config!!" << std::endl;
   if(saveTree_) initTree();
-}
-
-
-void
-PATCompositeTreeProducer::initHistogram()
-{
-  for(unsigned int ipt=0;ipt<pTBins_.size()-1;ipt++)
-  {
-    for(unsigned int iy=0;iy<yBins_.size()-1;iy++)
-    {
-      hMassVsMVA[iy][ipt] = fs->make<TH2F>(Form("hMassVsMVA_y%d_pt%d",iy,ipt),";mva;mass(GeV)",100,-1.,1.,massHistBins_,massHistPeak_-massHistWidth_,massHistPeak_+massHistWidth_);
-      if(saveAllHistogram_)
-      {
-        hpTVsMVA[iy][ipt] = fs->make<TH2F>(Form("hpTVsMVA_y%d_pt%d",iy,ipt),";mva;pT;",100,-1,1,100,0,10);
-        hetaVsMVA[iy][ipt] = fs->make<TH2F>(Form("hetaVsMVA_y%d_pt%d",iy,ipt),";mva;eta;",100,-1.,1.,40,-4,4);
-        hyVsMVA[iy][ipt] = fs->make<TH2F>(Form("hyVsMVA_y%d_pt%d",iy,ipt),";mva;y;",100,-1.,1.,40,-4,4);
-        hVtxProbVsMVA[iy][ipt] = fs->make<TH2F>(Form("hVtxProbVsMVA_y%d_pt%d",iy,ipt),";mva;VtxProb;",100,-1.,1.,100,0,1);
-        h3DCosPointingAngleVsMVA[iy][ipt] = fs->make<TH2F>(Form("h3DCosPointingAngleVsMVA_y%d_pt%d",iy,ipt),";mva;3DCosPointingAngle;",100,-1.,1.,100,-1,1);
-        h3DPointingAngleVsMVA[iy][ipt] = fs->make<TH2F>(Form("h3DPointingAngleVsMVA_y%d_pt%d",iy,ipt),";mva;3DPointingAngle;",100,-1.,1.,50,-3.14,3.14);
-        h2DCosPointingAngleVsMVA[iy][ipt] = fs->make<TH2F>(Form("h2DCosPointingAngleVsMVA_y%d_pt%d",iy,ipt),";mva;2DCosPointingAngle;",100,-1.,1.,100,-1,1);
-        h2DPointingAngleVsMVA[iy][ipt] = fs->make<TH2F>(Form("h2DPointingAngleVsMVA_y%d_pt%d",iy,ipt),";mva;2DPointingAngle;",100,-1.,1.,50,-3.14,3.14);
-        h3DDecayLengthSignificanceVsMVA[iy][ipt] = fs->make<TH2F>(Form("h3DDecayLengthSignificanceVsMVA_y%d_pt%d",iy,ipt),";mva;3DDecayLengthSignificance;",100,-1.,1.,300,0,30);
-        h2DDecayLengthSignificanceVsMVA[iy][ipt] = fs->make<TH2F>(Form("h2DDecayLengthSignificanceVsMVA_y%d_pt%d",iy,ipt),";mva;2DDecayLengthSignificance;",100,-1.,1.,300,0,30);
-        h3DDecayLengthVsMVA[iy][ipt] = fs->make<TH2F>(Form("h3DDecayLengthVsMVA_y%d_pt%d",iy,ipt),";mva;3DDecayLength;",100,-1.,1.,300,0,30);
-        h2DDecayLengthVsMVA[iy][ipt] = fs->make<TH2F>(Form("h2DDecayLengthVsMVA_y%d_pt%d",iy,ipt),";mva;2DDecayLength;",100,-1.,1.,300,0,30);
-        for(ushort d=1; d<=NDAU_; d++)
-        {
-          hzDCASignificanceDaugtherVsMVA[d-1][iy][ipt] = fs->make<TH2F>(Form("hzDCASignificanceDaugther%dVsMVA_y%d_pt%d",d,iy,ipt),Form(";mva;zDCASignificanceDaugther%d;",d),100,-1.,1.,100,-10,10);
-          hxyDCASignificanceDaugtherVsMVA[d-1][iy][ipt] = fs->make<TH2F>(Form("hxyDCASignificanceDaugther%dVsMVA_y%d_pt%d",d,iy,ipt),Form(";mva;xyDCASignificanceDaugther%d;",d),100,-1.,1.,100,-10,10);
-          hNHitDVsMVA[d-1][iy][ipt] = fs->make<TH2F>(Form("hNHitD%dVsMVA_y%d_pt%d",d,iy,ipt),Form(";mva;NHitD%d;",d),100,-1.,1.,100,0,100);
-          hpTDVsMVA[d-1][iy][ipt] = fs->make<TH2F>(Form("hpTD%dVsMVA_y%d_pt%d",d,iy,ipt),Form(";mva;pTD%d;",d),100,-1.,1.,100,0,10);
-          hpTerrDVsMVA[d-1][iy][ipt] = fs->make<TH2F>(Form("hpTerrD%dVsMVA_y%d_pt%d",d,iy,ipt),Form(";mva;pTerrD%d;",d),100,-1.,1.,50,0,0.5);
-          hEtaDVsMVA[d-1][iy][ipt] = fs->make<TH2F>(Form("hEtaD%dVsMVA_y%d_pt%d",d,iy,ipt),Form(";mva;EtaD%d;",d),100,-1.,1.,40,-4,4);
-          if(useDeDxData_)
-          {
-            hdedxHarmonic2DVsMVA[d-1][iy][ipt] = fs->make<TH2F>(Form("hdedxHarmonic2D%dVsMVA_y%d_pt%d",d,iy,ipt),Form(";mva;dedxHarmonic2D%d;",d),100,-1.,1.,100,0,10);
-            hdedxHarmonic2DVsP[d-1][iy][ipt] = fs->make<TH2F>(Form("hdedxHarmonic2D%dVsP_y%d_pt%d",d,iy,ipt),Form(";p (GeV);dedxHarmonic2D%d",d),100,0,10,100,0,10);
-          }
-        }
-      }
-    }
-  }
+  if(saveHistogram_) initHistogram();
+  
 }
 
 
 void 
-PATCompositeTreeProducer::initTree()
+PATEventPlane::initTree()
 { 
-  PATCompositeNtuple = fs->make< TTree>("VertexCompositeNtuple","VertexCompositeNtuple");
+  PATCompositeNtuple = fs->make< TTree>("EventPlane","EventPlane");
 
   if(doRecoNtuple_)
   {
@@ -1382,330 +470,60 @@ PATCompositeTreeProducer::initTree()
     PATCompositeNtuple->Branch("bestvtxX",&bestvx,"bestvtxX/F");
     PATCompositeNtuple->Branch("bestvtxY",&bestvy,"bestvtxY/F");
     PATCompositeNtuple->Branch("bestvtxZ",&bestvz,"bestvtxZ/F");
-    PATCompositeNtuple->Branch("candSize",&candSize,"candSize/i");
-    if(usePF_)
-    {
-      PATCompositeNtuple->Branch("PFHFmaxETPlus",&PFHFmaxETPlus,"PFHFmaxETPlus/F");
-      PATCompositeNtuple->Branch("PFHFmaxETMinus",&PFHFmaxETMinus,"PFHFmaxETMinus/F");
-      PATCompositeNtuple->Branch("PFHFsumETPlus",&PFHFsumETPlus,"PFHFsumETPlus/F");
-      PATCompositeNtuple->Branch("PFHFsumETMinus",&PFHFsumETMinus,"PFHFsumETMinus/F");
-    }
+    
     if(isCentrality_) 
     {
       PATCompositeNtuple->Branch("centrality",&centrality,"centrality/S");
-      PATCompositeNtuple->Branch("Npixel",&Npixel,"Npixel/I");
-      PATCompositeNtuple->Branch("NpixelTracks",&NpixelTracks,"NpixelTracks/I");
-      PATCompositeNtuple->Branch("HFsumETPlus",&HFsumETPlus,"HFsumETPlus/F");
-      PATCompositeNtuple->Branch("HFsumETMinus",&HFsumETMinus,"HFsumETMinus/F");
-      PATCompositeNtuple->Branch("ZDCPlus",&ZDCPlus,"ZDCPlus/F");
-      PATCompositeNtuple->Branch("ZDCMinus",&ZDCMinus,"ZDCMinus/F");
       PATCompositeNtuple->Branch("Ntrkoffline",&Ntrkoffline,"Ntrkoffline/I");
       PATCompositeNtuple->Branch("NtrkHP",&NtrkHP,"NtrkHP/I");
     }
-    if(isEventPlane_) {
-      PATCompositeNtuple->Branch("ephfpAngleRaw",ephfpAngleRaw,"ephfpAngleRaw[2]/F");
-      PATCompositeNtuple->Branch("ephfpsumCosRaw",ephfpsumCosRaw,"ephfpsumCosRaw[2]/F");
-      PATCompositeNtuple->Branch("ephfpsumSinRaw",ephfpsumSinRaw,"ephfpsumSinRaw[2]/F");
-      PATCompositeNtuple->Branch("ephfpsumPtOrEt",&ephfpsumPtOrEt,"ephfpsumPtOrEt/F");
-      
-      PATCompositeNtuple->Branch("ephfmAngleRaw",ephfmAngleRaw,"ephfmAngleRaw[2]/F");
-      PATCompositeNtuple->Branch("ephfmsumCosRaw",ephfmsumCosRaw,"ephfmsumCosRaw[2]/F");
-      PATCompositeNtuple->Branch("ephfmsumSinRaw",ephfmsumSinRaw,"ephfmsumSinRaw[2]/F");
-      PATCompositeNtuple->Branch("ephfmsumPtOrEt",&ephfmsumPtOrEt,"ephfmsumPtOrEt/F");
-      
-      PATCompositeNtuple->Branch("eptrackmidAngle",eptrackmidAngle,"eptrackmidAngle[2]/F");
-      PATCompositeNtuple->Branch("ephfpQ",ephfpQ,"ephfpQ[2]/F");
-      PATCompositeNtuple->Branch("ephfmQ",ephfmQ,"ephfmQ[2]/F");
-      PATCompositeNtuple->Branch("eptrackmidQ",eptrackmidQ,"eptrackmidQ[2]/F");
-      PATCompositeNtuple->Branch("eptrackmidSumW",&eptrackmidSumW,"eptrackmidSumW/F");
+    
+    PATCompositeNtuple->Branch("trkQx",&trkQx,"trkQx/D");
+    PATCompositeNtuple->Branch("trkQy",&trkQy,"trkQy/D");
+    PATCompositeNtuple->Branch("all_trkQx",&all_trkQx,"all_trkQx/D");
+    PATCompositeNtuple->Branch("all_trkQy",&all_trkQy,"all_trkQy/D");
 
-      PATCompositeNtuple->Branch("ephfAngle",ephfAngle,"ephfAngle[2]/F");
-      PATCompositeNtuple->Branch("ephfsumCos",ephfsumCos,"ephfsumCos[2]/F");
-      PATCompositeNtuple->Branch("ephfsumSin",ephfsumSin,"ephfsumSin[2]/F");      
-      PATCompositeNtuple->Branch("ephfAngleoff",ephfAngleoff,"ephfAngleoff[2]/F");
-      
-      PATCompositeNtuple->Branch("ephfAngleRaw",ephfAngleRaw,"ephfAngleRaw[2]/F");
-      PATCompositeNtuple->Branch("ephfsumCosRaw",ephfsumCosRaw,"ephfsumCosRaw[2]/F");
-      PATCompositeNtuple->Branch("ephfsumSinRaw",ephfsumSinRaw,"ephfsumSinRaw[2]/F");
-      PATCompositeNtuple->Branch("ephfsumPtOrEt",&ephfsumPtOrEt,"ephfsumPtOrEt/F");
-    }
-    PATCompositeNtuple->Branch("trigPrescale",trigPrescale,Form("trigPrescale[%d]/F",NTRG_));
-    PATCompositeNtuple->Branch("trigHLT",trigHLT,Form("trigHLT[%d]/O",NTRG_));
-    PATCompositeNtuple->Branch("evtSel",evtSel,Form("evtSel[%d]/O",NSEL_));
-
-    // particle info
-    PATCompositeNtuple->Branch("pT",pt,"pT[candSize]/F");
-    PATCompositeNtuple->Branch("eta",eta,"eta[candSize]/F");
-    PATCompositeNtuple->Branch("phi",phi,"phi[candSize]/F");
-    PATCompositeNtuple->Branch("mass",mass,"mass[candSize]/F");
-    PATCompositeNtuple->Branch("y",y,"y[candSize]/F");
-    if(useAnyMVA_) PATCompositeNtuple->Branch("mva",mva,"mva[candSize]/F");
-
-    if(!isSkimMVA_)
-    {
-      //Composite candidate info RECO
-      PATCompositeNtuple->Branch("flavor",flavor,"flavor[candSize]/F");
-      PATCompositeNtuple->Branch("VtxProb",VtxProb,"VtxProb[candSize]/F");
-      PATCompositeNtuple->Branch("3DCosPointingAngle",agl,"3DCosPointingAngle[candSize]/F");
-      PATCompositeNtuple->Branch("3DPointingAngle",agl_abs,"3DPointingAngle[candSize]/F");
-      PATCompositeNtuple->Branch("2DCosPointingAngle",agl2D,"2DCosPointingAngle[candSize]/F");
-      PATCompositeNtuple->Branch("2DPointingAngle",agl2D_abs,"2DPointingAngle[candSize]/F");
-      PATCompositeNtuple->Branch("3DDecayLengthSignificance",dlos,"3DDecayLengthSignificance[candSize]/F");
-      PATCompositeNtuple->Branch("3DDecayLength",dl,"3DDecayLength[candSize]/F");
-      PATCompositeNtuple->Branch("3DDecayLengthError",dlerror,"3DDecayLengthError[candSize]/F");
-      PATCompositeNtuple->Branch("2DDecayLengthSignificance",dlos2D,"2DDecayLengthSignificance[candSize]/F");
-      PATCompositeNtuple->Branch("2DDecayLength",dl2D,"2DDecayLength[candSize]/F");
-
-      if(doGenMatching_)
-      {
-        PATCompositeNtuple->Branch("isSwap",isSwap,"isSwap[candSize]/O");
-        PATCompositeNtuple->Branch("idmom_reco",idmom_reco,"idmom_reco[candSize]/I");
-        PATCompositeNtuple->Branch("matchGEN",matchGEN,"matchGEN[candSize]/O");
-      }
- 
-      if(doGenMatchingTOF_)
-      {
-        for(ushort iDau=1; iDau<=NDAU_; iDau++)
-        {
-          PATCompositeNtuple->Branch(Form("PIDD%d",iDau),pid[iDau-1],Form("PIDD%d[candSize]/I",iDau));
-        }
-      }
-
-      //daugther & grand daugther info
-      if(twoLayerDecay_)
-      {
-        PATCompositeNtuple->Branch("massDaugther1",grand_mass,"massDaugther1[candSize]/F");
-        PATCompositeNtuple->Branch("VtxProbDaugther1",grand_VtxProb,"VtxProbDaugther1[candSize]/F");
-        PATCompositeNtuple->Branch("3DCosPointingAngleDaugther1",grand_agl,"3DCosPointingAngleDaugther1[candSize]/F");
-        PATCompositeNtuple->Branch("3DPointingAngleDaugther1",grand_agl_abs,"3DPointingAngleDaugther1[candSize]/F");
-        PATCompositeNtuple->Branch("2DCosPointingAngleDaugther1",grand_agl2D,"2DCosPointingAngleDaugther1[candSize]/F");
-        PATCompositeNtuple->Branch("2DPointingAngleDaugther1",grand_agl2D_abs,"2DPointingAngleDaugther1[candSize]/F");
-        PATCompositeNtuple->Branch("3DDecayLengthSignificanceDaugther1",grand_dlos,"3DDecayLengthSignificanceDaugther1[candSize]/F");
-        PATCompositeNtuple->Branch("3DDecayLengthDaugther1",grand_dl,"3DDecayLengthDaugther1[candSize]/F");
-        PATCompositeNtuple->Branch("3DDecayLengthErrorDaugther1",grand_dlerror,"3DDecayLengthErrorDaugther1[candSize]/F");
-        PATCompositeNtuple->Branch("2DDecayLengthSignificanceDaugther1",grand_dlos2D,"2DDecayLengthSignificanceDaugther1[candSize]/F");
-        for(ushort iGDau=1; iGDau<=NGDAU_; iGDau++)
-        {
-          PATCompositeNtuple->Branch(Form("zDCASignificanceGrandDaugther%d",iGDau),grand_dzos[iGDau-1],Form("zDCASignificanceGrandDaugther%d[candSize]/F",iGDau));
-          PATCompositeNtuple->Branch(Form("xyDCASignificanceGrandDaugther%d",iGDau),grand_dxyos[iGDau-1],Form("xyDCASignificanceGrandDaugther%d[candSize]/F",iGDau));
-          PATCompositeNtuple->Branch(Form("NHitGrandD%d",iGDau),grand_nhit[iGDau-1],Form("NHitGrandD%d[candSize]/F",iGDau));
-          PATCompositeNtuple->Branch(Form("HighPurityGrandDaugther%d",iGDau),grand_trkquality[iGDau-1],Form("HighPurityGrandDaugther%d[candSize]/O",iGDau));
-          PATCompositeNtuple->Branch(Form("pTGrandD%d",iGDau),grand_pt[iGDau-1],Form("pTGrandD%d[candSize]/F",iGDau));
-          PATCompositeNtuple->Branch(Form("pTerrGrandD%d",iGDau),grand_ptErr[iGDau-1],Form("pTerrGrandD%d[candSize]/F",iGDau));
-          PATCompositeNtuple->Branch(Form("EtaGrandD%d",iGDau),grand_eta[iGDau-1],Form("EtaGrandD%d[candSize]/F",iGDau));
-          if(useDeDxData_)
-          {
-            PATCompositeNtuple->Branch(Form("dedxPixelHarmonic2GrandD%d",iGDau),grand_T4dedx[iGDau-1],Form("dedxPixelHarmonic2GrandD%d[candSize]/F",iGDau));
-            PATCompositeNtuple->Branch(Form("dedxHarmonic2GrandD%d",iGDau),grand_H2dedx[iGDau-1],Form("dedxHarmonic2GrandD%d[candSize]/F",iGDau));
-          }
-        }
-      }
-      for(ushort iDau=1; iDau<=NDAU_; iDau++)
-      {
-        PATCompositeNtuple->Branch(Form("zDCASignificanceDaugther%d",iDau),dzos[iDau-1],Form("zDCASignificanceDaugther%d[candSize]/F",iDau));
-        PATCompositeNtuple->Branch(Form("xyDCASignificanceDaugther%d",iDau),dxyos[iDau-1],Form("xyDCASignificanceDaugther%d[candSize]/F",iDau));
-        PATCompositeNtuple->Branch(Form("NHitD%d",iDau),nhit[iDau-1],Form("NHitD%d[candSize]/F",iDau));
-        PATCompositeNtuple->Branch(Form("HighPurityDaugther%d",iDau),trkquality[iDau-1],Form("HighPurityDaugther%d[candSize]/O",iDau));
-        PATCompositeNtuple->Branch(Form("pTD%d",iDau),ptDau[iDau-1],Form("pTD%d[candSize]/F",iDau));
-        PATCompositeNtuple->Branch(Form("pTerrD%d",iDau),ptErr[iDau-1],Form("pTerrD%d[candSize]/F",iDau));
-        PATCompositeNtuple->Branch(Form("EtaD%d",iDau),etaDau[iDau-1],Form("EtaD%d[candSize]/F",iDau));
-        PATCompositeNtuple->Branch(Form("PhiD%d",iDau),phiDau[iDau-1],Form("PhiD%d[candSize]/F",iDau));
-        PATCompositeNtuple->Branch(Form("chargeD%d",iDau),chargeDau[iDau-1],Form("chargeD%d[candSize]/S",iDau));
-        if(useDeDxData_)
-        {
-          PATCompositeNtuple->Branch(Form("dedxPixelHarmonic2D%d",iDau),T4dedx[iDau-1],Form("dedxPixelHarmonic2D%d[candSize]/F",iDau));
-          PATCompositeNtuple->Branch(Form("dedxHarmonic2D%d",iDau),H2dedx[iDau-1],Form("dedxHarmonic2D%d[candSize]/F",iDau));
-        }
-      }
- 
-      if(doMuon_)
-      {
-        for(ushort iDau=1; iDau<=NDAU_; iDau++)
-        {
-          if(fabs(PID_dau_[iDau-1])!=13) continue;
-          PATCompositeNtuple->Branch(Form("OneStMuon%d",iDau),onestmuon[iDau-1],Form("OneStMuon%d[candSize]/O",iDau));
-          PATCompositeNtuple->Branch(Form("PFMuon%d",iDau),pfmuon[iDau-1],Form("PFMuon%d[candSize]/O",iDau));
-          PATCompositeNtuple->Branch(Form("GlbMuon%d",iDau),glbmuon[iDau-1],Form("GlbMuon%d[candSize]/O",iDau));
-          PATCompositeNtuple->Branch(Form("trkMuon%d",iDau),trkmuon[iDau-1],Form("trkMuon%d[candSize]/O",iDau));
-          PATCompositeNtuple->Branch(Form("tightMuon%d",iDau),tightmuon[iDau-1],Form("tightMuon%d[candSize]/O",iDau));
-          PATCompositeNtuple->Branch(Form("softMuon%d",iDau),softmuon[iDau-1],Form("softMuon%d[candSize]/O",iDau));
-          PATCompositeNtuple->Branch(Form("hybridMuon%d",iDau),hybridmuon[iDau-1],Form("hybridMuon%d[candSize]/O",iDau));
-          PATCompositeNtuple->Branch(Form("HPMuon%d",iDau),hpmuon[iDau-1],Form("HPMuon%d[candSize]/O",iDau));
-          PATCompositeNtuple->Branch(Form("trigMuon%d",iDau),&(trgmuon[iDau-1]));
-          PATCompositeNtuple->Branch(Form("nMatchedStationD%d",iDau),nmatchedst[iDau-1],Form("nMatchedStationD%d[candSize]/S",iDau));
-          PATCompositeNtuple->Branch(Form("nTrackerLayerD%d",iDau),ntrackerlayer[iDau-1],Form("nTrackerLayerD%d[candSize]/S",iDau));
-          PATCompositeNtuple->Branch(Form("nPixelLayerD%d",iDau),npixellayer[iDau-1],Form("nPixelLayerD%d[candSize]/S",iDau));
-          PATCompositeNtuple->Branch(Form("nPixelHitD%d",iDau),npixelhit[iDau-1],Form("nPixelHitD%d[candSize]/S",iDau));
-          PATCompositeNtuple->Branch(Form("nMuonHitD%d",iDau),nmuonhit[iDau-1],Form("nMuonHitD%d[candSize]/S",iDau));
-          PATCompositeNtuple->Branch(Form("GlbTrkChiD%d",iDau),glbtrkchi[iDau-1],Form("GlbTrkChiD%d[candSize]/F",iDau));
-          PATCompositeNtuple->Branch(Form("muondXYD%d",iDau),muonbestdxy[iDau-1],Form("muondXYD%d[candSize]/F",iDau));
-          PATCompositeNtuple->Branch(Form("muondZD%d",iDau),muonbestdz[iDau-1],Form("muondZD%d[candSize]/F",iDau));
-          PATCompositeNtuple->Branch(Form("dXYD%d",iDau),muondxy[iDau-1],Form("dXYD%d[candSize]/F",iDau));
-          PATCompositeNtuple->Branch(Form("dZD%d",iDau),muondz[iDau-1],Form("dZD%d[candSize]/F",iDau));
-          if(doMuonFull_)
-          {
-            PATCompositeNtuple->Branch(Form("nMatchedChamberD%d",iDau),nmatchedch[iDau-1],Form("nMatchedChamberD%d[candSize]/S",iDau));
-            PATCompositeNtuple->Branch(Form("EnergyDepositionD%d",iDau),matchedenergy[iDau-1],Form("EnergyDepositionD%d[candSize]/F",iDau));
-            PATCompositeNtuple->Branch(Form("dx%d_seg",iDau),        dx_seg[iDau-1], Form("dx%d_seg[candSize]/F",iDau));
-            PATCompositeNtuple->Branch(Form("dy%d_seg",iDau),        dy_seg[iDau-1], Form("dy%d_seg[candSize]/F",iDau));
-            PATCompositeNtuple->Branch(Form("dxSig%d_seg",iDau),     dxSig_seg[iDau-1], Form("dxSig%d_seg[candSize]/F",iDau));
-            PATCompositeNtuple->Branch(Form("dySig%d_seg",iDau),     dySig_seg[iDau-1], Form("dySig%d_seg[candSize]/F",iDau));
-            PATCompositeNtuple->Branch(Form("ddxdz%d_seg",iDau),     ddxdz_seg[iDau-1], Form("ddxdz%d_seg[candSize]/F",iDau));
-            PATCompositeNtuple->Branch(Form("ddydz%d_seg",iDau),     ddydz_seg[iDau-1], Form("ddydz%d_seg[candSize]/F",iDau));
-            PATCompositeNtuple->Branch(Form("ddxdzSig%d_seg",iDau),  ddxdzSig_seg[iDau-1], Form("ddxdzSig%d_seg[candSize]/F",iDau));
-            PATCompositeNtuple->Branch(Form("ddydzSig%d_seg",iDau),  ddydzSig_seg[iDau-1], Form("ddydzSig%d_seg[candSize]/F",iDau));
-          }
-        }
-      }
-    }
   } // doRecoNtuple_
 
-  if(doGenNtuple_)
-  {
-    PATCompositeNtuple->Branch("weight_gen",&weight_gen,"weight_gen/F");
-    PATCompositeNtuple->Branch("weightLHE_gen",&weightLHE_gen);
-    PATCompositeNtuple->Branch("candSize_gen",&candSize_gen,"candSize_gen/i");
-    PATCompositeNtuple->Branch("pT_gen",pt_gen,"pT_gen[candSize_gen]/F");
-    PATCompositeNtuple->Branch("eta_gen",eta_gen,"eta_gen[candSize_gen]/F");
-    PATCompositeNtuple->Branch("y_gen",y_gen,"y_gen[candSize_gen]/F");
-    PATCompositeNtuple->Branch("status_gen",status_gen,"status_gen[candSize_gen]/S");
-    PATCompositeNtuple->Branch("PID_gen",pid_gen,"PID_gen[candSize_gen]/I");
-    PATCompositeNtuple->Branch("MotherID_gen",idmom_gen,"MotherID_gen[candSize_gen]/I");
-    PATCompositeNtuple->Branch("DecayID_gen",iddecay_gen,"DecayID_gen[candSize_gen]/S");
-    PATCompositeNtuple->Branch("RecIdx_gen",idxrec_gen,"RecIdx_gen[candSize_gen]/S");
+}
 
-    if(decayInGen_)
-    {
-      for(ushort iDau=1; iDau<=NDAU_; iDau++)
-      {
-        PATCompositeNtuple->Branch(Form("PIDD%d_gen",iDau),idDau_gen[iDau-1],Form("PIDD%d_gen[candSize_gen]/I",iDau));
-        PATCompositeNtuple->Branch(Form("chargeD%d_gen",iDau),chargeDau_gen[iDau-1],Form("chargeD%d_gen[candSize_gen]/S",iDau));
-        PATCompositeNtuple->Branch(Form("pTD%d_gen",iDau),ptDau_gen[iDau-1],Form("pTD%d_gen[candSize_gen]/F",iDau));
-        PATCompositeNtuple->Branch(Form("EtaD%d_gen",iDau),etaDau_gen[iDau-1],Form("EtaD%d_gen[candSize_gen]/F",iDau));
-        PATCompositeNtuple->Branch(Form("PhiD%d_gen",iDau),phiDau_gen[iDau-1],Form("PhiD%d_gen[candSize_gen]/F",iDau));
-      }
-    }
-  }
+void
+PATEventPlane::initHistogram()
+{
+  htrkpt = fs->make<TH1D>("hTrk",";pT",100,0,10);
+  hEtavsPt_DauTrk = fs->make<TH2D>("hEtavsPt_DauTrk",";Eta;Pt",200,-10,10,100,0,10);
+  houtmu = fs->make<TH2D>("houtmu",";Eta;Pt",200,-10,10,100,0,10);
+  htrk = fs->make<TH2D>("htrk",";Eta;Pt",200,-10,10,100,0,10);
+  hMassvsPt_dimu = fs->make<TH2D>("hMassvsPt_dimu",";Mass;Pt",20,2.6,4.2,100,0,10);
+  hEtavsPt_mu1 = fs->make<TH2D>("hEtavsPt_mu1",";Eta;Pt",500,-10,10,500,0,10);
+  hEtavsPt_mu2 = fs->make<TH2D>("hEtavsPt_mu2",";Eta;Pt",500,-10,10,500,0,10);
+  htrkd1 = fs->make<TH2D>("htrkd1",";Eta;Pt",500,-10,10,500,0,10);
+  htrkd2 = fs->make<TH2D>("htrkd2",";Eta;Pt",500,-10,10,500,0,10);
 
-  if(doMuonNtuple_)
-  {
-    PATCompositeNtuple->Branch("candSize_mu",&candSize_mu,"candSize_mu/i");
-    PATCompositeNtuple->Branch("pT_mu",pt_mu,"pT_mu[candSize_mu]/F");
-    PATCompositeNtuple->Branch("eta_mu",eta_mu,"eta_mu[candSize_mu]/F");
-    PATCompositeNtuple->Branch("phi_mu",phi_mu,"phi_mu[candSize_mu]/F");
+  hdeltaEta = fs->make<TH1D>("hdeltaEta",";#Delta#eta",10000,0,0.01);
+  hdeltaPhi = fs->make<TH1D>("hdeltaPhi",";#Delta#phi",10000,0,0.01);
+  hdeltaPt = fs->make<TH1D>("hdeltaPt",";#Deltap_{T}",10000,0,0.001);
 
-    PATCompositeNtuple->Branch("OneStMuon_mu",onestmuon_mu,"OneStMuon_mu[candSize_mu]/O");
-    PATCompositeNtuple->Branch("GlbMuon_mu",glbmuon_mu,"GlbMuon_mu[candSize_mu]/O");
-    PATCompositeNtuple->Branch("softMuon_mu",softmuon_mu,"softMuon_mu[candSize_mu]/O");
-    PATCompositeNtuple->Branch("HPMuon_mu",hpmuon_mu,"hybridMuon_mu[candSize_mu]/O");
-    PATCompositeNtuple->Branch("trigMuon_mu",&trgmuon_mu);
-    PATCompositeNtuple->Branch("nTrackerLayer_mu",ntrackerlayer_mu,"nTrackerLayer_mu[candSize_mu]/S");
-    PATCompositeNtuple->Branch("nPixelLayer_mu",npixellayer_mu,"nPixelLayer_mu[candSize_mu]/S");
-    PATCompositeNtuple->Branch("dXY_mu",muondxy_mu,"dXY_mu[candSize_mu]/F");
-    PATCompositeNtuple->Branch("dZ_mu",muondz_mu,"dZ_mu[candSize_mu]/F");
-  }
-
-  if(doTrackNtuple_)
-  {
-    PATCompositeNtuple->Branch("candSize_trk",&candSize_trk,"candSize_trk/i");
-    PATCompositeNtuple->Branch("pT_trk",pt_trk,"pT_trk[candSize_trk]/F");
-    PATCompositeNtuple->Branch("eta_trk",eta_trk,"eta_trk[candSize_trk]/F");
-    PATCompositeNtuple->Branch("phi_trk",phi_trk,"phi_trk[candSize_trk]/F");
-
-    PATCompositeNtuple->Branch("HP_trk",hp_trk,"highPurity_trk[candSize_trk]/O");
-    PATCompositeNtuple->Branch("pTErr_trk",pTErr_trk,"pTErr_trk[candSize_trk]/F");
-    PATCompositeNtuple->Branch("dXYsig_trk",dXYsig_trk,"dXYsig_trk[candSize_trk]/F");
-    PATCompositeNtuple->Branch("dZsig_trk",dZsig_trk,"dZsig_trk[candSize_trk]/F");
-  }
-
+  htwEt=fs->make<TH1D>("htwEt",";Et",100,0,100);
+  htwqx=fs->make<TH1D>("htwqx",";qx",100,0,100);
+  htwqy=fs->make<TH1D>("htwqy",";qy",100,0,100);
 }
 
 
 //--------------------------------------------------------------------------------------------------
 void 
-PATCompositeTreeProducer::beginRun(const edm::Run& iRun, const edm::EventSetup& iSetup)
+PATEventPlane::beginRun(const edm::Run& iRun, const edm::EventSetup& iSetup)
 {
-  bool changed = true;
-  EDConsumerBase::Labels triggerResultsLabel;
-  EDConsumerBase::labelsForToken(tok_triggerResults_, triggerResultsLabel);
-  hltPrescaleProvider_.init(iRun, iSetup, triggerResultsLabel.process, changed);
 }
 
 
 // ------------ method called once each job just after ending the event
 //loop  ------------
 void 
-PATCompositeTreeProducer::endJob()
+PATEventPlane::endJob()
 {
+	cout << "nMuons = " << nmuons <<  endl;
 }
-
-
-reco::GenParticleRef
-PATCompositeTreeProducer::findLastPar(const reco::GenParticleRef& genParRef)
-{
-  if(genParRef.isNull()) return genParRef;
-  reco::GenParticleRef genLastParRef = genParRef;
-  const int& pdg_OLD = genParRef->pdgId();
-  while(genLastParRef->numberOfDaughters()>0 && genLastParRef->daughterRef(0)->pdgId()==pdg_OLD)
-  {
-    genLastParRef = genLastParRef->daughterRef(0);
-  }
-  return genLastParRef;
-}
-
-
-reco::GenParticleRef
-PATCompositeTreeProducer::findMother(const reco::GenParticleRef& genParRef)
-{
-  if(genParRef.isNull()) return genParRef;
-  reco::GenParticleRef genMomRef = genParRef;
-  int pdg = genParRef->pdgId(); const int pdg_OLD = pdg;
-  while(pdg==pdg_OLD && genMomRef->numberOfMothers()>0)
-  {
-    genMomRef = genMomRef->motherRef(0);
-    pdg = genMomRef->pdgId();
-  }
-  if(pdg==pdg_OLD) genMomRef = reco::GenParticleRef();
-  return genMomRef;
-}
-
-
-bool
-PATCompositeTreeProducer::findDaughters(std::vector<reco::GenParticleRef>& dauVec, const reco::GenParticleRef& genParRef)
-{
-  if(genParRef.isNull()) return false;
-  auto PIDvec = PID_dau_;
-  for(ushort iDau=0; iDau<genParRef->numberOfDaughters(); iDau++)
-  {
-    const auto& dau = findLastPar(genParRef->daughterRef(iDau));
-    auto pos = std::find(PIDvec.begin(), PIDvec.end(), fabs(dau->pdgId()));
-    // Case: Candidate -> Daughters
-    if(pos!=PIDvec.end())
-    {
-      dauVec.push_back(dau);
-      PIDvec.erase(pos);
-    }
-    else
-    {
-      // Case: Candidate -> Intermediate Decays -> Daughters
-      for(ushort iGDau=0; iGDau<dau->numberOfDaughters(); iGDau++)
-      {
-        const auto& gdau = findLastPar(dau->daughterRef(iGDau));
-        pos = std::find(PIDvec.begin(), PIDvec.end(), fabs(gdau->pdgId()));
-        if(pos!=PIDvec.end())
-        {
-          dauVec.push_back(gdau);
-          PIDvec.erase(pos);
-          break;
-        }
-      }
-    }
-    if(PIDvec.empty()) return true;
-    else if(pos==PIDvec.end()) return false;
-  }
-  return false;
-}
-
 
 //define this as a plug-in
-DEFINE_FWK_MODULE(PATCompositeTreeProducer);
+DEFINE_FWK_MODULE(PATEventPlane);
