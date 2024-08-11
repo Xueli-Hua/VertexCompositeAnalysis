@@ -304,7 +304,7 @@ PATEventPlaneTrack::fillRECO(const edm::Event& iEvent, const edm::EventSetup& iS
   for(uint it=0; it<candSize; ++it)
   { 
     const auto& trk = (*v0candidates)[it];
-    bool isCohJpsi;
+    bool isCohJpsi = false;
 	  
     const ushort& nDau = trk.numberOfDaughters();
     if(nDau!=2) throw cms::Exception("PATCompositeAnalyzer") << "Expected " << 2 << " daughters but V0 candidate has " << nDau << " daughters!" << std::endl;
@@ -366,7 +366,7 @@ PATEventPlaneTrack::fillRECO(const edm::Event& iEvent, const edm::EventSetup& iS
 
     	for (unsigned i=0; i<dauEta.size(); ++i)
     	{
-            if( abs(dauEta[i] - eta) < 1.E-6 && abs(reco::deltaPhi(dauPhi[i], phi)) < 1.E-6) DauTrk = true; 
+            if( abs(dauEta[i] - eta) < 1.E-3 && abs(reco::deltaPhi(dauPhi[i], phi)) < 1.E-3) DauTrk = true; 
 	    double deltaEta = std::abs(dauEta[i] - eta);
     	    double deltaPhi = std::abs(reco::deltaPhi(dauPhi[i], phi));
 	    double deltaPt = std::abs(dauPt[i] - pt) / pt;

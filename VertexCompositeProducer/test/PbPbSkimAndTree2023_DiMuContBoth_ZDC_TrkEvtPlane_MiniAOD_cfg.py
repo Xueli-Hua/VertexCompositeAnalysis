@@ -25,7 +25,7 @@ process.source = cms.Source("PoolSource",
         #'root://cms-xrd-global.cern.ch//store/hidata/HIRun2023A/HIMinimumBias0/MINIAOD/PromptReco-v2/000/374/668/00000/99ceb28c-542e-4b2c-ac5d-bf44588e288d.root',
     ),
 )
-process.maxEvents = cms.untracked.PSet(input = cms.untracked.int32(10000))
+process.maxEvents = cms.untracked.PSet(input = cms.untracked.int32(-1))
 
 # Set the global tag
 process.load('Configuration.StandardSequences.FrontierConditions_GlobalTag_cff')
