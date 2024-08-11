@@ -366,7 +366,7 @@ PATEventPlaneTrack::fillRECO(const edm::Event& iEvent, const edm::EventSetup& iS
 
     	for (unsigned i=0; i<dauEta.size(); ++i)
     	{
-            if( abs(dauEta[i] - eta) < 1.E-3 && abs(reco::deltaPhi(dauPhi[i], phi)) < 1.E-3 && abs(dauPt[i] - pt) / dauPt[i] < 1.E-4) DauTrk = true; 
+            if( abs(dauEta[i] - eta) < 1.E-6 && abs(reco::deltaPhi(dauPhi[i], phi)) < 1.E-6) DauTrk = true; 
 	    double deltaEta = std::abs(dauEta[i] - eta);
     	    double deltaPhi = std::abs(reco::deltaPhi(dauPhi[i], phi));
 	    double deltaPt = std::abs(dauPt[i] - pt) / pt;
