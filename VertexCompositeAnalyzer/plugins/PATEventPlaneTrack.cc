@@ -312,10 +312,13 @@ PATEventPlaneTrack::fillRECO(const edm::Event& iEvent, const edm::EventSetup& iS
     //y[it] = trk.rapidity();
     //flavor[it] = (trk.pdgId()!=0 ? trk.pdgId()/fabs(trk.pdgId()) : 0.);
 
-    if (mass>cohJpsiMassMin && mass<cohJpsiMassMax && pt < cohJpsiPtMax) isCohJpsi = true;
+    if (mass[it] > cohJpsiMassMin && mass[it] < cohJpsiMassMax && pt[it] < cohJpsiPtMax) isCohJpsi = true;
     if (isCohJpsi == false) continue;
 
-    auto DauMu = std::make_unique<std::vector<T>>();
+    const ushort& nDau = trk.numberOfDaughters();
+    if(nDau!=2) throw cms::Exception("PATCompositeAnalyzer") << "Expected " << 2 << " daughters but V0 candidate has " << nDau << " daughters!" << std::endl;
+
+    auto DauMu = std::make_unique<std::vector<auto>>();
     for(ushort iDau=0; iDau<nDau; iDau++)
     {
       const auto& dau = *(trk.daughter(iDau));
@@ -373,7 +376,7 @@ PATEventPlaneTrack::fillRECO(const edm::Event& iEvent, const edm::EventSetup& iS
       	    if( fabs(eta-d2Eta[i]) <0.001 && fabs(phi-d2Phi[i]) <0.001) htrkd2->Fill(track->eta(),track->pt());
    	}
 
-    	for (std::vector<T>::const_iterator muon = DauMu->begin(); muon < DauMu->end(); muon++) {
+    	for (std::vector<auto>::const_iterator muon = DauMu->begin(); muon < DauMu->end(); muon++) {
 	    const auto& muonTrack = muon.get<reco::TrackRef>();
             if (muonTrack != track && track->charge() == muonTrack->charge() && std::abs(muonTrack->eta() - track->eta()) < 1.E-3 && std::abs(reco::deltaPhi(muonTrack->phi(), track->phi())) < 1.E-3 && std::abs(muonTrack->pt() - track->pt()) / muonTrack->pt() < 1.E-3) {
 		    cout << "it = " << it << "DauTrk = "<< DauTrk << endl;
