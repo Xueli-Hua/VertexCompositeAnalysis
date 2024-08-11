@@ -102,14 +102,6 @@ private:
   edm::Service<TFileService> fs;
 
   TTree* PATEventPlaneNtuple;
-  TH1D* htrkpt;
-  TH2D* hEtavsPt_DauTrk;
-  TH2D* htrk;
-  TH2D* hMassvsPt_dimu;
-  TH2D* hEtavsPt_mu1;
-  TH2D* hEtavsPt_mu2;
-  TH2D* htrkd1;
-  TH2D* htrkd2;
   TH1D* hdeltaEta;
   TH1D* hdeltaPhi;
   TH1D* hdeltaPt;
@@ -322,7 +314,7 @@ PATEventPlaneTrack::fillRECO(const edm::Event& iEvent, const edm::EventSetup& iS
       dauEta.push_back(dau.eta());
       dauPhi.push_back(dau.phi());
       dauPt.push_back(dau.pt());
-      cout << "idau Pt Eta Phi = " << dau.pt() <<' '<< dau.eta()<<' '<<dau.phi()<<endl;
+      //cout << "idau Pt Eta Phi = " << dau.pt() <<' '<< dau.eta()<<' '<<dau.phi()<<endl;
     }
   }
   nmuons += dauEta.size();
@@ -376,12 +368,10 @@ PATEventPlaneTrack::fillRECO(const edm::Event& iEvent, const edm::EventSetup& iS
    	}
 
     	if (DauTrk == true) {
-      	    hEtavsPt_DauTrk->Fill(track->eta(),track->pt());
-	    cout << "it = " << it << "; DauTrk = "<< DauTrk << endl;
-            cout << "Matched track Pt Eta Phi = " << track->pt() <<' '<< track->eta()<<' '<<track->phi()<<endl;
+	    //cout << "it = " << it << "; DauTrk = "<< DauTrk << endl;
+            //cout << "Matched track Pt Eta Phi = " << track->pt() <<' '<< track->eta()<<' '<<track->phi()<<endl;
       	    continue;
     	}
-    	htrkpt->Fill(pt);
     
     	trkqx += pt*cos(2*phi);
     	trkqy += pt*sin(2*phi);
@@ -445,15 +435,6 @@ PATEventPlaneTrack::initTree()
 void
 PATEventPlaneTrack::initHistogram()
 {
-  htrkpt = fs->make<TH1D>("hTrk",";pT",100,0,10);
-  hEtavsPt_DauTrk = fs->make<TH2D>("hEtavsPt_DauTrk",";Eta;Pt",200,-10,10,100,0,10);
-  htrk = fs->make<TH2D>("htrk",";Eta;Pt",200,-10,10,100,0,10);
-  hMassvsPt_dimu = fs->make<TH2D>("hMassvsPt_dimu",";Mass;Pt",20,2.6,4.2,100,0,10);
-  hEtavsPt_mu1 = fs->make<TH2D>("hEtavsPt_mu1",";Eta;Pt",500,-10,10,500,0,10);
-  hEtavsPt_mu2 = fs->make<TH2D>("hEtavsPt_mu2",";Eta;Pt",500,-10,10,500,0,10);
-  htrkd1 = fs->make<TH2D>("htrkd1",";Eta;Pt",500,-10,10,500,0,10);
-  htrkd2 = fs->make<TH2D>("htrkd2",";Eta;Pt",500,-10,10,500,0,10);
-
   hdeltaEta = fs->make<TH1D>("hdeltaEta",";#Delta#eta",10000,0,0.01);
   hdeltaPhi = fs->make<TH1D>("hdeltaPhi",";#Delta#phi",10000,0,0.01);
   hdeltaPt = fs->make<TH1D>("hdeltaPt",";#Deltap_{T}",10000,0,0.001);
