@@ -379,6 +379,7 @@ PATEventPlaneTrack::fillRECO(const edm::Event& iEvent, const edm::EventSetup& iS
             cout << "Track: phi = " << phi << endl;
 	    cout << "Track: pt = " << pt << endl;
 	    }
+	    DauTrk == false;
    	}
 
     	if (DauTrk == true) {
