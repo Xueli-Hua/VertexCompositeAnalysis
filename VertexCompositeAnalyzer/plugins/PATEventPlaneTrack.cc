@@ -378,23 +378,23 @@ PATEventPlaneTrack::fillRECO(const edm::Event& iEvent, const edm::EventSetup& iS
 
 	
     	for (std::vector<reco::TrackRef>::const_iterator muonTrack = DauMuTrk->begin(); muonTrack < DauMuTrk->end(); muonTrack++) {
-	    if (muonTrack != track && track->charge() == muonTrack->charge() && std::abs(muonTrack->eta() - track->eta()) < 1.E-3 && std::abs(reco::deltaPhi(muonTrack->phi(), track->phi())) < 1.E-3 && std::abs(muonTrack->pt() - track->pt()) / muonTrack->pt() < 1.E-3) {
+	    if (muonTrack != track && track->charge() == muonTrack.charge() && std::abs(muonTrack.eta() - track->eta()) < 1.E-3 && std::abs(reco::deltaPhi(muonTrack.phi(), track->phi())) < 1.E-3 && std::abs(muonTrack.pt() - track->pt()) / muonTrack.pt() < 1.E-3) {
 		    cout << "it = " << it << "DauTrk = "<< DauTrk << endl;
 		    cout << "pt,eta,phi matched, but muon trackref and track trackref are unequal"<< endl;;
-		    cout << "muonTrack: charge = " << muonTrack->charge() << endl;
-	            cout << "muonTrack: eta = " << muonTrack->eta() << endl;
-        	    cout << "muonTrack: phi = " << muonTrack->phi() << endl;
-	            cout << "muonTrack: pt = " << muonTrack->pt() << endl;
+		    cout << "muonTrack: charge = " << muonTrack.charge() << endl;
+	            cout << "muonTrack: eta = " << muonTrack.eta() << endl;
+        	    cout << "muonTrack: phi = " << muonTrack.phi() << endl;
+	            cout << "muonTrack: pt = " << muonTrack.pt() << endl;
         	    cout << "Track: charge = " << track->charge() << endl;
 	            cout << "Track: eta = " << track->eta() << endl;
         	    cout << "Track: phi = " << track->phi() << endl;
 	            cout << "Track: pt = " << track->pt() << endl;
 		    DauTrk = false;
 	    }
-	    if (track->charge() == muonTrack->charge() && std::abs(muonTrack->eta() - track->eta()) < 2.E-4 && std::abs(reco::deltaPhi(muonTrack->phi(), track->phi())) < 2.E-4 && std::abs(muonTrack->pt() - track->pt()) / muonTrack->pt() < 1.E-4) DauTrk = true; 
-    	    double deltaEta = std::abs(muonTrack->eta() - track->eta());
-    	    double deltaPhi = std::abs(reco::deltaPhi(muonTrack->phi(), track->phi()));
-	    double deltaPt = std::abs(muonTrack->pt() - track->pt()) / muonTrack->pt();
+	    if (track->charge() == muonTrack.charge() && std::abs(muonTrack.eta() - track->eta()) < 2.E-4 && std::abs(reco::deltaPhi(muonTrack.phi(), track->phi())) < 2.E-4 && std::abs(muonTrack.pt() - track->pt()) / muonTrack.pt() < 1.E-4) DauTrk = true; 
+    	    double deltaEta = std::abs(muonTrack.eta() - track->eta());
+    	    double deltaPhi = std::abs(reco::deltaPhi(muonTrack.phi(), track->phi()));
+	    double deltaPt = std::abs(muonTrack.pt() - track->pt()) / muonTrack.pt();
 	    hdeltaEta->Fill(deltaEta);
 	    hdeltaPhi->Fill(deltaPhi);
 	    hdeltaPt->Fill(deltaPt);
