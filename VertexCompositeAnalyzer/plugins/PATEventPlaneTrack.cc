@@ -181,10 +181,8 @@ private:
   edm::EDGetTokenT<int> tok_centBinLabel_;
   edm::EDGetTokenT<reco::Centrality> tok_centSrc_;
  
-  std::vector<double> d1Eta;
-  std::vector<double> d2Eta;
-  std::vector<double> d1Phi;
-  std::vector<double> d2Phi; 
+  std::vector<double> dauEta;
+  std::vector<double> dauPhi;
 
 };
 
@@ -299,18 +297,13 @@ PATEventPlaneTrack::fillRECO(const edm::Event& iEvent, const edm::EventSetup& iS
   float cohJpsiMassMax = 3.2;
   float cohJpsiPtMax = 0.2;
 
-  auto DauMuTrk = std::make_unique<std::vector<reco::TrackRef>>();
   for(uint it=0; it<candSize; ++it)
   { 
     const auto& trk = (*v0candidates)[it];
     bool isCohJpsi;
 
     pt[it] = trk.pt();
-    //eta[it] = trk.eta();
-    //phi[it] = trk.phi();
     mass[it] = trk.mass();
-    //y[it] = trk.rapidity();
-    //flavor[it] = (trk.pdgId()!=0 ? trk.pdgId()/fabs(trk.pdgId()) : 0.);
 
     if (mass[it] > cohJpsiMassMin && mass[it] < cohJpsiMassMax && pt[it] < cohJpsiPtMax) isCohJpsi = true;
     if (isCohJpsi == false) continue;
@@ -321,17 +314,12 @@ PATEventPlaneTrack::fillRECO(const edm::Event& iEvent, const edm::EventSetup& iS
     for(ushort iDau=0; iDau<nDau; iDau++)
     {
       const auto& dau = *(trk.daughter(iDau));
-      const reco::TrackRef& dtrk = dau.get<reco::TrackRef>();
       DauMuTrk->push_back(dtrk);
-      /*
-      ptDau[iDau][it] = dau.pt();
-      pDau[iDau][it] = dau.p();
-      etaDau[iDau][it] = dau.eta();
-      phiDau[iDau][it] = dau.phi();
-      chargeDau[iDau][it] = dau.charge();*/
+      dauEta->push_back(dau.eta());
+      dauPhi->push_back(dau.phi());
     }
   }
-  nmuons += DauMuTrk->size();
+  nmuons += dauEta->size();
   
   //track info
   double trkqx = 0;
@@ -370,35 +358,16 @@ PATEventPlaneTrack::fillRECO(const edm::Event& iEvent, const edm::EventSetup& iS
     	all_trkqy += pt*sin(2*phi);
     	all_trkPt += pt;
 
-    	for (unsigned i=0; i<d1Eta.size(); ++i)
+    	for (unsigned i=0; i<dauEta.size(); ++i)
     	{
-            if( fabs(eta-d1Eta[i]) <0.001 && fabs(phi-d1Phi[i]) <0.001 ) htrkd1->Fill(track->eta(),track->pt());
-      	    if( fabs(eta-d2Eta[i]) <0.001 && fabs(phi-d2Phi[i]) <0.001) htrkd2->Fill(track->eta(),track->pt());
-   	}
-
-	
-    	for (std::vector<reco::TrackRef>::const_iterator muonTrack = DauMuTrk->begin(); muonTrack < DauMuTrk->end(); muonTrack++) {
-	    if (muonTrack != track && track->charge() == muonTrack.charge() && std::abs(muonTrack.eta() - track->eta()) < 1.E-3 && std::abs(reco::deltaPhi(muonTrack.phi(), track->phi())) < 1.E-3 && std::abs(muonTrack.pt() - track->pt()) / muonTrack.pt() < 1.E-3) {
-		    cout << "it = " << it << "DauTrk = "<< DauTrk << endl;
-		    cout << "pt,eta,phi matched, but muon trackref and track trackref are unequal"<< endl;;
-		    cout << "muonTrack: charge = " << muonTrack.charge() << endl;
-	            cout << "muonTrack: eta = " << muonTrack.eta() << endl;
-        	    cout << "muonTrack: phi = " << muonTrack.phi() << endl;
-	            cout << "muonTrack: pt = " << muonTrack.pt() << endl;
-        	    cout << "Track: charge = " << track->charge() << endl;
-	            cout << "Track: eta = " << track->eta() << endl;
-        	    cout << "Track: phi = " << track->phi() << endl;
-	            cout << "Track: pt = " << track->pt() << endl;
-		    DauTrk = false;
-	    }
-	    if (track->charge() == muonTrack.charge() && std::abs(muonTrack.eta() - track->eta()) < 2.E-4 && std::abs(reco::deltaPhi(muonTrack.phi(), track->phi())) < 2.E-4 && std::abs(muonTrack.pt() - track->pt()) / muonTrack.pt() < 1.E-4) DauTrk = true; 
-    	    double deltaEta = std::abs(muonTrack.eta() - track->eta());
-    	    double deltaPhi = std::abs(reco::deltaPhi(muonTrack.phi(), track->phi()));
-	    double deltaPt = std::abs(muonTrack.pt() - track->pt()) / muonTrack.pt();
+            if( fabs(eta-dauEta[i]) <0.001 && fabs(phi-dauPhi[i]) <0.001 ) DauTrk = true; 
+	    double deltaEta = std::abs(muonTrack.eta() - eta);
+    	    double deltaPhi = std::abs(reco::deltaPhi(muonTrack.phi(), phi));
+	    double deltaPt = std::abs(muonTrack.pt() - pt) / pt;
 	    hdeltaEta->Fill(deltaEta);
 	    hdeltaPhi->Fill(deltaPhi);
 	    hdeltaPt->Fill(deltaPt);
-	}
+   	}
 
     	if (DauTrk == true) {
       	    hEtavsPt_DauTrk->Fill(track->eta(),track->pt());
