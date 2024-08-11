@@ -237,7 +237,7 @@ PATEventPlaneTrack::analyze(const edm::Event& iEvent, const edm::EventSetup& iSe
 {
   //check event
   if(doRecoNtuple_) fillRECO(iEvent,iSetup);
-  if(saveTree_&&NtrkHP>0&&centrality>=80) PATEventPlaneNtuple->Fill();
+  if(saveTree_&&centrality>=80) PATEventPlaneNtuple->Fill();
 }
 
 
@@ -298,6 +298,9 @@ PATEventPlaneTrack::fillRECO(const edm::Event& iEvent, const edm::EventSetup& iS
   float cohJpsiMassMax = 3.2;
   float cohJpsiPtMax = 0.2;
 
+  dauEta.clear();
+  dauPhi.clear();
+  dauPt.clear();
   for(uint it=0; it<candSize; ++it)
   { 
     const auto& trk = (*v0candidates)[it];
@@ -370,16 +373,6 @@ PATEventPlaneTrack::fillRECO(const edm::Event& iEvent, const edm::EventSetup& iS
 	    hdeltaEta->Fill(deltaEta);
 	    hdeltaPhi->Fill(deltaPhi);
 	    hdeltaPt->Fill(deltaPt);
-	    if (DauTrk == true) {
-	    cout << "it = " << it << "DauTrk = "<< DauTrk << endl;
-	    cout << "muonTrack: eta = " << dauEta[i] << endl;
-            cout << "muonTrack: phi = " << dauPhi[i] << endl;
-	    cout << "muonTrack: pt = " << dauPt[i] << endl;
-	    cout << "Track: eta = " << eta << endl;
-            cout << "Track: phi = " << phi << endl;
-	    cout << "Track: pt = " << pt << endl;
-	    }
-	    DauTrk == false;
    	}
 
     	if (DauTrk == true) {
