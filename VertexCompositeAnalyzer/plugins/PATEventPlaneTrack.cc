@@ -370,6 +370,7 @@ PATEventPlaneTrack::fillRECO(const edm::Event& iEvent, const edm::EventSetup& iS
 	    hdeltaEta->Fill(deltaEta);
 	    hdeltaPhi->Fill(deltaPhi);
 	    hdeltaPt->Fill(deltaPt);
+	    if (DauTrk == true) {
 	    cout << "it = " << it << "DauTrk = "<< DauTrk << endl;
 	    cout << "muonTrack: eta = " << dauEta[i] << endl;
             cout << "muonTrack: phi = " << dauPhi[i] << endl;
@@ -377,6 +378,7 @@ PATEventPlaneTrack::fillRECO(const edm::Event& iEvent, const edm::EventSetup& iS
 	    cout << "Track: eta = " << eta << endl;
             cout << "Track: phi = " << phi << endl;
 	    cout << "Track: pt = " << pt << endl;
+	    }
    	}
 
     	if (DauTrk == true) {
