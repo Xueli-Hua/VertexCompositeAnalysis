@@ -197,7 +197,7 @@ private:
 //
 
 PATEventPlaneTrack::PATEventPlaneTrack(const edm::ParameterSet& iConfig) :
-  patCompositeCandidateCollection_Token_(consumes<pat::CompositeCandidateCollection>(iConfig.getUntrackedParameter<edm::InputTag>("VertexCompositeCollection"))),
+  patCompositeCandidateCollection_Token_(consumes<pat::CompositeCandidateCollection>(iConfig.getUntrackedParameter<edm::InputTag>("VertexCompositeCollection")))
 {
   //options
   doRecoNtuple_ = iConfig.getUntrackedParameter<bool>("doRecoNtuple");
@@ -299,7 +299,7 @@ PATEventPlaneTrack::fillRECO(const edm::Event& iEvent, const edm::EventSetup& iS
   float cohJpsiMassMax = 3.2;
   float cohJpsiPtMax = 0.2;
 
-  auto DauMu = std::make_unique<std::vector<pat::Muon>>();
+  auto DauMu = std::make_unique<std::vector<reco::Candidate>>();
   for(uint it=0; it<candSize; ++it)
   { 
     const auto& trk = (*v0candidates)[it];
@@ -320,7 +320,7 @@ PATEventPlaneTrack::fillRECO(const edm::Event& iEvent, const edm::EventSetup& iS
 
     for(ushort iDau=0; iDau<nDau; iDau++)
     {
-      const pat::Muon& dau = *(trk.daughter(iDau));
+      const auto& dau = *(trk.daughter(iDau));
       DauMu->push_back(dau);
       /*
       ptDau[iDau][it] = dau.pt();
@@ -375,7 +375,7 @@ PATEventPlaneTrack::fillRECO(const edm::Event& iEvent, const edm::EventSetup& iS
       	    if( fabs(eta-d2Eta[i]) <0.001 && fabs(phi-d2Phi[i]) <0.001) htrkd2->Fill(track->eta(),track->pt());
    	}
 
-    	for (std::vector<pat::Muon>::const_iterator muon = DauMu->begin(); muon < DauMu->end(); muon++) {
+    	for (std::vector<reco::Candidate>::const_iterator muon = DauMu->begin(); muon < DauMu->end(); muon++) {
 	    const reco::TrackRef& muonTrack = muon.get<reco::TrackRef>();
             if (muonTrack != track && track->charge() == muonTrack->charge() && std::abs(muonTrack->eta() - track->eta()) < 1.E-3 && std::abs(reco::deltaPhi(muonTrack->phi(), track->phi())) < 1.E-3 && std::abs(muonTrack->pt() - track->pt()) / muonTrack->pt() < 1.E-3) {
 		    cout << "it = " << it << "DauTrk = "<< DauTrk << endl;
