@@ -314,12 +314,11 @@ PATEventPlaneTrack::fillRECO(const edm::Event& iEvent, const edm::EventSetup& iS
     for(ushort iDau=0; iDau<nDau; iDau++)
     {
       const auto& dau = *(trk.daughter(iDau));
-      DauMuTrk->push_back(dtrk);
-      dauEta->push_back(dau.eta());
-      dauPhi->push_back(dau.phi());
+      dauEta.push_back(dau.eta());
+      dauPhi.push_back(dau.phi());
     }
   }
-  nmuons += dauEta->size();
+  nmuons += dauEta.size();
   
   //track info
   double trkqx = 0;
@@ -361,9 +360,9 @@ PATEventPlaneTrack::fillRECO(const edm::Event& iEvent, const edm::EventSetup& iS
     	for (unsigned i=0; i<dauEta.size(); ++i)
     	{
             if( fabs(eta-dauEta[i]) <0.001 && fabs(phi-dauPhi[i]) <0.001 ) DauTrk = true; 
-	    double deltaEta = std::abs(muonTrack.eta() - eta);
-    	    double deltaPhi = std::abs(reco::deltaPhi(muonTrack.phi(), phi));
-	    double deltaPt = std::abs(muonTrack.pt() - pt) / pt;
+	    double deltaEta = std::abs(dauEta[i] - eta);
+    	    double deltaPhi = std::abs(reco::deltaPhi(dauEta[i], phi));
+	    double deltaPt = std::abs(dauEta[i] - pt) / pt;
 	    hdeltaEta->Fill(deltaEta);
 	    hdeltaPhi->Fill(deltaPhi);
 	    hdeltaPt->Fill(deltaPt);
