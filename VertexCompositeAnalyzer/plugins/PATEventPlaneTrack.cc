@@ -103,7 +103,6 @@ private:
   TTree* PATEventPlaneNtuple;
   TH1D* htrkpt;
   TH2D* hEtavsPt_DauTrk;
-  TH2D* houtmu;
   TH2D* htrk;
   TH2D* hMassvsPt_dimu;
   TH2D* hEtavsPt_mu1;
@@ -113,9 +112,6 @@ private:
   TH1D* hdeltaEta;
   TH1D* hdeltaPhi;
   TH1D* hdeltaPt;
-  TH1D* htwEt;
-  TH1D* htwqx;
-  TH1D* htwqy;
 
   bool   saveTree_;
   bool   saveHistogram_;
@@ -178,13 +174,10 @@ private:
   edm::EDGetTokenT<reco::VertexCollection> tok_offlinePV_;
   edm::EDGetTokenT<pat::CompositeCandidateCollection> patCompositeCandidateCollection_Token_;
 
-  edm::EDGetTokenT<pat::MuonCollection> tok_muoncol_;
-  //edm::EDGetTokenT<reco::MuonCollection> tok_muoncol_;
   edm::EDGetTokenT<reco::TrackCollection> tok_tracks_;
 
   edm::EDGetTokenT<int> tok_centBinLabel_;
   edm::EDGetTokenT<reco::Centrality> tok_centSrc_;
-  edm::EDGetTokenT<CaloTowerCollection> caloTowerToken_;
  
   std::vector<double> d1Eta;
   std::vector<double> d2Eta;
@@ -212,12 +205,8 @@ PATEventPlaneTrack::PATEventPlaneTrack(const edm::ParameterSet& iConfig) :
   //input tokens
   tok_offlineBS_ = consumes<reco::BeamSpot>(iConfig.getUntrackedParameter<edm::InputTag>("beamSpotSrc"));
   tok_offlinePV_ = consumes<reco::VertexCollection>(iConfig.getUntrackedParameter<edm::InputTag>("VertexCollection"));
-  tok_muoncol_ = consumes<pat::MuonCollection>(edm::InputTag(iConfig.getUntrackedParameter<edm::InputTag>("MuonCollection")));
-  //tok_muoncol_ = consumes<reco::MuonCollection>(edm::InputTag(iConfig.getUntrackedParameter<edm::InputTag>("MuonCollection")));
   tok_tracks_ = consumes<reco::TrackCollection>(edm::InputTag(iConfig.getUntrackedParameter<edm::InputTag>("TrackCollection")));
-  caloTowerToken_ = consumes<CaloTowerCollection>(edm::InputTag(iConfig.getUntrackedParameter<edm::InputTag>("caloTowerInputTag")));
-
-
+  
   isCentrality_ = (iConfig.exists("isCentrality") ? iConfig.getParameter<bool>("isCentrality") : false);
   if(isCentrality_)
   {
@@ -417,37 +406,6 @@ PATEventPlaneTrack::fillRECO(const edm::Event& iEvent, const edm::EventSetup& iS
   trkQy = trkqy/trkPt;
   all_trkQx = all_trkqx/all_trkPt;
   all_trkQy = all_trkqy/all_trkPt;
-
-  //Calo tower info
-  //
-  edm::Handle<CaloTowerCollection> towers;
-  iEvent.getByToken(caloTowerToken_, towers);
-  if(!towers.isValid()) return;
-  
-  double twqx = 0;
-  double twqy = 0;
-  double twEt = 0;
-  twQx = -1;
-  twQy = -1;
-  for(unsigned itw = 0; itw < towers->size(); ++itw){
-
-    const CaloTower & hit= (*towers)[itw];
-
-    double et = hit.et(bestvz);
-    double caloPhi = hit.phi();
-
-    twqx += et*cos(2*caloPhi);
-    twqy += et*sin(2*caloPhi);
-    twEt += et;
-
-    htwqx->Fill(twqx);
-    htwqy->Fill(twqy);
-    htwEt->Fill(twEt);
-
-  }
-  twQx = twqx/twEt;
-  twQy = twqy/twEt;
-
 }
 
 
@@ -504,7 +462,6 @@ PATEventPlaneTrack::initHistogram()
 {
   htrkpt = fs->make<TH1D>("hTrk",";pT",100,0,10);
   hEtavsPt_DauTrk = fs->make<TH2D>("hEtavsPt_DauTrk",";Eta;Pt",200,-10,10,100,0,10);
-  houtmu = fs->make<TH2D>("houtmu",";Eta;Pt",200,-10,10,100,0,10);
   htrk = fs->make<TH2D>("htrk",";Eta;Pt",200,-10,10,100,0,10);
   hMassvsPt_dimu = fs->make<TH2D>("hMassvsPt_dimu",";Mass;Pt",20,2.6,4.2,100,0,10);
   hEtavsPt_mu1 = fs->make<TH2D>("hEtavsPt_mu1",";Eta;Pt",500,-10,10,500,0,10);
@@ -517,8 +474,6 @@ PATEventPlaneTrack::initHistogram()
   hdeltaPt = fs->make<TH1D>("hdeltaPt",";#Deltap_{T}",10000,0,0.001);
 
   htwEt=fs->make<TH1D>("htwEt",";Et",100,0,100);
-  htwqx=fs->make<TH1D>("htwqx",";qx",100,0,100);
-  htwqy=fs->make<TH1D>("htwqy",";qy",100,0,100);
 }
 
 
