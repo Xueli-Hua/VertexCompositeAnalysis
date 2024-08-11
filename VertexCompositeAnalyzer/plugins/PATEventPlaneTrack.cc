@@ -350,7 +350,6 @@ PATEventPlaneTrack::fillRECO(const edm::Event& iEvent, const edm::EventSetup& iS
 	double pt  = track->pt();
 	double phi = track->phi();
 	double eta = track->eta();
-	htrk->Fill(track->eta(),track->pt());
 
     	all_trkqx += pt*cos(2*phi);
     	all_trkqy += pt*sin(2*phi);
