@@ -1,9 +1,14 @@
 # We want to put all the CRAB project directories from the tasks we submit here into one common directory.
 # That's why we need to set this parameter (here or above in the configuration file, it does not matter, we will not overwrite it).
-from WMCore.Configuration import Configuration
-#from CRABClient.UserUtilities import getUsername
+#from WMCore.Configuration import Configuration
+#config = Configuration()
 
-config = Configuration()
+from datetime import datetime
+from CRABAPI.RawCommand import crabCommand
+from CRABClient.UserUtilities import config
+config = config()
+date = datetime.now().strftime('%y%m%d')
+date_time = datetime.now().strftime('%y%m%d_%H%M%S')
 
 config.section_("General")
 config.General.workArea = 'crab_projects'
@@ -34,15 +39,28 @@ dataMap = {
           }
 
 ## Submit the muon PDs
-config.General.requestName = 'Jpsi_HIPhysicsRawPrime31_HIRun2023A-PromptRec_Cen40'
-config.Data.inputDataset = '/HIPhysicsRawPrime31/HIRun2023A-PromptReco-v2/MINIAOD'
+#config.General.requestName = 'Jpsi_HIPhysicsRawPrime31_HIRun2023A-PromptRec_Cen40_0812'
+#config.Data.inputDataset = '/HIPhysicsRawPrime31/HIRun2023A-PromptReco-v2/MINIAOD'
 config.Data.unitsPerJob = 20
 #config.Data.totalUnits = 200
 config.JobType.maxMemoryMB = 2500
 config.JobType.maxJobRuntimeMin = 2100
-config.JobType.psetName = 'PbPbSkimAndTree2023_DiMuContBoth_ZDC_MiniAOD_cfg.py'
-config.Data.outputDatasetTag = config.General.requestName
+config.JobType.psetName = 'PbPbSkimAndTree2023_DiMuContBoth_ZDC_TrkEvtPlane_MiniAOD_cfg.py'
+#config.Data.outputDatasetTag = config.General.requestName
 config.Data.outLFNDirBase = '/store/group/phys_heavyions/xueli/HIPhysicsRawPrime/'
 
 #config.Data.runRange = '374961'
 #config.Site.storageSite = 'T3_CH_CERNBOX'
+
+## Submit PDs ###############################################################################
+for i in range(1, 32):
+    config.General.requestName = f'Jpsi_HIPhysicsRawPrime{i}_HIRun2023A-PromptRec_Cen40_'+ date_time
+    config.Data.inputDataset = f'/HIPhysicsRawPrime{i}/HIRun2023A-PromptReco-v2/MINIAOD'
+    config.Data.outputDatasetTag = config.General.requestName
+
+    crabCommand('submit', config = config, dryrun=False)
+
+print('='*50)
+print('All jobs submitted.')
+print(f'Output directory: {config.Data.outLFNDirBase}')
+print('='*50)

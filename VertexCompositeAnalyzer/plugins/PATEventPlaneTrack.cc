@@ -138,7 +138,7 @@ private:
   Double_t all_trkQx;
   Double_t all_trkQy;
 
-  int nmuons = 0;
+  //int nmuons = 0;
   bool isCentrality_;
 
   //Composite candidate info
@@ -286,8 +286,8 @@ PATEventPlaneTrack::fillRECO(const edm::Event& iEvent, const edm::EventSetup& iS
   //RECO Candidate info
   candSize = v0candidates->size();
   if(candSize>MAXCAN) throw cms::Exception("PATEventPlaneTrack") << "Number of candidates (" << candSize << ") exceeds limit!" << std::endl; 
-  float cohJpsiMassMin = 2.8;
-  float cohJpsiMassMax = 3.2;
+  float cohJpsiMassMin = 2.9;
+  float cohJpsiMassMax = 3.3;
   float cohJpsiPtMax = 0.2;
 
   dauEta.clear();
@@ -317,7 +317,7 @@ PATEventPlaneTrack::fillRECO(const edm::Event& iEvent, const edm::EventSetup& iS
       //cout << "idau Pt Eta Phi = " << dau.pt() <<' '<< dau.eta()<<' '<<dau.phi()<<endl;
     }
   }
-  nmuons += dauEta.size();
+  //nmuons += dauEta.size();
   
   //track info
   double trkqx = 0;
@@ -452,7 +452,6 @@ PATEventPlaneTrack::beginRun(const edm::Run& iRun, const edm::EventSetup& iSetup
 void 
 PATEventPlaneTrack::endJob()
 {
-	cout << "nMuons = " << nmuons <<  endl;
 }
 
 //define this as a plug-in
