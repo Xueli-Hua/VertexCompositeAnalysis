@@ -1507,7 +1507,7 @@ PATCompositeTreeProducer::initTree()
         PATCompositeNtuple->Branch(Form("NHitD%d",iDau),nhit[iDau-1],Form("NHitD%d[candSize]/F",iDau));
         PATCompositeNtuple->Branch(Form("HighPurityDaugther%d",iDau),trkquality[iDau-1],Form("HighPurityDaugther%d[candSize]/O",iDau));
         PATCompositeNtuple->Branch(Form("pTD%d",iDau),ptDau[iDau-1],Form("pTD%d[candSize]/F",iDau));
-        PATCompositeNtuple->Branch(Form("pTD%d",iDau),pDau[iDau-1],Form("pD%d[candSize]/F",iDau));
+        PATCompositeNtuple->Branch(Form("pD%d",iDau),pDau[iDau-1],Form("pD%d[candSize]/F",iDau));
         PATCompositeNtuple->Branch(Form("pTerrD%d",iDau),ptErr[iDau-1],Form("pTerrD%d[candSize]/F",iDau));
         PATCompositeNtuple->Branch(Form("EtaD%d",iDau),etaDau[iDau-1],Form("EtaD%d[candSize]/F",iDau));
         PATCompositeNtuple->Branch(Form("PhiD%d",iDau),phiDau[iDau-1],Form("PhiD%d[candSize]/F",iDau));
