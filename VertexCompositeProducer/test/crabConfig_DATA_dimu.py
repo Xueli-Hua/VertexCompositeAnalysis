@@ -47,13 +47,13 @@ config.JobType.maxMemoryMB = 2500
 config.JobType.maxJobRuntimeMin = 2100
 config.JobType.psetName = 'PbPbSkimAndTree2023_DiMuContBoth_ZDC_TrkEvtPlane_MiniAOD_cfg.py'
 #config.Data.outputDatasetTag = config.General.requestName
-config.Data.outLFNDirBase = '/store/group/phys_heavyions/xueli/HIPhysicsRawPrime/'
+config.Data.outLFNDirBase = '/store/group/phys_heavyions/xueli/HIPhysicsRawPrimeCorrect/'
 
 #config.Data.runRange = '374961'
 #config.Site.storageSite = 'T3_CH_CERNBOX'
 
 ## Submit PDs ###############################################################################
-for i in range(1, 32):
+for i in range(0, 32):
     config.General.requestName = f'Jpsi_HIPhysicsRawPrime{i}_HIRun2023A-PromptRec_Cen40_'+ date_time
     config.Data.inputDataset = f'/HIPhysicsRawPrime{i}/HIRun2023A-PromptReco-v2/MINIAOD'
     config.Data.outputDatasetTag = config.General.requestName

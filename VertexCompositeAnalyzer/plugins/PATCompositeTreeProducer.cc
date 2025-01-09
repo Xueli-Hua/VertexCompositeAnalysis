@@ -193,12 +193,12 @@ private:
   float ephfpAngleRaw[2];
   float ephfpsumCosRaw[2];
   float ephfpsumSinRaw[2];
-  float ephfpsumPtOrEt;
+  float ephfpsumPtOrEt[2];
 
   float ephfmAngleRaw[2];
   float ephfmsumCosRaw[2];
   float ephfmsumSinRaw[2];
-  float ephfmsumPtOrEt;
+  float ephfmsumPtOrEt[2];
 
   float eptrackmidAngle[2];
   float ephfpQ[2];
@@ -214,7 +214,7 @@ private:
   float ephfAngleRaw[2];
   float ephfsumCosRaw[2];
   float ephfsumSinRaw[2];
-  float ephfsumPtOrEt;
+  float ephfsumPtOrEt[2];
 
   //Composite candidate info
   float mva[MAXCAN];
@@ -323,6 +323,7 @@ private:
   uint candSize_gen;
   float pt_gen[MAXCAN];
   float eta_gen[MAXCAN];
+  float phi_gen[MAXCAN];
   float y_gen[MAXCAN];
   short status_gen[MAXCAN];
   int pid_gen[MAXCAN];
@@ -334,6 +335,7 @@ private:
   float ptDau_gen[MAXDAU][MAXCAN];
   float etaDau_gen[MAXDAU][MAXCAN];
   float phiDau_gen[MAXDAU][MAXCAN];
+  float pDau_gen[MAXDAU][MAXCAN];
 
   // muon info
   uint candSize_mu;
@@ -679,7 +681,9 @@ PATCompositeTreeProducer::fillRECO(const edm::Event& iEvent, const edm::EventSet
     ephfmsumCosRaw[1] = (eventplanes.isValid() ? (*eventplanes)[6].sumCos(0) : -99.);
     ephfmsumSinRaw[0] = (eventplanes.isValid() ? (*eventplanes)[0].sumSin(0) : -99.);
     ephfmsumSinRaw[1] = (eventplanes.isValid() ? (*eventplanes)[6].sumSin(0) : -99.);
-    ephfmsumPtOrEt = (eventplanes.isValid() ? (*eventplanes)[0].sumPtOrEt() : -99.);
+    ephfmsumPtOrEt[0] = (eventplanes.isValid() ? (*eventplanes)[0].sumPtOrEt() : -99.);
+    ephfmsumPtOrEt[1] = (eventplanes.isValid() ? (*eventplanes)[6].sumPtOrEt() : -99.);
+
 
     // HF plus Event Plane PsiFlat, coff, soff, Psioff, PsiRaw, c, s, sumEt(=sumW)
     
@@ -689,7 +693,8 @@ PATCompositeTreeProducer::fillRECO(const edm::Event& iEvent, const edm::EventSet
     ephfpsumCosRaw[1] = (eventplanes.isValid() ? (*eventplanes)[7].sumCos(0) : -99.);
     ephfpsumSinRaw[0] = (eventplanes.isValid() ? (*eventplanes)[1].sumSin(0) : -99.);
     ephfpsumSinRaw[1] = (eventplanes.isValid() ? (*eventplanes)[7].sumSin(0) : -99.); 
-    ephfpsumPtOrEt = (eventplanes.isValid() ? (*eventplanes)[1].sumPtOrEt() : -99.);
+    ephfpsumPtOrEt[0] = (eventplanes.isValid() ? (*eventplanes)[1].sumPtOrEt() : -99.);
+    ephfpsumPtOrEt[1] = (eventplanes.isValid() ? (*eventplanes)[7].sumPtOrEt() : -99.);
 
     // Andre's part
     eptrackmidAngle[0] = (eventplanes.isValid() ? (*eventplanes)[3].angle(2) : -99.);
@@ -724,7 +729,8 @@ PATCompositeTreeProducer::fillRECO(const edm::Event& iEvent, const edm::EventSet
     ephfsumSinRaw[0] = (eventplanes.isValid() ? (*eventplanes)[2].sumSin(0) : -99.);
     ephfsumSinRaw[1] = (eventplanes.isValid() ? (*eventplanes)[8].sumSin(0) : -99.);
     
-    ephfsumPtOrEt = (eventplanes.isValid() ? (*eventplanes)[2].sumPtOrEt() : -99.);  
+    ephfsumPtOrEt[0] = (eventplanes.isValid() ? (*eventplanes)[2].sumPtOrEt() : -99.);  
+    ephfsumPtOrEt[1] = (eventplanes.isValid() ? (*eventplanes)[8].sumPtOrEt() : -99.);
   }
 
   nPV = vertices->size();
@@ -1270,7 +1276,10 @@ PATCompositeTreeProducer::fillGEN(const edm::Event& iEvent, const edm::EventSetu
       continue;
     } 
   
-    if (trk->status()!=2 && trk->status()!=62) continue; //check gen particle status
+    //cout << "trk->status(): " << trk->status() << endl;
+    //if (trk->status()!=2 && trk->status()!=62 && trk->status()!=22) {cout << "gen particle status is wrong" << endl;continue;}
+
+    //if (trk->status()!=2 && trk->status()!=62 ) continue; //check gen particle status
     if(!findDaughters(dauVec, trk)) continue; //check if has the daughters
 
     pt_gen[candSize_gen] = trk->pt();
@@ -1279,6 +1288,7 @@ PATCompositeTreeProducer::fillGEN(const edm::Event& iEvent, const edm::EventSetu
     pid_gen[candSize_gen] = trk->pdgId();
     status_gen[candSize_gen] = trk->status();
     iddecay_gen[candSize_gen] = fabs(findMother(dauVec[0])->pdgId());
+    phi_gen[candSize_gen] = trk->phi();
 
     const auto& recIt = std::find(genVec_.begin(), genVec_.end(), trk);
     idxrec_gen[candSize_gen] = (recIt!=genVec_.end() ? std::distance(genVec_.begin(), recIt) : -1);
@@ -1296,6 +1306,7 @@ PATCompositeTreeProducer::fillGEN(const edm::Event& iEvent, const edm::EventSetu
         ptDau_gen[iDau][candSize_gen] = (Dd.isNonnull() ? Dd->pt() : -1.);
         etaDau_gen[iDau][candSize_gen] = (Dd.isNonnull() ? Dd->eta() : 9.);
         phiDau_gen[iDau][candSize_gen] = (Dd.isNonnull() ? Dd->phi() : 9.);
+	pDau_gen[iDau][candSize_gen] = (Dd.isNonnull() ? Dd->p() : -1.);
       }
     }
 
@@ -1406,12 +1417,12 @@ PATCompositeTreeProducer::initTree()
       PATCompositeNtuple->Branch("ephfpAngleRaw",ephfpAngleRaw,"ephfpAngleRaw[2]/F");
       PATCompositeNtuple->Branch("ephfpsumCosRaw",ephfpsumCosRaw,"ephfpsumCosRaw[2]/F");
       PATCompositeNtuple->Branch("ephfpsumSinRaw",ephfpsumSinRaw,"ephfpsumSinRaw[2]/F");
-      PATCompositeNtuple->Branch("ephfpsumPtOrEt",&ephfpsumPtOrEt,"ephfpsumPtOrEt/F");
+      PATCompositeNtuple->Branch("ephfpsumPtOrEt",ephfpsumPtOrEt,"ephfpsumPtOrEt[2]/F");
       
       PATCompositeNtuple->Branch("ephfmAngleRaw",ephfmAngleRaw,"ephfmAngleRaw[2]/F");
       PATCompositeNtuple->Branch("ephfmsumCosRaw",ephfmsumCosRaw,"ephfmsumCosRaw[2]/F");
       PATCompositeNtuple->Branch("ephfmsumSinRaw",ephfmsumSinRaw,"ephfmsumSinRaw[2]/F");
-      PATCompositeNtuple->Branch("ephfmsumPtOrEt",&ephfmsumPtOrEt,"ephfmsumPtOrEt/F");
+      PATCompositeNtuple->Branch("ephfmsumPtOrEt",ephfmsumPtOrEt,"ephfmsumPtOrEt[2]/F");
       
       PATCompositeNtuple->Branch("eptrackmidAngle",eptrackmidAngle,"eptrackmidAngle[2]/F");
       PATCompositeNtuple->Branch("ephfpQ",ephfpQ,"ephfpQ[2]/F");
@@ -1427,7 +1438,7 @@ PATCompositeTreeProducer::initTree()
       PATCompositeNtuple->Branch("ephfAngleRaw",ephfAngleRaw,"ephfAngleRaw[2]/F");
       PATCompositeNtuple->Branch("ephfsumCosRaw",ephfsumCosRaw,"ephfsumCosRaw[2]/F");
       PATCompositeNtuple->Branch("ephfsumSinRaw",ephfsumSinRaw,"ephfsumSinRaw[2]/F");
-      PATCompositeNtuple->Branch("ephfsumPtOrEt",&ephfsumPtOrEt,"ephfsumPtOrEt/F");
+      PATCompositeNtuple->Branch("ephfsumPtOrEt",ephfsumPtOrEt,"ephfsumPtOrEt[2]/F");
     }
     PATCompositeNtuple->Branch("trigPrescale",trigPrescale,Form("trigPrescale[%d]/F",NTRG_));
     PATCompositeNtuple->Branch("trigHLT",trigHLT,Form("trigHLT[%d]/O",NTRG_));
@@ -1574,6 +1585,7 @@ PATCompositeTreeProducer::initTree()
     PATCompositeNtuple->Branch("MotherID_gen",idmom_gen,"MotherID_gen[candSize_gen]/I");
     PATCompositeNtuple->Branch("DecayID_gen",iddecay_gen,"DecayID_gen[candSize_gen]/S");
     PATCompositeNtuple->Branch("RecIdx_gen",idxrec_gen,"RecIdx_gen[candSize_gen]/S");
+    PATCompositeNtuple->Branch("phi_gen",phi_gen,"phi_gen[candSize_gen]/F");
 
     if(decayInGen_)
     {
@@ -1584,6 +1596,7 @@ PATCompositeTreeProducer::initTree()
         PATCompositeNtuple->Branch(Form("pTD%d_gen",iDau),ptDau_gen[iDau-1],Form("pTD%d_gen[candSize_gen]/F",iDau));
         PATCompositeNtuple->Branch(Form("EtaD%d_gen",iDau),etaDau_gen[iDau-1],Form("EtaD%d_gen[candSize_gen]/F",iDau));
         PATCompositeNtuple->Branch(Form("PhiD%d_gen",iDau),phiDau_gen[iDau-1],Form("PhiD%d_gen[candSize_gen]/F",iDau));
+	PATCompositeNtuple->Branch(Form("pD%d_gen",iDau),pDau_gen[iDau-1],Form("pD%d_gen[candSize_gen]/F",iDau));
       }
     }
   }

@@ -105,6 +105,10 @@ private:
   TH1D* hdeltaEta;
   TH1D* hdeltaPhi;
   TH1D* hdeltaPt;
+  TH1D* htrketa_forw;
+  TH1D* htrketa_afterw;
+  TH1D* htrkpt;
+  TH1D* htrketa;
 
   bool   saveTree_;
   bool   saveHistogram_;
@@ -132,11 +136,19 @@ private:
 
   Double_t trkQx;
   Double_t trkQy;
-  Double_t twQx;
-  Double_t twQy;
-
   Double_t all_trkQx;
   Double_t all_trkQy;
+  Double_t trkQx_forw;
+  Double_t trkQy_forw;
+  Double_t trkQx_afterw;
+  Double_t trkQy_afterw;
+
+  Double_t trkQx_v3;
+  Double_t trkQy_v3;
+  Double_t trkQx_v3_forw;
+  Double_t trkQy_v3_forw;
+  Double_t trkQx_v3_afterw;
+  Double_t trkQy_v3_afterw;
 
   //int nmuons = 0;
   bool isCentrality_;
@@ -286,9 +298,9 @@ PATEventPlaneTrack::fillRECO(const edm::Event& iEvent, const edm::EventSetup& iS
   //RECO Candidate info
   candSize = v0candidates->size();
   if(candSize>MAXCAN) throw cms::Exception("PATEventPlaneTrack") << "Number of candidates (" << candSize << ") exceeds limit!" << std::endl; 
-  float cohJpsiMassMin = 2.9;
-  float cohJpsiMassMax = 3.3;
-  float cohJpsiPtMax = 0.2;
+  float cohJpsiMassMin = 2.5;
+  float cohJpsiMassMax = 4.3;
+  //float cohJpsiPtMax = 0.2;
 
   dauEta.clear();
   dauPhi.clear();
@@ -296,7 +308,7 @@ PATEventPlaneTrack::fillRECO(const edm::Event& iEvent, const edm::EventSetup& iS
   for(uint it=0; it<candSize; ++it)
   { 
     const auto& trk = (*v0candidates)[it];
-    bool isCohJpsi = false;
+    bool isJpsi = false;
 	  
     const ushort& nDau = trk.numberOfDaughters();
     if(nDau!=2) throw cms::Exception("PATCompositeAnalyzer") << "Expected " << 2 << " daughters but V0 candidate has " << nDau << " daughters!" << std::endl;
@@ -304,8 +316,8 @@ PATEventPlaneTrack::fillRECO(const edm::Event& iEvent, const edm::EventSetup& iS
     pt[it] = trk.pt();
     mass[it] = trk.mass();
 
-    if (mass[it] > cohJpsiMassMin && mass[it] < cohJpsiMassMax && pt[it] < cohJpsiPtMax) isCohJpsi = true;
-    if (isCohJpsi == false) continue;
+    if (mass[it] > cohJpsiMassMin && mass[it] < cohJpsiMassMax) isJpsi = true;
+    if (isJpsi == false) continue;
 
     
     for(ushort iDau=0; iDau<nDau; iDau++)
@@ -325,13 +337,38 @@ PATEventPlaneTrack::fillRECO(const edm::Event& iEvent, const edm::EventSetup& iS
   double trkPt = 0;
   trkQx = -1;
   trkQy = -1;
-  bool DauTrk = false;
-
   double all_trkqx= 0;
   double all_trkqy = 0;
   double all_trkPt = 0;
   all_trkQx = -1;
   all_trkQy = -1;
+
+  bool DauTrk = false;
+
+  double trkPt_forw = 0;
+  double trkPt_afterw = 0;
+  double trkqx_forw = 0;
+  double trkqy_forw = 0;
+  double trkqx_afterw = 0;
+  double trkqy_afterw = 0;
+  trkQx_forw = -1;
+  trkQy_forw = -1;
+  trkQx_afterw = -1;
+  trkQy_afterw = -1;
+
+  double trkqx_v3 = 0;
+  double trkqy_v3 = 0;
+  double trkqx_v3_forw = 0;
+  double trkqy_v3_forw = 0;
+  double trkqx_v3_afterw = 0;
+  double trkqy_v3_afterw = 0;
+  trkQx_v3 = -1;
+  trkQy_v3 = -1;
+  trkQx_v3_forw = -1;
+  trkQy_v3_forw = -1;
+  trkQx_v3_afterw = -1;
+  trkQy_v3_afterw = -1;
+
 
   for(unsigned it=0; it<trackColl->size(); ++it){
 	DauTrk = false;
@@ -346,6 +383,11 @@ PATEventPlaneTrack::fillRECO(const edm::Event& iEvent, const edm::EventSetup& iS
         if(fabs(track->ptError())/track->pt()>0.10) continue;
         if(fabs(dzvtx/dzerror) > 3) continue;
         if(fabs(dxyvtx/dxyerror) > 3) continue;
+	if(track->pt()<=0.3 || track->pt()>=3.0) continue;
+	if(abs(track->eta())>=2.4) continue;
+
+	htrkpt->Fill(track->pt());
+	htrketa->Fill(track->eta());
 	  
 	double pt  = track->pt();
 	double phi = track->phi();
@@ -375,11 +417,43 @@ PATEventPlaneTrack::fillRECO(const edm::Event& iEvent, const edm::EventSetup& iS
     	trkqx += pt*cos(2*phi);
     	trkqy += pt*sin(2*phi);
     	trkPt += pt;
+
+	trkqx_v3 += pt*cos(3*phi);
+	trkqy_v3 += pt*sin(3*phi);
+
+	if (eta>0.5&&eta<2.4) {
+	   trkPt_forw += pt;
+	   trkqx_forw += pt*cos(2*phi);
+	   trkqy_forw += pt*sin(2*phi);
+	   trkqx_v3_forw += pt*cos(3*phi);
+	   trkqy_v3_forw += pt*sin(3*phi);
+           htrketa_forw->Fill(eta);
+	}
+	if (eta>-2.4&&eta<-0.5) {
+	   trkPt_afterw += pt;
+	   trkqx_afterw += pt*cos(2*phi);
+	   trkqy_afterw += pt*sin(2*phi);
+	   trkqx_v3_afterw += pt*cos(3*phi);
+	   trkqy_v3_afterw += pt*sin(3*phi);
+     	   htrketa_afterw->Fill(eta);
+	}
+
   }
   trkQx = trkqx/trkPt;
   trkQy = trkqy/trkPt;
   all_trkQx = all_trkqx/all_trkPt;
   all_trkQy = all_trkqy/all_trkPt;
+  trkQx_v3 = trkqx_v3/trkPt;
+  trkQy_v3 = trkqy_v3/trkPt;
+
+  trkQx_forw = trkqx_forw/trkPt_forw;
+  trkQy_forw = trkqy_forw/trkPt_forw;
+  trkQx_v3_forw = trkqx_v3_forw/trkPt_forw;
+  trkQy_v3_forw = trkqy_v3_forw/trkPt_forw;
+  trkQx_afterw = trkqx_afterw/trkPt_afterw;
+  trkQy_afterw = trkqy_afterw/trkPt_afterw;
+  trkQx_v3_afterw = trkqx_v3_afterw/trkPt_afterw;
+  trkQy_v3_afterw = trkqy_v3_afterw/trkPt_afterw;
 }
 
 
@@ -426,6 +500,16 @@ PATEventPlaneTrack::initTree()
     PATEventPlaneNtuple->Branch("trkQy",&trkQy,"trkQy/D");
     PATEventPlaneNtuple->Branch("all_trkQx",&all_trkQx,"all_trkQx/D");
     PATEventPlaneNtuple->Branch("all_trkQy",&all_trkQy,"all_trkQy/D");
+    PATEventPlaneNtuple->Branch("trkQx_forw",&trkQx_forw,"trkQx_forw/D");
+    PATEventPlaneNtuple->Branch("trkQy_forw",&trkQy_forw,"trkQy_forw/D");
+    PATEventPlaneNtuple->Branch("trkQx_afterw",&trkQx_afterw,"trkQx_afterw/D");
+    PATEventPlaneNtuple->Branch("trkQy_afterw",&trkQy_afterw,"trkQy_afterw/D");
+    PATEventPlaneNtuple->Branch("trkQx_v3",&trkQx_v3,"trkQx_v3/D");
+    PATEventPlaneNtuple->Branch("trkQy_v3",&trkQy_v3,"trkQy_v3/D");
+    PATEventPlaneNtuple->Branch("trkQx_v3_forw",&trkQx_v3_forw,"trkQx_v3_forw/D");
+    PATEventPlaneNtuple->Branch("trkQy_v3_forw",&trkQy_v3_forw,"trkQy_v3_forw/D");
+    PATEventPlaneNtuple->Branch("trkQx_v3_afterw",&trkQx_v3_afterw,"trkQx_v3_afterw/D");
+    PATEventPlaneNtuple->Branch("trkQy_v3_afterw",&trkQy_v3_afterw,"trkQy_v3_afterw/D");
 
   } // doRecoNtuple_
 
@@ -434,9 +518,13 @@ PATEventPlaneTrack::initTree()
 void
 PATEventPlaneTrack::initHistogram()
 {
-  hdeltaEta = fs->make<TH1D>("hdeltaEta",";#Delta#eta",10000,0,0.01);
-  hdeltaPhi = fs->make<TH1D>("hdeltaPhi",";#Delta#phi",10000,0,0.01);
-  hdeltaPt = fs->make<TH1D>("hdeltaPt",";#Deltap_{T}",10000,0,0.001);
+  hdeltaEta = fs->make<TH1D>("hdeltaEta",";#Delta#eta",100000,0,1e-2);
+  hdeltaPhi = fs->make<TH1D>("hdeltaPhi",";#Delta#phi",100000,0,1e-2);
+  hdeltaPt = fs->make<TH1D>("hdeltaPt",";#Deltap_{T}",100000,0,1e-2);
+  htrketa_forw = fs->make<TH1D>("htrketa_forw",";Track Eta in forward",500,-2.5,2.5);
+  htrketa_afterw = fs->make<TH1D>("htrketa_afterw",";Track Eta in afterward",500,-2.5,2.5);
+  htrkpt = fs->make<TH1D>("htrkpt", ";track pt", 100,0,5);
+  htrketa = fs->make<TH1D>("htrketa",";track eta", 300, -3.,3.);
 }
 
 
