@@ -62,8 +62,8 @@ def doPATMuons(process, MC=False):
     if MC:
         # Prune generated particles to muons and their parents
         process.genMuons = cms.EDProducer("GenParticlePruner",
-            src = cms.InputTag("genParticles"),
-            #src = cms.InputTag("prunedGenParticles"),
+            #src = cms.InputTag("genParticles"),
+            src = cms.InputTag("prunedGenParticles"),
             select = cms.vstring(
                 "drop  *  ",                      # this is the default
                 "++keep abs(pdgId) = 13"          # keep muons and their parents

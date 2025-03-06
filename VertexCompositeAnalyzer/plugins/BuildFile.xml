@@ -20,11 +20,14 @@
 <use name="RecoVertex/KalmanVertexFit"/>
 <use name="DataFormats/MuonReco"/>
 <use name="DataFormats/PatCandidates"/>
+<use name="DataFormats/ParticleFlowCandidate"/>
 <use name="DataFormats/HeavyIonEvent"/>
 <use name="CondFormats/DataRecord"/>
 <use name="CondFormats/EgammaObjects"/>
 <use name="DataFormats/HLTReco"/>
 <use name="HLTrigger/HLTcore"/>
 <use name="CondFormats/GBRForest"/>
+
+<use name="heppdt"/>
 
 <flags EDM_PLUGIN="1"/>
