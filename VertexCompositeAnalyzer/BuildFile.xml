@@ -1,1 +1,2 @@
-<flags EDM_PLUGIN="1"/>
+<flags   EDM_PLUGIN="1"/>
+<use   name="root"/>

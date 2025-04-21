@@ -2,13 +2,13 @@
 
 Example of setting up and running gamma+gamma to dimuon tree
 
-cmsrel CMSSW_13_2_6_patch2
+cmsrel CMSSW_15_0_2
 
-cd CMSSW_13_2_6_patch2/src
+cd CMSSW_15_0_2/src
 
 cmsenv
 
-git clone -b ParticleFitter_13_2_X https://github.com/davidlw/VertexCompositeAnalysis
+git clone -b 15_0_X https://github.com/Xueli-Hua/VertexCompositeAnalysis
 
 cd VertexCompositeAnalysis
 
@@ -16,4 +16,4 @@ scram b -j8
 
 cd VertexCompositeProducer/test
 
-cmsRun PbPbSkimAndTree2023_Phi_ParticleAnalyzer_cfg.py
+cmsRun PbPbSkimAndTree2024_cfg.py

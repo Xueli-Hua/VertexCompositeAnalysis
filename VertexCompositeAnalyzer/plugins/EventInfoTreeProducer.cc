@@ -231,7 +231,7 @@ EventInfoTreeProducer::fillRECO(const edm::Event& iEvent, const edm::EventSetup&
       std::vector<ushort> trgIdxFound;
       for(ushort trgIdx=0; trgIdx<triggerNames.size(); trgIdx++)
       {
-        if(triggerNames.triggerName(trgIdx).find(trigName)!=std::string::npos && triggerResults->wasrun(trgIdx)) { trgIdxFound.emplace_back(trgIdx); }
+        if(triggerNames.triggerName(trgIdx).find(trigName)!=std::string::npos && triggerResults->wasrun(trgIdx)) { trgIdxFound.push_back(trgIdx); }
       }
       short triggerIndex = -1;
       if(trgIdxFound.size()>1)
