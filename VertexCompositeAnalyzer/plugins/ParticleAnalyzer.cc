@@ -59,6 +59,9 @@
 
 #include "VertexCompositeAnalysis/VertexCompositeProducer/interface/ParticleFitter.h"
 #include "ParticleContainer.h"
+//#include "MuonAnalysis/MuonAssociators/interface/PropagateToMuon.h"
+#include "MuonAnalysis/MuonAssociators/interface/PropagateToMuonSetup.h"
+//#include "RecoMuon/Records/interface/MuonRecoGeometryRecord.h"
 
 //
 // constants, enums and typedefs
@@ -81,9 +84,9 @@ private:
   virtual void getEventData(const edm::Event&, const edm::EventSetup&);
   virtual void getTriggerData(const edm::Event&, const edm::EventSetup&);
   virtual void fillEventInfo(const edm::Event&);
-  virtual void fillTriggerInfo(const edm::Event&);
+  virtual void fillTriggerInfo(const edm::Event&, const edm::EventSetup&);
   virtual void fillLumiInfo(const edm::Event&);
-  virtual void fillRecoParticleInfo(const edm::Event&);
+  virtual void fillRecoParticleInfo(const edm::Event&, const edm::EventSetup&);
   virtual void fillGenParticleInfo(const edm::Event&);
   virtual void fillSimParticleInfo(const edm::Event&);
   virtual void endJob();
@@ -94,7 +97,7 @@ private:
   virtual void check();
 
   UShort_t fillTriggerObjectInfo(const pat::TriggerObjectStandAlone&, const UShort_t&, const bool&, const UInt_t& candIdx=UINT_MAX);
-  UInt_t   fillRecoParticleInfo(const pat::GenericParticle&, const UInt_t& momIdx=UINT_MAX);
+  UInt_t   fillRecoParticleInfo(const pat::GenericParticle&, const edm::EventSetup& iSetup, const UInt_t& momIdx=UINT_MAX);
   UShort_t fillTrackInfo(const pat::GenericParticle&, const UInt_t&, const bool& force=false);
   UShort_t fillSourceInfo(const pat::GenericParticle&, const UInt_t&, const bool& force=false);
   UShort_t fillMuonInfo(const pat::GenericParticle&, const UInt_t&, const bool& force=false);
@@ -107,7 +110,7 @@ private:
   UShort_t fillGenParticleInfo(const reco::GenParticleRef&, const UInt_t& candIdx=UINT_MAX, const bool& force=false);
   UShort_t fillSimParticleInfo(const TrackingParticleRef&, const UInt_t& candIdx=UINT_MAX, const bool& force=false);
 
-  void initParticleInfo(const std::string&, const Token& sid=Token::Unknown);
+  void initParticleInfo(const std::string&, const edm::EventSetup& iSetup, const Token& sid=Token::Unknown);
   void addTriggerObject(pat::GenericParticle&);
   bool addTriggerObject(pat::GenericParticle&, const math::XYZTLorentzVector&, const TriggerIndexMap&, const std::string&, const std::string&, const int&);
   bool addGenParticle(pat::GenericParticle&, const math::XYZTLorentzVector&, const reco::GenParticleRefVector&);
@@ -199,6 +202,7 @@ private:
   std::vector<std::string> dedxInfo_;
 
   HLTPrescaleProvider hltPrescaleProvider_;
+  PropagateToMuonSetup propSetup_;
   std::vector<std::vector<double> > l1PrescaleTable_;
   std::map<std::string, std::vector<size_t> > hltPathIdx_;
   std::vector<size_t> datasetPathIdx_;
@@ -267,7 +271,8 @@ ParticleAnalyzer::ParticleAnalyzer(const edm::ParameterSet& iConfig) :
   maxGenDeltaR_(iConfig.getUntrackedParameter<double>("maxGenDeltaR", 0.03)),
   maxGenDeltaPtRel_(iConfig.getUntrackedParameter<double>("maxGenDeltaPtRel", 0.5)),
   genPdgIdV_(iConfig.getUntrackedParameter<std::vector<UInt_t> >("genPdgId", {})),
-  hltPrescaleProvider_(iConfig, consumesCollector(), *this)
+  hltPrescaleProvider_(iConfig, consumesCollector(), *this),
+  propSetup_(iConfig, consumesCollector())
 {
   for (const auto& data : triggerInfo_)
   {
@@ -289,7 +294,7 @@ ParticleAnalyzer::~ParticleAnalyzer()
 // ------------ method called to for each event  ------------
 void
 ParticleAnalyzer::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup)
-{
+{  
   //check event
   if (selectEvents_!="")
   {
@@ -317,9 +322,9 @@ ParticleAnalyzer::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetu
 
   // fill information
   fillEventInfo(iEvent);
-  fillTriggerInfo(iEvent);
+  fillTriggerInfo(iEvent, iSetup);
   fillLumiInfo(iEvent);
-  fillRecoParticleInfo(iEvent);
+  fillRecoParticleInfo(iEvent, iSetup);
   fillGenParticleInfo(iEvent);
   fillSimParticleInfo(iEvent);
 
@@ -391,7 +396,7 @@ ParticleAnalyzer::getEventData(const edm::Event& iEvent, const edm::EventSetup& 
       }
     }
     // initialize generated particle container
-    initParticleInfo("gen");
+    initParticleInfo("gen",iSetup,Token::Unknown);
     int nGenTracks = 0;
     // extract generated particles
     for (size_t i=0; i<genParticles->size(); i++)
@@ -432,7 +437,7 @@ ParticleAnalyzer::getEventData(const edm::Event& iEvent, const edm::EventSetup& 
   if (isMC_ && addInfo_["sim"])
   {
     // initialize simulated particle container
-    initParticleInfo("sim");
+    initParticleInfo("sim",iSetup,Token::Unknown);
   }
 }
 
@@ -607,12 +612,15 @@ ParticleAnalyzer::getTriggerData(const edm::Event& iEvent, const edm::EventSetup
       std::map<std::string, std::vector<size_t> > filterObjects;
       const auto& filterKeys = (isTrgEvtValid && filterIndex>=0 ? triggerEvent->filterKeys(filterIndex) : std::vector<UShort_t>());
       const auto& filterIds = (isTrgEvtValid && filterIndex>=0 ? triggerEvent->filterIds(filterIndex) : std::vector<int>());
+      //cout << "isTrgEvtValid: " << isTrgEvtValid << ", filterIndex" << filterIndex << endl;
+      //cout << "isTrgEvtValid: " << isTrgEvtValid << ", filterIndex" << filterIndex << ", filterKeys" << filterKeys[0] << ", filterIds" << filterIds[0] << endl;
       for (size_t iKey=0; iKey<filterKeys.size() && minN>0; iKey++)
       {
         const auto& col = objCol[filterKeys[iKey]];
         // if map does not have collection, add all associated trigger objects
         if (triggerObjectMap_.find(col)==triggerObjectMap_.end())
         {
+          //cout << "triggerObjectMap_.find(col)==triggerObjectMap_.end()" << endl;
           const auto& i = triggerEvent->collectionIndex(col);
           const auto& cK = triggerEvent->collectionKeys();
           const auto& triggerObjects = triggerEvent->getObjects();
@@ -627,6 +635,7 @@ ParticleAnalyzer::getTriggerData(const edm::Event& iEvent, const edm::EventSetup
         obj.addFilterId(filterIds[iKey]);
         obj.addFilterLabel(filterName);
         filterObjects[col].emplace_back(filterKeys[iKey]);
+        //cout << "filterKeys[iKey]: " << filterKeys[iKey] << ", filterIds[iKey]: " << filterIds[iKey] << ", filterName: " << filterName << endl;
       }
       // store trigger information
       triggerData_[iTrg].setInfo(triggerIndex, filterIndex, triggerName, filterName, minN, validPrescale, hltPrescale, l1Prescale, bit, filterObjects);
@@ -824,10 +833,10 @@ ParticleAnalyzer::fillLumiInfo(const edm::Event& iEvent)
 
 
 void
-ParticleAnalyzer::fillTriggerInfo(const edm::Event& iEvent)
+ParticleAnalyzer::fillTriggerInfo(const edm::Event& iEvent, const edm::EventSetup& iSetup)
 {
   // initialize trigger object container
-  initParticleInfo("trig");
+  initParticleInfo("trig",iSetup,Token::Unknown);
 
   // fill trigger information
   for (UShort_t idx=0; idx<triggerData_.size(); idx++)
@@ -865,7 +874,7 @@ ParticleAnalyzer::fillTriggerInfo(const edm::Event& iEvent)
 
 
 void
-ParticleAnalyzer::initParticleInfo(const std::string& type, const Token& sid)
+ParticleAnalyzer::initParticleInfo(const std::string& type, const edm::EventSetup& iSetup, const Token& sid)
 {
   // return if already initialized
   if (particleInfo_.find(type)!=particleInfo_.end()) return;
@@ -877,7 +886,7 @@ ParticleAnalyzer::initParticleInfo(const std::string& type, const Token& sid)
   else if (type=="src"  && !addInfo_.at("source")) return;
   // proceed to initialize with dummy value
   pat::GenericParticle cand; cand.addUserInt("sourceId", sid);
-  if      (type=="cand") fillRecoParticleInfo(pat::GenericParticle(), 0);
+  if      (type=="cand") fillRecoParticleInfo(pat::GenericParticle(), iSetup, 0);
   else if (type=="trig") fillTriggerObjectInfo(pat::TriggerObjectStandAlone(), 0, 0, 0);
   else if (type=="gen" ) fillGenParticleInfo(reco::GenParticleRef(), 0, true);
   else if (type=="sim" ) fillSimParticleInfo(TrackingParticleRef(), 0, true);
@@ -936,24 +945,27 @@ ParticleAnalyzer::fillTriggerObjectInfo(const pat::TriggerObjectStandAlone& obj,
 
 
 void
-ParticleAnalyzer::fillRecoParticleInfo(const edm::Event& iEvent)
+ParticleAnalyzer::fillRecoParticleInfo(const edm::Event& iEvent, const edm::EventSetup& iSetup)
 {
   // fill reconstructed particle information
   const auto& particles = iEvent.getHandle(tok_recParticle_);
   if (particles.isValid())
   {
     // initialize reconstructed particle containers
-    initParticleInfo("cand");
-    initParticleInfo("trk");
-    for (const auto& sid : sourceId_) { initParticleInfo("src", sid); }
+    initParticleInfo("cand",iSetup,Token::Unknown);
+    initParticleInfo("trk",iSetup,Token::Unknown);
+    for (const auto& sid : sourceId_) { initParticleInfo("src",iSetup, sid); }
+
     // loop over reconstructed particles
-    for (const auto& cand : *particles) { fillRecoParticleInfo(cand); }
+    for (const auto& cand : *particles) { 
+      fillRecoParticleInfo(cand, iSetup, 0); 
+    }
   }
 }
 
 
 UInt_t
-ParticleAnalyzer::fillRecoParticleInfo(const pat::GenericParticle& cand, const UInt_t& momIdx)
+ParticleAnalyzer::fillRecoParticleInfo(const pat::GenericParticle& cand, const edm::EventSetup& iSetup, const UInt_t& momIdx)
 {
   // fill reconstructed particle information
   auto& info = particleInfo_["cand"];
@@ -1028,6 +1040,21 @@ ParticleAnalyzer::fillRecoParticleInfo(const pat::GenericParticle& cand, const U
   // mva information
   if (addInfo_.at("mva")) info.add("mva", getFloat(cand, "mva"));
 
+  // === New: propagate reco track to L1 reference ===
+  auto const prop = propSetup_.init(iSetup);
+  const reco::TrackRef tk = cand.track();
+  if (tk.isNonnull()) {
+    auto const propagated = prop.extrapolate(*tk);
+    if (propagated.isValid()) {
+      auto etaForMatch = propagated.globalPosition().eta();
+      auto phiForMatch = propagated.globalPosition().phi();
+      info.add("l1Eta", static_cast<float>(etaForMatch));
+      info.add("l1Phi", static_cast<float>(phiForMatch.value()));
+      //cout << "l1Phi" << static_cast<float>(phiForMatch.value()) << endl;
+    }
+  }
+
+  //cout << "triggerData_.size(): " << triggerData_.size() << endl;
   // trigger information
   if (!triggerData_.empty())
   {
@@ -1035,10 +1062,13 @@ ParticleAnalyzer::fillRecoParticleInfo(const pat::GenericParticle& cand, const U
     addTriggerObject(*const_cast<pat::GenericParticle*>(&cand));
     for (UShort_t i=0; i<triggerData_.size(); i++)
     {
+      //cout << "triggerData_[i].minN(): " << triggerData_[i].minN() << endl;
       if (triggerData_[i].minN()==0) continue;
       pat::TriggerObjectStandAloneCollection triggerObjects;
+      //cout << "triggerData_[i].filterName(): " << triggerData_[i].filterName() << endl;
       if (triggerData_[i].filterName()!="") triggerObjects = cand.triggerObjectMatchesByFilter(triggerData_[i].filterName());
       else triggerObjects = cand.triggerObjectMatchesByPath(triggerData_[i].triggerName());
+      //cout << "triggerObjects.empty(): " << triggerObjects.empty() << endl;
       info.add(Form("matchTRG%d",i), !triggerObjects.empty());
       if (cand.status()==1 && addInfo_.at("trgObj"))
       {
@@ -1097,7 +1127,7 @@ ParticleAnalyzer::fillRecoParticleInfo(const pat::GenericParticle& cand, const U
     {
       const auto& dau = *dauColl[iDau];
       const auto& p4 = daughtersP4[iDau];
-      info.push(idx, "dauIdx", fillRecoParticleInfo(dau, idx));
+      info.push(idx, "dauIdx", fillRecoParticleInfo(dau, iSetup, idx));
       info.push(idx, "pTDau", p4.Pt());
       info.push(idx, "etaDau", p4.Eta());
       info.push(idx, "phiDau", p4.Phi());
@@ -1108,7 +1138,6 @@ ParticleAnalyzer::fillRecoParticleInfo(const pat::GenericParticle& cand, const U
   // return index
   return idx;
 }
-
 
 void
 ParticleAnalyzer::addTriggerObject(pat::GenericParticle& cand)
@@ -1157,21 +1186,37 @@ ParticleAnalyzer::addTriggerObject(pat::GenericParticle& cand, const math::XYZTL
   if (triggerObjects.empty() && !filterObjects.empty() && filterName!="")
   {
     // case: final state particle (direct matching)
+    //cout << "cand.status(): " << cand.status() << endl;
     if (cand.status()==1)
     {
       for (const auto& c : filterObjects)
       {
+        //cout << "cand.hasUserInt(c.first): " << cand.hasUserInt(c.first) << endl;
         if (!cand.hasUserInt(c.first))
         {
           cand.addUserInt(c.first, 1);
           const auto& m = matchData_.at(c.first);
           auto deltaR = m.maxDeltaR();
+          //cout << "deltaR: " << deltaR << endl;
           pat::TriggerObjectStandAlone mObj;
+          
+          //std::cout << "triggerObjectMap_key = " << c.first << std::endl;
+
           for (const auto& o : triggerObjectMap_.at(c.first))
           {
             // general case: match by deltaR and deltaPtRel, select lowest deltaR
+            /*if (c.first.find("Stage2Digis:Muon")!=std::string::npos) {
+              std::cout << "Trigger object IDs: ";
+              for (auto id : o.second.filterIds()) {
+                  std::cout << id << " ";
+              }
+              std::cout << std::endl;
+              cout << "cand.hasUserFloat(l1Eta): " << cand.hasUserFloat("l1Eta") << ", l1Eta: " << cand.userFloat("l1Eta") << endl;
+            }*/
+
             if (c.first.find("Stage2Digis:Muon")==std::string::npos && !o.second.id(-81))
             {
+              //cout << "c.first.find(Stage2Digis:Muon)==std::string::npos && !o.second.id(-81)" << endl;
               if (!isMatched(p4, o.second.p4(), deltaR, m.maxDeltaPtRel())) continue;
               deltaR = reco::deltaR(p4.eta(), p4.phi(), o.second.eta(), o.second.phi());
               mObj = o.second;
@@ -1179,6 +1224,7 @@ ParticleAnalyzer::addTriggerObject(pat::GenericParticle& cand, const math::XYZTL
             // L1 muon case: match by deltaR, deltaEta and deltaPhi, select lowest deltaR
             else if (cand.hasUserFloat("l1Eta"))
             {
+              cout << "cand.hasUserFloat(l1Eta)" << endl;
               math::PtEtaPhiMLorentzVector propP4(p4.pt(), cand.userFloat("l1Eta"), cand.userFloat("l1Phi")-(M_PI/144.), 0); // L1 phi offset: 1.25*pi/180
               if (!isL1MuMatched(propP4, o.second.p4(), deltaR, m.maxDeltaEta(), m.maxDeltaPhi())) continue;
               deltaR = reco::deltaR(propP4.eta(), propP4.phi(), o.second.eta(), o.second.phi());
@@ -1425,6 +1471,7 @@ ParticleAnalyzer::fillMuonInfo(const pat::GenericParticle& cand, const UInt_t& c
   // muon L1 info
   if (!triggerData_.empty() && addInfo_.at("trgObj") && addInfo_.at("muonL1"))
   {
+    //cout << "cand.hasUserFloat(l1Eta): " << cand.hasUserFloat("l1Eta") <<endl;
     info.add("l1Eta", (cand.hasUserFloat("l1Eta") ? cand.userFloat("l1Eta") : -99.9));
     info.add("l1Phi", (cand.hasUserFloat("l1Phi") ? cand.userFloat("l1Phi") : -99.9));
   }

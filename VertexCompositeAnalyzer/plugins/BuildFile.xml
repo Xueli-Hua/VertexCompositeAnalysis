@@ -16,4 +16,5 @@
 <use name="SimDataFormats/Associations"/>
 <use name="HLTrigger/HLTcore"/>
 <use name="heppdt"/>
+<use name="MuonAnalysis/MuonAssociators"/>
 <flags EDM_PLUGIN="1"/>
