@@ -82,10 +82,10 @@ typedef ROOT::Math::SVector<double, 6> SVector6;
 // class decleration
 //
 
-class PATEventPlaneTrack : public edm::one::EDAnalyzer<edm::one::WatchRuns> {
+class HiEventPlaneTrack : public edm::one::EDAnalyzer<edm::one::WatchRuns> {
 public:
-  explicit PATEventPlaneTrack(const edm::ParameterSet&);
-  ~PATEventPlaneTrack();
+  explicit HiEventPlaneTrack(const edm::ParameterSet&);
+  ~HiEventPlaneTrack();
 
 
 private:
@@ -102,6 +102,7 @@ private:
   edm::Service<TFileService> fs;
 
   TTree* PATEventPlaneNtuple;
+  TH1D* hdR;
   TH1D* hdeltaEta;
   TH1D* hdeltaPhi;
   TH1D* hdeltaPt;
@@ -199,7 +200,7 @@ private:
 // constructors and destructor
 //
 
-PATEventPlaneTrack::PATEventPlaneTrack(const edm::ParameterSet& iConfig) :
+HiEventPlaneTrack::HiEventPlaneTrack(const edm::ParameterSet& iConfig) :
   patCompositeCandidateCollection_Token_(consumes<pat::CompositeCandidateCollection>(iConfig.getUntrackedParameter<edm::InputTag>("VertexCompositeCollection")))
 {
   //options
@@ -222,7 +223,7 @@ PATEventPlaneTrack::PATEventPlaneTrack(const edm::ParameterSet& iConfig) :
 }
 
 
-PATEventPlaneTrack::~PATEventPlaneTrack()
+HiEventPlaneTrack::~HiEventPlaneTrack()
 {
 
   // do anything here that needs to be done at desctruction time
@@ -237,27 +238,28 @@ PATEventPlaneTrack::~PATEventPlaneTrack()
 
 // ------------ method called to for each event  ------------
 void
-PATEventPlaneTrack::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup)
+HiEventPlaneTrack::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup)
 {
   //check event
   if(doRecoNtuple_) fillRECO(iEvent,iSetup);
-  if(saveTree_&&centrality>=80) PATEventPlaneNtuple->Fill();
+  //if(saveTree_&&centrality>=80) PATEventPlaneNtuple->Fill();
+  if(saveTree_) PATEventPlaneNtuple->Fill();
 }
 
 
 void
-PATEventPlaneTrack::fillRECO(const edm::Event& iEvent, const edm::EventSetup& iSetup)
+HiEventPlaneTrack::fillRECO(const edm::Event& iEvent, const edm::EventSetup& iSetup)
 {
   //get collection
   edm::Handle<reco::BeamSpot> beamspot;
   iEvent.getByToken(tok_offlineBS_, beamspot);
   edm::Handle<reco::VertexCollection> vertices;
   iEvent.getByToken(tok_offlinePV_, vertices);
-  if(!vertices.isValid()) throw cms::Exception("PATEventPlaneTrack") << "Primary vertices  collection not found!" << std::endl;
+  if(!vertices.isValid()) throw cms::Exception("HiEventPlaneTrack") << "Primary vertices  collection not found!" << std::endl;
 
   edm::Handle<pat::CompositeCandidateCollection> v0candidates;
   iEvent.getByToken(patCompositeCandidateCollection_Token_, v0candidates);
-  if(!v0candidates.isValid()) throw cms::Exception("PATEventPlaneTrack") << "V0 candidate collection not found!" << std::endl;
+  if(!v0candidates.isValid()) throw cms::Exception("HiEventPlaneTrack") << "V0 candidate collection not found!" << std::endl;
 
   runNb = iEvent.id().run();
   eventNb = iEvent.id().event();
@@ -297,7 +299,7 @@ PATEventPlaneTrack::fillRECO(const edm::Event& iEvent, const edm::EventSetup& iS
 
   //RECO Candidate info
   candSize = v0candidates->size();
-  if(candSize>MAXCAN) throw cms::Exception("PATEventPlaneTrack") << "Number of candidates (" << candSize << ") exceeds limit!" << std::endl; 
+  if(candSize>MAXCAN) throw cms::Exception("HiEventPlaneTrack") << "Number of candidates (" << candSize << ") exceeds limit!" << std::endl; 
   float cohJpsiMassMin = 2.5;
   float cohJpsiMassMax = 4.3;
   //float cohJpsiPtMax = 0.2;
@@ -371,10 +373,10 @@ PATEventPlaneTrack::fillRECO(const edm::Event& iEvent, const edm::EventSetup& iS
 
 
   for(unsigned it=0; it<trackColl->size(); ++it){
-	DauTrk = false;
-	reco::TrackRef track(trackColl, it);
+        DauTrk = false;
+        reco::TrackRef track(trackColl, it);
 
-	double dzvtx = track->dz(bestvtx);
+        double dzvtx = track->dz(bestvtx);
         double dxyvtx = track->dxy(bestvtx);
         double dzerror = sqrt(track->dzError()*track->dzError()+bestvzError*bestvzError);
         double dxyerror = sqrt(track->d0Error()*track->d0Error()+bestvxError*bestvyError);
@@ -383,61 +385,62 @@ PATEventPlaneTrack::fillRECO(const edm::Event& iEvent, const edm::EventSetup& iS
         if(fabs(track->ptError())/track->pt()>0.10) continue;
         if(fabs(dzvtx/dzerror) > 3) continue;
         if(fabs(dxyvtx/dxyerror) > 3) continue;
-	if(track->pt()<=0.3 || track->pt()>=3.0) continue;
-	if(abs(track->eta())>=2.4) continue;
+        if(track->pt()<=0.3 || track->pt()>=3.0) continue;
+        if(abs(track->eta())>=2.4) continue;
 
-	htrkpt->Fill(track->pt());
-	htrketa->Fill(track->eta());
-	  
-	double pt  = track->pt();
-	double phi = track->phi();
-	double eta = track->eta();
+        htrkpt->Fill(track->pt());
+        htrketa->Fill(track->eta());
+          
+        double pt  = track->pt();
+        double phi = track->phi();
+        double eta = track->eta();
 
-    	all_trkqx += pt*cos(2*phi);
-    	all_trkqy += pt*sin(2*phi);
-    	all_trkPt += pt;
+        all_trkqx += pt*cos(2*phi);
+        all_trkqy += pt*sin(2*phi);
+        all_trkPt += pt;
 
-    	for (unsigned i=0; i<dauEta.size(); ++i)
-    	{
-            if( abs(dauEta[i] - eta) < 1.E-3 && abs(reco::deltaPhi(dauPhi[i], phi)) < 1.E-3) DauTrk = true; 
-	    double deltaEta = std::abs(dauEta[i] - eta);
+    	  for (unsigned i=0; i<dauEta.size(); ++i)
+    	  {
+          if( abs(dauEta[i] - eta) < 1.E-3 && abs(reco::deltaPhi(dauPhi[i], phi)) < 1.E-3) DauTrk = true; 
+	        double deltaEta = std::abs(dauEta[i] - eta);
     	    double deltaPhi = std::abs(reco::deltaPhi(dauPhi[i], phi));
-	    double deltaPt = std::abs(dauPt[i] - pt) / pt;
-	    hdeltaEta->Fill(deltaEta);
-	    hdeltaPhi->Fill(deltaPhi);
-	    hdeltaPt->Fill(deltaPt);
-   	}
+          double deltaPt = std::abs(dauPt[i] - pt) / pt;
+          hdeltaEta->Fill(deltaEta);
+          hdeltaPhi->Fill(deltaPhi);
+          hdeltaPt->Fill(deltaPt);
+          double dR = reco::deltaR(eta, phi, dauEta[i], dauPhi[i]);
+          hdR->Fill(dR);
+   	    }
 
-    	if (DauTrk == true) {
-	    //cout << "it = " << it << "; DauTrk = "<< DauTrk << endl;
-            //cout << "Matched track Pt Eta Phi = " << track->pt() <<' '<< track->eta()<<' '<<track->phi()<<endl;
-      	    continue;
-    	}
+    	  if (DauTrk == true) {
+	        //cout << "it = " << it << "; DauTrk = "<< DauTrk << endl;
+          //cout << "Matched track Pt Eta Phi = " << track->pt() <<' '<< track->eta()<<' '<<track->phi()<<endl;
+      	  continue;
+    	  }
     
-    	trkqx += pt*cos(2*phi);
-    	trkqy += pt*sin(2*phi);
-    	trkPt += pt;
+        trkqx += pt*cos(2*phi);
+        trkqy += pt*sin(2*phi);
+        trkPt += pt;
 
-	trkqx_v3 += pt*cos(3*phi);
-	trkqy_v3 += pt*sin(3*phi);
+        trkqx_v3 += pt*cos(3*phi);
+        trkqy_v3 += pt*sin(3*phi);
 
-	if (eta>0.5&&eta<2.4) {
-	   trkPt_forw += pt;
-	   trkqx_forw += pt*cos(2*phi);
-	   trkqy_forw += pt*sin(2*phi);
-	   trkqx_v3_forw += pt*cos(3*phi);
-	   trkqy_v3_forw += pt*sin(3*phi);
-           htrketa_forw->Fill(eta);
-	}
-	if (eta>-2.4&&eta<-0.5) {
-	   trkPt_afterw += pt;
-	   trkqx_afterw += pt*cos(2*phi);
-	   trkqy_afterw += pt*sin(2*phi);
-	   trkqx_v3_afterw += pt*cos(3*phi);
-	   trkqy_v3_afterw += pt*sin(3*phi);
-     	   htrketa_afterw->Fill(eta);
-	}
-
+        if (eta>0.05&&eta<2.4) {
+          trkPt_forw += pt;
+          trkqx_forw += pt*cos(2*phi);
+          trkqy_forw += pt*sin(2*phi);
+          trkqx_v3_forw += pt*cos(3*phi);
+          trkqy_v3_forw += pt*sin(3*phi);
+          htrketa_forw->Fill(eta);
+	      }
+	      if (eta>-2.4&&eta<-0.05) {
+          trkPt_afterw += pt;
+          trkqx_afterw += pt*cos(2*phi);
+          trkqy_afterw += pt*sin(2*phi);
+          trkqx_v3_afterw += pt*cos(3*phi);
+          trkqy_v3_afterw += pt*sin(3*phi);
+          htrketa_afterw->Fill(eta);
+	      }
   }
   trkQx = trkqx/trkPt;
   trkQy = trkqy/trkPt;
@@ -460,7 +463,7 @@ PATEventPlaneTrack::fillRECO(const edm::Event& iEvent, const edm::EventSetup& iS
 // ------------ method called once each job just before starting event
 //loop  ------------
 void
-PATEventPlaneTrack::beginJob()
+HiEventPlaneTrack::beginJob()
 {
   TH1D::SetDefaultSumw2();
 
@@ -473,7 +476,7 @@ PATEventPlaneTrack::beginJob()
 
 
 void 
-PATEventPlaneTrack::initTree()
+HiEventPlaneTrack::initTree()
 { 
   PATEventPlaneNtuple = fs->make< TTree>("EventPlane","EventPlane");
 
@@ -516,8 +519,9 @@ PATEventPlaneTrack::initTree()
 }
 
 void
-PATEventPlaneTrack::initHistogram()
+HiEventPlaneTrack::initHistogram()
 {
+  hdR = fs->make<TH1D>("hdR",";dR",1000000,0,5);
   hdeltaEta = fs->make<TH1D>("hdeltaEta",";#Delta#eta",100000,0,1e-2);
   hdeltaPhi = fs->make<TH1D>("hdeltaPhi",";#Delta#phi",100000,0,1e-2);
   hdeltaPt = fs->make<TH1D>("hdeltaPt",";#Deltap_{T}",100000,0,1e-2);
@@ -530,7 +534,7 @@ PATEventPlaneTrack::initHistogram()
 
 //--------------------------------------------------------------------------------------------------
 void 
-PATEventPlaneTrack::beginRun(const edm::Run& iRun, const edm::EventSetup& iSetup)
+HiEventPlaneTrack::beginRun(const edm::Run& iRun, const edm::EventSetup& iSetup)
 {
 }
 
@@ -538,9 +542,9 @@ PATEventPlaneTrack::beginRun(const edm::Run& iRun, const edm::EventSetup& iSetup
 // ------------ method called once each job just after ending the event
 //loop  ------------
 void 
-PATEventPlaneTrack::endJob()
+HiEventPlaneTrack::endJob()
 {
 }
 
 //define this as a plug-in
-DEFINE_FWK_MODULE(PATEventPlaneTrack);
+DEFINE_FWK_MODULE(HiEventPlaneTrack);

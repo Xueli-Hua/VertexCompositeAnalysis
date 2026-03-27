@@ -89,10 +89,10 @@ typedef ROOT::Math::SVector<double, 6> SVector6;
 // class decleration
 //
 
-class PATHFpfCandTree : public edm::one::EDAnalyzer<edm::one::WatchRuns> {
+class PATHFPFCand : public edm::one::EDAnalyzer<edm::one::WatchRuns> {
 public:
-  explicit PATHFpfCandTree(const edm::ParameterSet&);
-  ~PATHFpfCandTree();
+  explicit PATHFPFCand(const edm::ParameterSet&);
+  ~PATHFPFCand();
 
 
 private:
@@ -108,7 +108,7 @@ private:
 
   edm::Service<TFileService> fs;
 
-  TTree* PATpfCandNtuple;
+  TTree* PATPFCandNtuple;
 
   bool   saveTree_;
   bool   saveHistogram_;
@@ -132,15 +132,13 @@ private:
   bool isCentrality_;
 
   //PF candidate info
-  uint pfcandSize_Plus;
-  uint pfcandSize_Minus;
   float hiHFEPlus_pf[MAXPFCAN];
   float hiHFEMinus_pf[MAXPFCAN];
   float hiHFPlus_pfle;
   float hiHFMinus_pfle;
-  int nCountsHF_pf;
-  int nCountsHFPlus_pf;
-  int nCountsHFMinus_pf;
+  uint nCountsHF_pf;
+  uint nCountsHFPlus_pf;
+  uint nCountsHFMinus_pf;
 
   //token
   edm::EDGetTokenT<pat::PackedCandidateCollection> pfCandidateTag_;
@@ -158,7 +156,7 @@ private:
 // constructors and destructor
 //
 
-PATHFpfCandTree::PATHFpfCandTree(const edm::ParameterSet& iConfig) :
+PATHFPFCand::PATHFPFCand(const edm::ParameterSet& iConfig) :
   pfCandidateTag_(consumes<pat::PackedCandidateCollection>(iConfig.getParameter<edm::InputTag>("pfCandidateSrc")))
 {
   //options
@@ -177,7 +175,7 @@ PATHFpfCandTree::PATHFpfCandTree(const edm::ParameterSet& iConfig) :
 }
 
 
-PATHFpfCandTree::~PATHFpfCandTree()
+PATHFPFCand::~PATHFPFCand()
 {
 
   // do anything here that needs to be done at desctruction time
@@ -192,16 +190,17 @@ PATHFpfCandTree::~PATHFpfCandTree()
 
 // ------------ method called to for each event  ------------
 void
-PATHFpfCandTree::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup)
+PATHFPFCand::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup)
 {
   //check event
   if(doPFCandNtuple_) fillpfCand(iEvent,iSetup);
-  if(saveTree_&&centrality>=80) PATpfCandNtuple->Fill();
+  //if(saveTree_&&centrality>=80) PATPFCandNtuple->Fill();
+  if(saveTree_) PATPFCandNtuple->Fill();
 }
 
 
 void
-PATHFpfCandTree::fillpfCand(const edm::Event& iEvent, const edm::EventSetup& iSetup)
+PATHFPFCand::fillpfCand(const edm::Event& iEvent, const edm::EventSetup& iSetup)
 {
   
   runNb = iEvent.id().run();
@@ -209,8 +208,6 @@ PATHFpfCandTree::fillpfCand(const edm::Event& iEvent, const edm::EventSetup& iSe
   lsNb = iEvent.luminosityBlock();
 
   centrality = -1;
-  pfcandSize_Plus = 0;
-  pfcandSize_Minus = 0;
   if(isCentrality_)
   {
     const auto& cent = iEvent.getHandle(tok_centSrc_);
@@ -234,15 +231,13 @@ PATHFpfCandTree::fillpfCand(const edm::Event& iEvent, const edm::EventSetup& iSe
         {   
           nCountsHF_pf++;
           if(eta_plus){
-            hiHFEPlus_pf[pfcandSize_Plus] = pfcand.energy();
+            hiHFEPlus_pf[nCountsHFPlus_pf] = pfcand.energy();
             if(pfcand.energy() >= hiHFPlus_pfle) hiHFPlus_pfle = pfcand.energy();
-            pfcandSize_Plus++;
             nCountsHFPlus_pf++;
           }
           else if(eta_minus){
-            hiHFEMinus_pf[pfcandSize_Minus] = pfcand.energy();
+            hiHFEMinus_pf[nCountsHFMinus_pf] = pfcand.energy();
             if(pfcand.energy() >= hiHFMinus_pfle) hiHFMinus_pfle = pfcand.energy();
-            pfcandSize_Minus++;
             nCountsHFMinus_pf++;
           }
         }
@@ -263,7 +258,7 @@ PATHFpfCandTree::fillpfCand(const edm::Event& iEvent, const edm::EventSetup& iSe
 // ------------ method called once each job just before starting event
 //loop  ------------
 void
-PATHFpfCandTree::beginJob()
+PATHFPFCand::beginJob()
 {
   TH1D::SetDefaultSumw2();
 
@@ -276,32 +271,30 @@ PATHFpfCandTree::beginJob()
 
 
 void 
-PATHFpfCandTree::initTree()
+PATHFPFCand::initTree()
 { 
-  PATpfCandNtuple = fs->make< TTree>("hiHF_pfCandidate","hiHF_pfCandidate");
+  PATPFCandNtuple = fs->make< TTree>("hiHF_PFCandidate","hiHF_PFCandidate");
 
   if(doPFCandNtuple_)
   {
     // Event info
     
-    PATpfCandNtuple->Branch("RunNb",&runNb,"RunNb/i");
-    PATpfCandNtuple->Branch("LSNb",&lsNb,"LSNb/i");
-    PATpfCandNtuple->Branch("EventNb",&eventNb,"EventNb/i");
+    PATPFCandNtuple->Branch("RunNb",&runNb,"RunNb/i");
+    PATPFCandNtuple->Branch("LSNb",&lsNb,"LSNb/i");
+    PATPFCandNtuple->Branch("EventNb",&eventNb,"EventNb/i");
     
     if(isCentrality_) 
     {
-      PATpfCandNtuple->Branch("centrality",&centrality,"centrality/S");
-      PATpfCandNtuple->Branch("Ntrkoffline",&Ntrkoffline,"Ntrkoffline/I");
-      PATpfCandNtuple->Branch("NtrkHP",&NtrkHP,"NtrkHP/I");
-      PATpfCandNtuple->Branch("pfcanSize_Plus",&pfcandSize_Plus,"pfcandSize_Plus/I");
-      PATpfCandNtuple->Branch("pfcanSize_Minus",&pfcandSize_Minus,"pfcandSize_Minus/I");
-      PATpfCandNtuple->Branch("hiHFEPlus_pf",hiHFEPlus_pf,"hiHFEPlus_pf[pfcandSize_Plus]/F");
-      PATpfCandNtuple->Branch("hiHFEMinus_pf",hiHFEMinus_pf,"hiHFEMinus_pf[pfcandSize_Minus]/F");
-      PATpfCandNtuple->Branch("hiHFPlus_pfle",&hiHFPlus_pfle,"hiHFPlus_pfle/F");
-      PATpfCandNtuple->Branch("hiHFMinus_pfle",&hiHFMinus_pfle,"hiHFMinus_pfle/F");
-      PATpfCandNtuple->Branch("nCountsHF_pf",&nCountsHF_pf,"nCountsHF_pf/I");
-      PATpfCandNtuple->Branch("nCountsHFPlus_pf",&nCountsHFPlus_pf,"nCountsHFPlus_pf/I");
-      PATpfCandNtuple->Branch("nCountsHFMinus_pf",&nCountsHFMinus_pf,"nCountsHFMinus_pf/I");
+      PATPFCandNtuple->Branch("centrality",&centrality,"centrality/S");
+      PATPFCandNtuple->Branch("Ntrkoffline",&Ntrkoffline,"Ntrkoffline/I");
+      PATPFCandNtuple->Branch("NtrkHP",&NtrkHP,"NtrkHP/I");
+      PATPFCandNtuple->Branch("nCountsHF_pf",&nCountsHF_pf,"nCountsHF_pf/I");
+      PATPFCandNtuple->Branch("nCountsHFPlus_pf",&nCountsHFPlus_pf,"nCountsHFPlus_pf/I");
+      PATPFCandNtuple->Branch("nCountsHFMinus_pf",&nCountsHFMinus_pf,"nCountsHFMinus_pf/I");
+      PATPFCandNtuple->Branch("hiHFEPlus_pf",hiHFEPlus_pf,"hiHFEPlus_pf[nCountsHFPlus_pf]/F");
+      PATPFCandNtuple->Branch("hiHFEMinus_pf",hiHFEMinus_pf,"hiHFEMinus_pf[nCountsHFMinus_pf]/F");
+      PATPFCandNtuple->Branch("hiHFPlus_pfle",&hiHFPlus_pfle,"hiHFPlus_pfle/F");
+      PATPFCandNtuple->Branch("hiHFMinus_pfle",&hiHFMinus_pfle,"hiHFMinus_pfle/F");
     }
 
   } // doPFCandNtuple_
@@ -309,14 +302,14 @@ PATHFpfCandTree::initTree()
 }
 
 void
-PATHFpfCandTree::initHistogram()
+PATHFPFCand::initHistogram()
 {
 }
 
 
 //--------------------------------------------------------------------------------------------------
 void 
-PATHFpfCandTree::beginRun(const edm::Run& iRun, const edm::EventSetup& iSetup)
+PATHFPFCand::beginRun(const edm::Run& iRun, const edm::EventSetup& iSetup)
 {
 }
 
@@ -324,9 +317,9 @@ PATHFpfCandTree::beginRun(const edm::Run& iRun, const edm::EventSetup& iSetup)
 // ------------ method called once each job just after ending the event
 //loop  ------------
 void 
-PATHFpfCandTree::endJob()
+PATHFPFCand::endJob()
 {
 }
 
 //define this as a plug-in
-DEFINE_FWK_MODULE(PATHFpfCandTree);
+DEFINE_FWK_MODULE(PATHFPFCand);
