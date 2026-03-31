@@ -79,10 +79,10 @@
 
 using namespace std;
 
-class HiEventPlaneHF : public edm::one::EDAnalyzer<edm::one::WatchRuns> {
+class HiEventPlaneHFbyTower : public edm::one::EDAnalyzer<edm::one::WatchRuns> {
 public:
-  explicit HiEventPlaneHF(const edm::ParameterSet&);
-  ~HiEventPlaneHF();
+  explicit HiEventPlaneHFbyTower(const edm::ParameterSet&);
+  ~HiEventPlaneHFbyTower();
 
 private:
   virtual void beginJob();
@@ -137,7 +137,7 @@ private:
 // constructors and destructor
 //
 
-HiEventPlaneHF::HiEventPlaneHF(const edm::ParameterSet& ps)
+HiEventPlaneHFbyTower::HiEventPlaneHFbyTower(const edm::ParameterSet& ps)
 {
   //input tokens
   vtxToken_ = consumes<reco::VertexCollection>(ps.getUntrackedParameter<edm::InputTag>("vtxInputTag"));
@@ -153,7 +153,7 @@ HiEventPlaneHF::HiEventPlaneHF(const edm::ParameterSet& ps)
 
 }
 
-HiEventPlaneHF::~HiEventPlaneHF()
+HiEventPlaneHFbyTower::~HiEventPlaneHFbyTower()
 {
   // do anything here that needs to be done at desctruction time
   // (e.g. close files, deallocate resources etc.)
@@ -166,7 +166,7 @@ HiEventPlaneHF::~HiEventPlaneHF()
 
 // ------------ method called to for each event  ------------
 void
-HiEventPlaneHF::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup)
+HiEventPlaneHFbyTower::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup)
 {
   using std::vector;
   using namespace edm;
@@ -176,7 +176,7 @@ HiEventPlaneHF::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup)
 }
 
 void
-HiEventPlaneHF::fillRECO(const edm::Event& iEvent, const edm::EventSetup& iSetup)
+HiEventPlaneHFbyTower::fillRECO(const edm::Event& iEvent, const edm::EventSetup& iSetup)
 {
   //get collections
   edm::Handle<reco::VertexCollection> vertices;
@@ -273,7 +273,7 @@ HiEventPlaneHF::fillRECO(const edm::Event& iEvent, const edm::EventSetup& iSetup
 // ------------ method called once each job just before starting event
 //loop  ------------
 void
-HiEventPlaneHF::beginJob()
+HiEventPlaneHFbyTower::beginJob()
 {
     TH1D::SetDefaultSumw2();
 
@@ -283,7 +283,7 @@ HiEventPlaneHF::beginJob()
 }
 
 void 
-HiEventPlaneHF::initTree()
+HiEventPlaneHFbyTower::initTree()
 { 
   EventInfoNtuple = fs->make< TTree>("EventInfoNtuple","EventInfoNtuple");
 
@@ -308,16 +308,16 @@ HiEventPlaneHF::initTree()
 
 //--------------------------------------------------------------------------------------------------
 void 
-HiEventPlaneHF::beginRun(const edm::Run& iRun, const edm::EventSetup& iSetup)
+HiEventPlaneHFbyTower::beginRun(const edm::Run& iRun, const edm::EventSetup& iSetup)
 {
 }
 
 // ------------ method called once each job just after ending the event
 //loop  ------------
 void
-HiEventPlaneHF::endJob() {
+HiEventPlaneHFbyTower::endJob() {
     
 }
 
 //define this as a plug-in
-DEFINE_FWK_MODULE(HiEventPlaneHF);
+DEFINE_FWK_MODULE(HiEventPlaneHFbyTower);
