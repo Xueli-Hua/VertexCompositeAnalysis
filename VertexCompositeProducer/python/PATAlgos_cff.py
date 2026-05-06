@@ -62,8 +62,8 @@ def doPATMuons(process, MC=False):
     if MC:
         # Prune generated particles to muons and their parents
         process.genMuons = cms.EDProducer("GenParticlePruner",
-            #src = cms.InputTag("genParticles"),
-            src = cms.InputTag("prunedGenParticles"),
+            src = cms.InputTag("genParticles"),
+            #src = cms.InputTag("prunedGenParticles"),
             select = cms.vstring(
                 "drop  *  ",                      # this is the default
                 "++keep abs(pdgId) = 13"          # keep muons and their parents
@@ -98,6 +98,14 @@ def changeToMiniAOD(process):
         process.eventFilter_HM.insert(0, process.unpackedTracksAndVertices)
         process.load('VertexCompositeAnalysis.VertexCompositeProducer.unpackedMuons_cfi')
         process.eventFilter_HM.insert(1, process.unpackedMuons)
+
+    if hasattr(process, "muonMatch"):
+        from MuonAnalysis.MuonAssociators.patMuonsWithTrigger_cff import changeRecoMuonInput
+        changeRecoMuonInput(process, recoMuonCollectionTag=cms.InputTag("unpackedMuonsWithGenMatch"), oldRecoMuonCollectionTag=cms.InputTag("unpackedMuons"))
+        process.load('VertexCompositeAnalysis.VertexCompositeProducer.unpackedMuonsWithGenMatch_cfi')
+        process.patMuonsWithTriggerSequence.insert(1, process.unpackedMuonsWithGenMatch)
+        process.genMuons.src = "prunedGenParticles"
+        process.muonMatch.src = "unpackedMuons"
 
     if hasattr(process, "output_HM"):
         process.output_HM.outputCommands.append('keep *Vert*_unpackedTracksAndVertices_*_*')
